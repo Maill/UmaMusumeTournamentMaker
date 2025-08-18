@@ -1,0 +1,364 @@
+.tournament-detail-container {
+  padding: 2rem 0;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.tournament-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-info h1 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+}
+
+.edit-name-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tournament-name-input {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2c3e50;
+  border: 2px solid #3498db;
+  border-radius: 4px;
+  padding: 0.5rem;
+  margin: 0;
+}
+
+.edit-name-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.tournament-meta {
+  display: flex;
+  gap: 1rem;
+}
+
+.tournament-type {
+  background-color: #e8f4f8;
+  color: #2980b9;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.tournament-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-1 { /* Created */
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-2 { /* InProgress */
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-3 { /* Completed */
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Tournament Setup (Created State) */
+.tournament-setup {
+  background-color: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.add-player-form {
+  margin-bottom: 2rem;
+}
+
+.input-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.input-group .form-control {
+  flex: 1;
+}
+
+.players-list {
+  margin-bottom: 2rem;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.player-number {
+  font-weight: bold;
+  margin-right: 0.75rem;
+  color: #666;
+  min-width: 2rem;
+}
+
+.player-name {
+  color: #333;
+}
+
+.start-tournament-section {
+  text-align: center;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.start-info {
+  margin-top: 1rem;
+  color: #666;
+}
+
+.minimum-players-warning {
+  text-align: center;
+  padding: 1.5rem;
+  background-color: #fff3cd;
+  border-radius: 8px;
+  color: #856404;
+}
+
+/* Tournament Active (In Progress State) */
+.tournament-active {
+  display: grid;
+  gap: 2rem;
+}
+
+.final-round-notice {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border: 2px solid #f39c12;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(243, 156, 18, 0.2);
+}
+
+.final-round-notice p {
+  margin: 0;
+  color: #856404;
+  font-size: 1.1rem;
+}
+
+.current-round {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.matches-table-container {
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.matches-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.match-players {
+  font-weight: 500;
+}
+
+.match-completed {
+  color: #27ae60;
+  font-weight: 500;
+}
+
+.match-pending {
+  color: #f39c12;
+  font-weight: 500;
+}
+
+.winner-name {
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.no-winner {
+  color: #bdc3c7;
+}
+
+.winner-selection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.winner-select {
+  min-width: 150px;
+}
+
+.setting-winner {
+  color: #666;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+.match-complete-indicator {
+  color: #27ae60;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.round-actions {
+  text-align: center;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.round-incomplete {
+  text-align: center;
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #fff3cd;
+  border-radius: 8px;
+  color: #856404;
+}
+
+.standings-section {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.standings-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+/* Tournament Completed State */
+.tournament-completed {
+  display: grid;
+  gap: 2rem;
+}
+
+.final-standings {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.final-standings h2 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+.final-standings-table .champion {
+  background-color: #fff9c4;
+  font-weight: bold;
+}
+
+.final-standings-table .runner-up {
+  background-color: #f0f0f0;
+  font-weight: 600;
+}
+
+.final-standings-table .third-place {
+  background-color: #ffeaa7;
+  font-weight: 500;
+}
+
+.rounds-history {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.round-history {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.round-history:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.round-history h4 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.round-matches-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tournament-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .header-actions {
+    align-self: stretch;
+  }
+  
+  .tournament-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .input-group {
+    flex-direction: column;
+  }
+  
+  .matches-table-container {
+    font-size: 0.875rem;
+  }
+  
+  .winner-selection {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .tournament-active {
+    gap: 1rem;
+  }
+}

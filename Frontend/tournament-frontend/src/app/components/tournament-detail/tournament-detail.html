@@ -1,0 +1,393 @@
+<div class="tournament-detail-container">
+  @if (isLoading) {
+    <div class="loading">
+      <p>Loading tournament...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error">
+      {{ error }}
+      <button class="btn btn-secondary" (click)="loadTournament(tournament?.id || 0)">Retry</button>
+    </div>
+  }
+
+  @if (tournament) {
+    <div class="tournament-content">
+    <!-- Tournament Header -->
+    <div class="tournament-header">
+      <div class="header-info">
+        @if (isEditingName) {
+          <div class="edit-name-form">
+            <input 
+              #nameInput
+              type="text" 
+              [(ngModel)]="editingTournamentName" 
+              class="form-control tournament-name-input"
+              (keyup.enter)="saveNameEdit()"
+              (keyup.escape)="cancelNameEdit()"
+              [disabled]="isSavingName">
+            <div class="edit-name-actions">
+              <button 
+                class="btn btn-sm btn-primary" 
+                (click)="saveNameEdit()"
+                [disabled]="isSavingName || !editingTournamentName.trim()">
+                @if (isSavingName) {
+                  <span>Saving...</span>
+                } @else {
+                  <span>Save</span>
+                }
+              </button>
+              <button 
+                class="btn btn-sm btn-secondary" 
+                (click)="cancelNameEdit()"
+                [disabled]="isSavingName">
+                Cancel
+              </button>
+            </div>
+          </div>
+        } @else {
+          <h1>{{ tournament.name }}</h1>
+        }
+        <div class="tournament-meta">
+          <span class="tournament-type">{{ getTournamentTypeName(tournament.type) }}</span>
+          <span class="tournament-status" [class]="'status-' + tournament.status.toString().toLowerCase()">
+            {{ getStatusText(tournament.status) }}
+          </span>
+        </div>
+      </div>
+      <div class="header-actions">
+        @if (!isEditingName) {
+          <button 
+            class="btn btn-outline-primary btn-sm" 
+            (click)="startNameEdit()"
+            title="Edit tournament name">
+            Edit Name
+          </button>
+        }
+        <button 
+          class="btn btn-outline-danger btn-sm" 
+          (click)="deleteTournament()"
+          [disabled]="isDeletingTournament"
+          title="Delete tournament">
+          @if (isDeletingTournament) {
+            <span>Deleting...</span>
+          } @else {
+            <span>Delete</span>
+          }
+        </button>
+        <a routerLink="/tournaments" class="btn btn-secondary">Back to Tournaments</a>
+      </div>
+    </div>
+
+    <!-- Tournament Created State: Player Management -->
+    @if (tournament.status === TournamentStatus.Created) {
+      <div class="tournament-setup">
+      <div class="players-section">
+        <h2>Players ({{ tournament.players.length }})</h2>
+        
+        <!-- Add Player Form -->
+        <div class="add-player-form">
+          <div class="form-group">
+            <label for="playerName">Add Player:</label>
+            <div class="input-group">
+              <input 
+                id="playerName"
+                type="text" 
+                [(ngModel)]="newPlayerName" 
+                class="form-control"
+                placeholder="Enter player name"
+                (keyup.enter)="addPlayer()"
+                [disabled]="isAddingPlayer">
+              <button 
+                class="btn btn-primary" 
+                (click)="addPlayer()"
+                [disabled]="isAddingPlayer || !newPlayerName.trim()">
+                @if (isAddingPlayer) {
+                  <span>Adding...</span>
+                } @else {
+                  <span>Add Player</span>
+                }
+              </button>
+            </div>
+          </div>
+          @if (addPlayerError) {
+            <div class="error">
+              {{ addPlayerError }}
+            </div>
+          }
+        </div>
+
+        <!-- Players List -->
+        @if (tournament.players.length > 0) {
+          <div class="players-list">
+            @for (player of tournament.players; track player.id; let i = $index) {
+              <div class="player-item">
+                <span class="player-number">{{ i + 1 }}.</span>
+                <span class="player-name">{{ player.name }}</span>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Start Tournament -->
+        @if (tournament.players.length >= 3) {
+          <div class="start-tournament-section">
+            <button 
+              class="btn btn-success" 
+              (click)="startTournament()"
+              [disabled]="isStartingTournament">
+              @if (isStartingTournament) {
+                <span>Starting Tournament...</span>
+              } @else {
+                <span>Start Tournament</span>
+              }
+            </button>
+            <p class="start-info">Ready to start with {{ tournament.players.length }} players</p>
+          </div>
+        }
+
+        @if (tournament.players.length < 3) {
+          <div class="minimum-players-warning">
+            <p>⚠️ Need at least 3 players to start the tournament (currently {{ tournament.players.length }})</p>
+          </div>
+        }
+      </div>
+      </div>
+    }
+
+    <!-- Tournament In Progress State: Match Management -->
+    @if (tournament.status === TournamentStatus.InProgress) {
+      <div class="tournament-active">
+      <div class="round-info">
+        <h2>{{ getFinalRoundTitle() }}</h2>
+        @if (isCurrentRoundFinal()) {
+          <div class="final-round-notice">
+            <p>🏆 <strong>Championship Match!</strong> The top 3 players compete for the tournament victory.</p>
+          </div>
+        }
+        
+        <!-- Current Round Matches -->
+        @if (getCurrentRound(); as currentRound) {
+          <div class="current-round">
+          <h3>Current Round Matches</h3>
+          <div class="matches-table-container">
+            <table class="matches-table table">
+              <thead>
+                <tr>
+                  <th>Match #</th>
+                  <th>Players</th>
+                  <th>Status</th>
+                  <th>Winner</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (match of currentRound.matches; track match.id; let i = $index) {
+                  <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>
+                    <div class="match-players">
+                      @for (player of match.players; track player.id; let j = $index) {
+                        <span>
+                          {{ player.name }}@if (j < match.players.length - 1) {<span> vs </span>}
+                        </span>
+                      }
+                    </div>
+                  </td>
+                  <td>
+                    @if (match.winnerId) {
+                      <span class="match-completed">Completed</span>
+                    } @else {
+                      <span class="match-pending">Pending</span>
+                    }
+                  </td>
+                  <td>
+                    @if (match.winner) {
+                      <span class="winner-name">{{ match.winner.name }}</span>
+                    } @else {
+                      <span class="no-winner">-</span>
+                    }
+                  </td>
+                  <td>
+                    @if (!match.winnerId) {
+                      <div class="winner-selection">
+                        <select 
+                          class="form-control winner-select" 
+                          [value]="getSelectedWinnerValue(match.id)"
+                          (change)="onWinnerSelectionChange(match, $event)"
+                          [disabled]="isSettingWinner && currentSettingMatchId === match.id">
+                          <option value="">Select Winner</option>
+                          @for (player of match.players; track player.id) {
+                            <option [value]="player.id">
+                              {{ player.name }}
+                            </option>
+                          }
+                        </select>
+                        @if (isSettingWinner && currentSettingMatchId === match.id) {
+                          <span class="setting-winner">
+                            Setting...
+                          </span>
+                        }
+                      </div>
+                    } @else {
+                      <span class="match-complete-indicator">✓</span>
+                    }
+                  </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Next Round Button -->
+          @if (canStartNextRound()) {
+            <div class="round-actions">
+              <button 
+                class="btn btn-primary" 
+                (click)="startNextRound()"
+                [disabled]="isStartingNextRound">
+                @if (isStartingNextRound) {
+                  <span>Starting Next Round...</span>
+                } @else {
+                  <span>{{ getNextRoundButtonText() }}</span>
+                }
+              </button>
+            </div>
+          }
+
+          @if (!isCurrentRoundCompleted() && !canStartNextRound()) {
+            <div class="round-incomplete">
+              <p>Complete all matches to proceed to the next round</p>
+            </div>
+          }
+          </div>
+        }
+
+        <!-- Current Standings -->
+        <div class="standings-section">
+          <h3>Current Standings</h3>
+          <table class="standings-table table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Points</th>
+                <th>Wins</th>
+                <th>Losses</th>
+                <th>Win Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (player of getPlayersSortedByPoints(); track player.id; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ player.name }}</td>
+                  <td>{{ player.points }}</td>
+                  <td>{{ player.wins }}</td>
+                  <td>{{ player.losses }}</td>
+                  <td>{{ (player.winRate * 100) | number:'1.1-1' }}%</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      </div>
+    }
+
+    <!-- Tournament Completed State: Final Results -->
+    @if (tournament.status === TournamentStatus.Completed) {
+      <div class="tournament-completed">
+      <h2>🏆 Tournament Results</h2>
+      
+      <!-- Final Standings -->
+      <div class="final-standings">
+        <h3>Final Standings</h3>
+        <table class="final-standings-table table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Player</th>
+              <th>Points</th>
+              <th>Wins</th>
+              <th>Losses</th>
+              <th>Win Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (player of getPlayersSortedByPoints(); track player.id; let i = $index) {
+              <tr [class]="i === 0 ? 'champion' : i === 1 ? 'runner-up' : i === 2 ? 'third-place' : ''">
+                <td>
+                  @if (i === 0) {
+                    <span>🥇</span>
+                  } @else if (i === 1) {
+                    <span>🥈</span>
+                  } @else if (i === 2) {
+                    <span>🥉</span>
+                  } @else {
+                    <span>{{ i + 1 }}</span>
+                  }
+                </td>
+                <td>{{ player.name }}</td>
+                <td>{{ player.points }}</td>
+                <td>{{ player.wins }}</td>
+                <td>{{ player.losses }}</td>
+                <td>{{ (player.winRate * 100) | number:'1.1-1' }}%</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- All Rounds History -->
+      <div class="rounds-history">
+        <h3>Tournament History</h3>
+        @for (round of tournament.rounds; track round.id) {
+          <div class="round-history">
+          <h4>Round {{ round.roundNumber }}</h4>
+          <table class="round-matches-table table">
+            <thead>
+              <tr>
+                <th>Match</th>
+                <th>Players</th>
+                <th>Winner</th>
+                <th>Completed</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (match of round.matches; track match.id; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>
+                    @for (player of match.players; track player.id; let j = $index) {
+                      <span>
+                        {{ player.name }}@if (j < match.players.length - 1) {<span> vs </span>}
+                      </span>
+                    }
+                  </td>
+                  <td>{{ match.winner?.name || 'No winner' }}</td>
+                  <td>{{ match.completedAt ? (match.completedAt | date:'short') : 'Not completed' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          </div>
+        }
+      </div>
+      </div>
+    }
+    </div>
+  }
+
+  <!-- Password Modal -->
+  <app-password-input
+    [isVisible]="showPasswordModal"
+    [title]="passwordModalTitle"
+    [message]="passwordModalMessage"
+    [isLoading]="passwordModalLoading"
+    [error]="passwordModalError"
+    (passwordSubmitted)="onPasswordSubmitted($event)"
+    (cancelled)="onPasswordCancelled()">
+  </app-password-input>
+</div>

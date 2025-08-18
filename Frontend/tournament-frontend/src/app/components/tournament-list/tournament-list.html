@@ -1,0 +1,76 @@
+<div class="tournament-list-container">
+  <div class="header">
+    <h1>Tournaments</h1>
+    <button class="btn btn-primary" (click)="onCreateTournament()">
+      Create New Tournament
+    </button>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading">
+      <p>Loading tournaments...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error">
+      {{ error }}
+      <button class="btn btn-secondary" (click)="loadTournaments()">Retry</button>
+    </div>
+  }
+
+  @if (!isLoading && !error) {
+    <div class="tournaments-grid">
+      @if (tournaments.length === 0) {
+        <div class="no-tournaments">
+          <h3>No tournaments found</h3>
+          <p>Create your first tournament to get started!</p>
+          <button class="btn btn-primary" (click)="onCreateTournament()">
+            Create Tournament
+          </button>
+        </div>
+      }
+
+      @for (tournament of tournaments; track tournament.id) {
+        <div 
+          class="tournament-card"
+          (click)="onTournamentClick(tournament)">
+      <div class="tournament-header">
+        <h3>{{ tournament.name }}</h3>
+        <span class="tournament-type">{{ getTournamentTypeName(tournament.type) }}</span>
+      </div>
+      
+      <div class="tournament-info">
+        <div class="info-row">
+          <span class="label">Status:</span>
+          <span class="status" [class]="getStatusClass(tournament.status)">
+            {{ getStatusText(tournament.status) }}
+          </span>
+        </div>
+        
+        <div class="info-row">
+          <span class="label">Players:</span>
+          <span class="value">{{ tournament.players.length }}</span>
+        </div>
+        
+        @if (tournament.status === TournamentStatus.InProgress) {
+          <div class="info-row">
+            <span class="label">Current Round:</span>
+            <span class="value">{{ tournament.currentRound }}</span>
+          </div>
+        }
+        
+        <div class="info-row">
+          <span class="label">Created:</span>
+          <span class="value">{{ tournament.createdAt | date:'short' }}</span>
+        </div>
+      </div>
+      
+        <div class="tournament-actions">
+          <span class="click-hint">Click to view details</span>
+        </div>
+        </div>
+      }
+    </div>
+  }
+</div>

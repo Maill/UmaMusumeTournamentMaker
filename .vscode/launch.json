@@ -1,0 +1,79 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch API",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-api",
+      "program": "${workspaceFolder}/API/TournamentSystem.API/bin/Debug/net8.0/TournamentSystem.API.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/API/TournamentSystem.API",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
+    },
+    {
+      "name": "Launch API (Watch)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "watch-api",
+      "program": "${workspaceFolder}/API/TournamentSystem.API/bin/Debug/net8.0/TournamentSystem.API.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/API/TournamentSystem.API",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "Launch Frontend",
+      "type": "chrome",
+      "request": "launch",
+      "preLaunchTask": "start-frontend",
+      "url": "http://localhost:4200/",
+      "webRoot": "${workspaceFolder}/Frontend/tournament-frontend/src",
+      "sourceMapPathOverrides": {
+        "webpack:///./src/*": "${webRoot}/*"
+      }
+    },
+    {
+      "name": "Launch Full Stack",
+      "type": "chrome",
+      "request": "launch",
+      "preLaunchTask": "start-full-stack",
+      "url": "http://localhost:4200/",
+      "webRoot": "${workspaceFolder}/Frontend/tournament-frontend/src",
+      "sourceMapPathOverrides": {
+        "webpack:///./src/*": "${webRoot}/*"
+      }
+    },
+    {
+      "name": "Test Frontend",
+      "type": "chrome",
+      "request": "launch",
+      "preLaunchTask": "test-frontend",
+      "url": "http://localhost:9876/debug.html",
+      "webRoot": "${workspaceFolder}/Frontend/tournament-frontend/src"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Launch API + Frontend",
+      "configurations": ["Launch API", "Launch Frontend"],
+      "stopAll": true
+    }
+  ]
+}

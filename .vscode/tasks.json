@@ -1,0 +1,234 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/API/TournamentSystem.API/TournamentSystem.API.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "publish-api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "publish",
+        "${workspaceFolder}/API/TournamentSystem.API/TournamentSystem.API.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "watch-api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "watch",
+        "run",
+        "--project",
+        "${workspaceFolder}/API/TournamentSystem.API/TournamentSystem.API.csproj"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "dotnet",
+        "pattern": "$msCompile",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^\\s*Determining projects to restore\\.\\.\\.$|^\\s*Restoring\\s",
+          "endsPattern": "^\\s*Application started\\.|^\\s*dotnet watch\\s*:"
+        }
+      }
+    },
+    {
+      "label": "start-frontend",
+      "type": "npm",
+      "script": "start",
+      "path": "Frontend/tournament-frontend/",
+      "isBackground": true,
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": {
+        "owner": "typescript",
+        "source": "ts",
+        "applyTo": "closedDocuments",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/Frontend/tournament-frontend"
+        ],
+        "pattern": "$tsc",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": {
+            "regexp": ".*Local:.*"
+          },
+          "endsPattern": {
+            "regexp": ".*webpack compiled.*"
+          }
+        }
+      }
+    },
+    {
+      "label": "build-frontend",
+      "type": "npm",
+      "script": "build",
+      "path": "Frontend/tournament-frontend/",
+      "group": "build",
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": {
+        "owner": "typescript",
+        "source": "ts",
+        "applyTo": "closedDocuments",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/Frontend/tournament-frontend"
+        ],
+        "pattern": "$tsc"
+      }
+    },
+    {
+      "label": "test-frontend",
+      "type": "npm",
+      "script": "test",
+      "path": "Frontend/tournament-frontend/",
+      "isBackground": true,
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": {
+        "owner": "typescript",
+        "source": "ts",
+        "applyTo": "closedDocuments",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/Frontend/tournament-frontend"
+        ],
+        "pattern": "$tsc",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": {
+            "regexp": ".*"
+          },
+          "endsPattern": {
+            "regexp": ".*Executed.*"
+          }
+        }
+      }
+    },
+    {
+      "label": "start-full-stack",
+      "dependsOrder": "parallel",
+      "dependsOn": [
+        "watch-api",
+        "start-frontend"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "install-frontend-deps",
+      "type": "npm",
+      "script": "install",
+      "path": "Frontend/tournament-frontend/",
+      "group": "build",
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "restore-api-deps",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "restore",
+        "${workspaceFolder}/API/TournamentSystem.API/TournamentSystem.API.csproj"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-frontend-prod",
+      "type": "npm",
+      "script": "build",
+      "path": "Frontend/tournament-frontend/",
+      "group": "build",
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": {
+        "owner": "typescript",
+        "source": "ts",
+        "applyTo": "closedDocuments",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/Frontend/tournament-frontend"
+        ],
+        "pattern": "$tsc"
+      }
+    },
+    {
+      "label": "build-frontend-dev",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "ng",
+        "build",
+        "--configuration=development"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/Frontend/tournament-frontend"
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": {
+        "owner": "typescript",
+        "source": "ts",
+        "applyTo": "closedDocuments",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}/Frontend/tournament-frontend"
+        ],
+        "pattern": "$tsc"
+      }
+    }
+  ]
+}

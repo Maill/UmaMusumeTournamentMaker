@@ -2,14 +2,20 @@
 
 A web application tournament maker for the game Uma Musume.
 
-## 🎯 What Makes This Special
+## 🎯 Main Features
 
-This system implements a **unique tournament format** that combines the best of Swiss and Round-Robin systems:
+The web application implements a **unique tournament format** that combines the best of Swiss and Round-Robin systems:
 
 - **3-Player Simultaneous Matches** for dynamic competition
 - **No Repeat Opponents Algorithm** ensuring fair play across all rounds
 - **Swiss-Style Competitive Pairing** matching players of similar skill levels
 - **Real-time Multi-user Management** with instant synchronization across all devices
+
+## 🤖 Disclaimer
+
+This project has been partially developped with an AI. Claude Code to be exact. I used it for everything in the frontend and a good part of the backend. And also for everything logic related before implementation. (You need to thouroughly test him by questionning the use cases and edge cases and make Claude understand everything if I want a concise and **_"bug free"_** logic)
+
+However, I am very aware of how the code should be and look and won't let the AI take control of the project at 100%. At least for the backend part. I didn't really focused my attention on the frontend for now but I will get there. It's the very first project I use with the help of an AI, although I don't follow blindly Claude, I am in control and I make it sure that Claude follow proper code conventions and clean coding. Once the absolute first stable version drops, I will stop using it, since AI with a big context tends to make too many mistakes and take more and more time to do things. And I am closer than you think of.
 
 ## 📑 Table of Contents
 
@@ -43,15 +49,15 @@ This system implements a **unique tournament format** that combines the best of 
 - **Database**: SQLite with Entity Framework Core
 - **API Style**: RESTful with real-time updates
 - **Security**: Password-protected tournaments
-- **Real-time**: WebSockets/SignalR for live updates
+- **Real-time**: WebSockets/SignalR for live updates _(TODO)_
 
 ### Frontend
 
 - **Framework**: Angular 18
 - **Styling**: CSS with responsive design
 - **HTTP Client**: Angular HttpClient with real-time connections
-- **Real-time**: WebSocket client for live tournament updates
-- **Multi-user**: Concurrent user support with conflict resolution
+- **Real-time**: WebSocket client for live tournament updates _(TODO)_
+- **Multi-user**: Concurrent user support with conflict resolution _(TODO)_
 
 ## 📁 Project Structure
 
@@ -246,8 +252,8 @@ The system implements a unique **hybrid Swiss-Round-Robin system** optimized for
 - **Tournament Management**: Create, start, and manage tournaments with password protection
 - **Player Management**: Add/delete players with real-time sync across all users
 - **Match Management**: Set winners with immediate broadcast to all tournament viewers
-- **Multi-user Support**: Multiple users can manage tournaments simultaneously
-- **Real-time Updates**: Live synchronization via WebSockets for all tournament actions
+- **Multi-user Support**: Multiple users can manage tournaments simultaneously _(TODO)_
+- **Real-time Updates**: Live synchronization via WebSockets for all tournament actions _(TODO)_
 - **Optimistic UI**: Immediate feedback with rollback on API failures
 - **Responsive Design**: Works on desktop and mobile devices
 
@@ -268,7 +274,7 @@ The system implements a unique **hybrid Swiss-Round-Robin system** optimized for
 
 - `PUT /api/matches/{id}/winner` - Set match winner (broadcasts to all users)
 
-### Real-time
+### Real-time _(TODO)_
 
 - **WebSocket/SignalR Hub**: `/tournamentHub` - Real-time tournament updates
   - Player additions/deletions
@@ -419,7 +425,9 @@ The Angular frontend features modern reactive patterns:
 2. **Frontend**: Create reactive components, update models, add service methods with WebSocket support, configure routing with real-time updates
 3. **Real-time**: Add SignalR hub methods for broadcasting, update frontend WebSocket handlers for live updates
 
-## 🧪 Testing
+## 🧪 Testing _(TODO)_
+
+There are no tests for the moment. (TBH, I didn't thought that this application will grow that big and skipped the tests). But they are planned!
 
 ### Backend Testing
 

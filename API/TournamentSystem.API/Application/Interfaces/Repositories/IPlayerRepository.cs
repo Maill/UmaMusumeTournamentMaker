@@ -10,6 +10,11 @@ namespace TournamentSystem.API.Application.Interfaces.Repositories
     {
 
         /// <summary>
+        /// Gets a player by ID
+        /// </summary>
+        Task<Player?> GetByIdAsync(int playerId);
+
+        /// <summary>
         /// Checks if a player with the given name exists in a tournament
         /// </summary>
         Task<bool> ExistsInTournamentAsync(int tournamentId, string playerName);
@@ -18,6 +23,11 @@ namespace TournamentSystem.API.Application.Interfaces.Repositories
         /// Adds a new player to a tournament
         /// </summary>
         Player AddPlayer(Player player);
+
+        /// <summary>
+        /// Removes a player from a tournament
+        /// </summary>
+        void Remove(Player player);
 
         /// <summary>
         /// Updates an existing player

@@ -7,9 +7,10 @@ namespace TournamentSystem.API.Application.Interfaces
         Task<List<TournamentDto>> GetAllTournamentsAsync();
         Task<TournamentDto?> GetTournamentByIdAsync(int id);
         Task<TournamentDto> CreateTournamentAsync(CreateTournamentDto createTournamentDto);
-        Task<TournamentDto> AddPlayerAsync(int tournamentId, AddPlayerDto addPlayerDto);
+        Task<PlayerDto> AddPlayerAsync(int tournamentId, AddPlayerDto addPlayerDto);
+        Task<int> RemovePlayerAsync(RemovePlayerDto removePlayerDto);
         Task<TournamentDto> StartTournamentAsync(int tournamentId, StartTournamentDto startTournamentDto);
-        Task<RoundDto> StartNextRoundAsync(int tournamentId);
+        Task<TournamentDto> StartNextRoundAsync(int tournamentId);
         Task<TournamentDto> GetTournamentWithCurrentRoundAsync(int tournamentId);
         Task<TournamentDto> UpdateTournamentAsync(int tournamentId, UpdateTournamentDto updateTournamentDto);
         Task<bool> DeleteTournamentAsync(int tournamentId, DeleteTournamentDto deleteTournamentDto);

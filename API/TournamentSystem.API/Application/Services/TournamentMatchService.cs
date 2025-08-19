@@ -22,7 +22,7 @@ namespace TournamentSystem.API.Application.Services
             _logger = logger;
         }
 
-        public async Task<MatchDto> SetMatchWinnerAsync(int matchId, SetWinnerDto setWinnerDto)
+        public async Task<(MatchDto Match, int TournamentId)> SetMatchWinnerAsync(int matchId, SetWinnerDto setWinnerDto)
         {
             using var transaction = await _unitOfWork.BeginTransactionAsync();
             
@@ -121,7 +121,7 @@ namespace TournamentSystem.API.Application.Services
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
                 
-                return match.ToDto();
+                return (match.ToDto(), tournamentId);
             }
             catch (ArgumentException)
             {

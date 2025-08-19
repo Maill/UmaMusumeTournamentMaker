@@ -4,6 +4,8 @@ using TournamentSystem.API.Application.Interfaces;
 using TournamentSystem.API.Application.Services;
 using TournamentSystem.API.Application.Strategies;
 using TournamentSystem.API.Infrastructure.Repositories;
+using TournamentSystem.API.Infrastructure.Services;
+using TournamentSystem.API.Infrastructure.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,10 @@ builder.Services.AddScoped<ChampionsMeetingTournamentStrategy>();
 builder.Services.AddScoped<ITournamentMatchService, TournamentMatchService>();
 builder.Services.AddScoped<ITournamentService, TournamentService>();
 
+// Register SignalR and broadcast service
+builder.Services.AddSignalR();
+builder.Services.AddScoped<ITournamentBroadcastService, TournamentBroadcastService>();
+
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
@@ -35,7 +41,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:4200")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials(); // Required for SignalR
     });
 });
 
@@ -60,5 +67,8 @@ if (app.Environment.IsDevelopment())
 app.UseCors();
 app.UseHttpsRedirection();
 app.MapControllers();
+
+// Map SignalR hub
+app.MapHub<TournamentHub>("/tournamentHub");
 
 app.Run();

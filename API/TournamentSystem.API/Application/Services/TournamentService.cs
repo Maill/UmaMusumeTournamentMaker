@@ -67,7 +67,7 @@ namespace TournamentSystem.API.Application.Services
             }
         }
 
-        public async Task<TournamentDto> AddPlayerAsync(int tournamentId, AddPlayerDto addPlayerDto)
+        public async Task<PlayerDto> AddPlayerAsync(int tournamentId, AddPlayerDto addPlayerDto)
         {
             using var transaction = await _unitOfWork.BeginTransactionAsync();
             
@@ -93,12 +93,11 @@ namespace TournamentSystem.API.Application.Services
                     Group = string.Empty
                 };
 
-                _unitOfWork.Players.AddPlayer(player);
+                var addedPlayer = _unitOfWork.Players.AddPlayer(player);
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
                 
-                var updatedTournament = await _unitOfWork.Tournaments.GetByIdWithPlayersAsync(tournamentId);
-                return updatedTournament!.ToDto();
+                return addedPlayer.ToDto();
             }
             catch (InvalidOperationException)
             {
@@ -120,6 +119,51 @@ namespace TournamentSystem.API.Application.Services
                 _logger.LogError("TournamentService", $"Failed to add player '{addPlayerDto.Name}' to tournament {tournamentId}: {ex.Message}", ex);
                 await _unitOfWork.RollbackTransactionAsync();
                 throw new InvalidOperationException($"An unexpected error occurred while adding player '{addPlayerDto.Name}' to the tournament. Please try again.", ex);
+            }
+        }
+
+        public async Task<int> RemovePlayerAsync(RemovePlayerDto removePlayerDto)
+        {
+            using var transaction = await _unitOfWork.BeginTransactionAsync();
+            
+            try
+            {
+                var tournament = await _unitOfWork.Tournaments.ValidatePasswordAndGetTournamentAsync(removePlayerDto.TournamentId, removePlayerDto.Password);
+
+                if (tournament.Status != TournamentStatus.Created)
+                    throw new InvalidOperationException("Cannot remove players from a tournament that has already started");
+
+                var player = await _unitOfWork.Players.GetByIdAsync(removePlayerDto.PlayerId);
+                if (player == null || player.TournamentId != removePlayerDto.TournamentId)
+                    throw new ArgumentException("Player not found in this tournament");
+
+                var playerId = player.Id;
+                _unitOfWork.Players.Remove(player);
+                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.CommitTransactionAsync();
+                
+                return playerId;
+            }
+            catch (InvalidOperationException)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw; // Re-throw business logic exceptions as-is
+            }
+            catch (UnauthorizedAccessException)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw; // Re-throw authentication exceptions as-is
+            }
+            catch (ArgumentException)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw; // Re-throw validation exceptions as-is
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("TournamentService", $"Failed to remove player {removePlayerDto.PlayerId} from tournament {removePlayerDto.TournamentId}: {ex.Message}", ex);
+                await _unitOfWork.RollbackTransactionAsync();
+                throw new InvalidOperationException($"An unexpected error occurred while removing the player from the tournament. Please try again.", ex);
             }
         }
 
@@ -160,8 +204,10 @@ namespace TournamentSystem.API.Application.Services
 
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
-
-                return tournament.ToDto();
+                
+                // Get updated tournament for broadcasting
+                var updatedTournament = await _unitOfWork.Tournaments.GetByIdWithCompleteDetailsAsync(tournamentId);
+                return updatedTournament!.ToDto();
             }
             catch (InvalidOperationException)
             {
@@ -186,7 +232,7 @@ namespace TournamentSystem.API.Application.Services
             }
         }
 
-        public async Task<RoundDto> StartNextRoundAsync(int tournamentId)
+        public async Task<TournamentDto> StartNextRoundAsync(int tournamentId)
         {
             using var transaction = await _unitOfWork.BeginTransactionAsync();
             
@@ -223,12 +269,10 @@ namespace TournamentSystem.API.Application.Services
                 _unitOfWork.Tournaments.Update(tournament);
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
-
-                // Get updated round with matches
+                
+                // Get updated tournament for broadcasting
                 var updatedTournament = await _unitOfWork.Tournaments.GetByIdWithCompleteDetailsAsync(tournamentId);
-                var updatedRound = updatedTournament!.Rounds.First(r => r.RoundNumber == tournament.CurrentRound);
-
-                return updatedRound.ToDto();
+                return updatedTournament!.ToDto();
             }
             catch (ArgumentException)
             {

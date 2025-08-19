@@ -4,6 +4,6 @@ namespace TournamentSystem.API.Application.Interfaces
 {
     public interface ITournamentMatchService
     {
-        Task<MatchDto> SetMatchWinnerAsync(int matchId, SetWinnerDto setWinnerDto);
+        Task<(MatchDto Match, int TournamentId)> SetMatchWinnerAsync(int matchId, SetWinnerDto setWinnerDto);
     }
 }

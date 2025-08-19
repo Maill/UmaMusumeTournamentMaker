@@ -9,19 +9,22 @@ namespace TournamentSystem.API.Presentation.Controllers
     public class MatchesController : ControllerBase
     {
         private readonly ITournamentMatchService _tournamentMatchService;
+        private readonly ITournamentBroadcastService _broadcastService;
 
-        public MatchesController(ITournamentMatchService tournamentMatchService)
+        public MatchesController(ITournamentMatchService tournamentMatchService, ITournamentBroadcastService broadcastService)
         {
             _tournamentMatchService = tournamentMatchService;
+            _broadcastService = broadcastService;
         }
 
         [HttpPut("{id}/winner")]
-        public async Task<ActionResult<MatchDto>> SetMatchWinner(int id, SetWinnerDto setWinnerDto)
+        public async Task<ActionResult> SetMatchWinner(int id, SetWinnerDto setWinnerDto)
         {
             try
             {
-                var match = await _tournamentMatchService.SetMatchWinnerAsync(id, setWinnerDto);
-                return Ok(match);
+                var (match, tournamentId) = await _tournamentMatchService.SetMatchWinnerAsync(id, setWinnerDto);
+                await _broadcastService.BroadcastMatchUpdated(tournamentId, match);
+                return Ok(new { message = "Match winner set successfully" });
             }
             catch (ArgumentException ex)
             {

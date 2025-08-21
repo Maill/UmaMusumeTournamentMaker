@@ -10,5 +10,6 @@ namespace TournamentSystem.API.Application.Strategies
         Task CreateMatchesForRoundAsync(Tournament tournament, Round round);
         bool ShouldCompleteTournament(Tournament tournament);
         int CalculateTargetMatches(int playerCount);
+        int? DetermineTournamentWinner(Tournament tournament);
     }
 }

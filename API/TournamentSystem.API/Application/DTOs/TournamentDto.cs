@@ -12,6 +12,7 @@ namespace TournamentSystem.API.Application.DTOs
         public DateTime? StartedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public int CurrentRound { get; set; }
+        public int? WinnerId { get; set; }
         public List<PlayerDto> Players { get; set; } = new();
         public List<RoundDto> Rounds { get; set; } = new();
     }

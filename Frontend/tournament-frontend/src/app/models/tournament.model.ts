@@ -38,6 +38,7 @@ export interface Round {
   roundNumber: number;
   createdAt: string;
   isCompleted: boolean;
+  roundType?: string;
   matches: Match[];
 }
 
@@ -50,6 +51,7 @@ export interface Tournament {
   startedAt?: string;
   completedAt?: string;
   currentRound: number;
+  winnerId?: number;
   players: Player[];
   rounds: Round[];
 }
@@ -81,4 +83,14 @@ export interface UpdateTournament {
 
 export interface DeleteTournament {
   password: string;
+}
+
+export interface MatchResult {
+  matchId: number;
+  winnerId: number;
+}
+
+export interface StartNextRound {
+  password?: string;
+  matchResults: MatchResult[];
 }

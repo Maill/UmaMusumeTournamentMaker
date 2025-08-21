@@ -3,6 +3,7 @@ using TournamentSystem.API.Domain.Enums;
 using TournamentSystem.API.Application.Interfaces;
 using TournamentSystem.API.Application.Services;
 using TournamentSystem.API.Application.Extensions;
+using System.Numerics;
 
 namespace TournamentSystem.API.Application.Strategies
 {
@@ -18,17 +19,18 @@ namespace TournamentSystem.API.Application.Strategies
     public class SwissTournamentStrategy : ITournamentStrategy
     {
         private readonly ITournamentLogger _logger;
-        private readonly PlayerCombinationService _combinationService;
+        private readonly IPlayerCombinationService _combinationService;
         private readonly IMatchCreationService _matchCreationService;
 
         public TournamentType SupportedType => TournamentType.Swiss;
 
         public SwissTournamentStrategy(
             ITournamentLogger logger,
+            IPlayerCombinationService combinationService,
             IMatchCreationService matchCreationService)
         {
             _logger = logger;
-            _combinationService = new PlayerCombinationService();
+            _combinationService = combinationService;
             _matchCreationService = matchCreationService;
         }
 
@@ -67,7 +69,7 @@ namespace TournamentSystem.API.Application.Strategies
             
             _logger.LogDebug("HybridSwiss", $"Creating regular round {round.RoundNumber}");
 
-            List<PlayerCombinationService.PlayerTriple> selectedMatches;
+            List<IPlayerCombinationService.PlayerTriple> selectedMatches;
 
             if (round.RoundNumber == 1)
             {
@@ -83,9 +85,10 @@ namespace TournamentSystem.API.Application.Strategies
             }
 
             // Create matches from selected combinations
+            await _matchCreationService.CreateMatchesAsync(round, selectedMatches.Select(tbm => tbm.Players));
             foreach (var matchCombo in selectedMatches)
             {
-                await _matchCreationService.CreateSingleMatchAsync(round, matchCombo.Players);
+                //await _matchCreationService.CreateSingleMatchAsync(round, matchCombo.Players);
                 _logger.LogDebug("HybridSwiss", 
                     $"Created match with players: {string.Join(", ", matchCombo.Players.Select(p => p.Id))}");
             }
@@ -135,6 +138,31 @@ namespace TournamentSystem.API.Application.Strategies
         }
 
         /// <summary>
+        /// Determines the tournament winner - always the winner of the final round
+        /// </summary>
+        public int? DetermineTournamentWinner(Tournament tournament)
+        {
+            var finalRound = tournament.GetFinalRound();
+            _logger.LogDebug("SwissTournament", $"Final round found: {finalRound != null}, IsCompleted: {finalRound?.IsCompleted}");
+            
+            if (finalRound?.IsCompleted == true)
+            {
+                var finalMatch = finalRound.Matches.FirstOrDefault();
+                _logger.LogDebug("SwissTournament", $"Final match found: {finalMatch != null}, WinnerId: {finalMatch?.WinnerId}");
+                
+                if (finalMatch?.WinnerId.HasValue == true)
+                {
+                    _logger.LogDebug("SwissTournament", $"Tournament winner: Player {finalMatch.WinnerId}");
+                    return finalMatch.WinnerId;
+                }
+            }
+            
+            _logger.LogDebug("SwissTournament", "Tournament has no winner yet - final round not completed");
+            return null;
+        }
+
+
+        /// <summary>
         /// Creates tiebreaker round to resolve standings ties
         /// </summary>
         private async Task CreateTiebreakerRound(Tournament tournament, Round round)
@@ -142,20 +170,20 @@ namespace TournamentSystem.API.Application.Strategies
             round.RoundType = "Tiebreaker";
             _logger.LogDebug("HybridSwiss", $"Creating tiebreaker round {round.RoundNumber}");
             
-            // Use same hybrid algorithm but focus on tied players
-            var players = tournament.Players.ToList();
-            var selectedMatches = _combinationService.SelectOptimalMatches(players, tournament);
-            
-            foreach (var matchCombo in selectedMatches)
+            // Get the specific tiebreaker matches we want to create
+            var tiebreakerMatches = GetTiebreakerMatches(tournament);
+            _logger.LogDebug("HybridSwiss", $"Tiebreaker involves {tiebreakerMatches.Count} matches");
+
+            await _matchCreationService.CreateMatchesAsync(round, tiebreakerMatches.Select(tbm => tbm.Players));
+
+            foreach (var matchCombo in tiebreakerMatches)
             {
-                await _matchCreationService.CreateSingleMatchAsync(round, matchCombo.Players);
+                //await _matchCreationService.CreateSingleMatchAsync(round, matchCombo.Players);
+                _logger.LogDebug("HybridSwiss", $"Created tiebreaker match: {string.Join(", ", matchCombo.Players.Select(p => p.Id))}");
             }
             
-            var byePlayers = _combinationService.SelectByePlayers(players, selectedMatches, tournament);
-            await HandleByePlayers(byePlayers, round.RoundNumber);
-            
             _logger.LogDebug("HybridSwiss", 
-                $"Tiebreaker round {round.RoundNumber}: {selectedMatches.Count} matches, {byePlayers.Count} byes");
+                $"Tiebreaker round {round.RoundNumber}: {tiebreakerMatches.Count} matches, no bye points awarded");
         }
 
         /// <summary>
@@ -170,7 +198,7 @@ namespace TournamentSystem.API.Application.Strategies
             
             if (top3Players.Count >= 3)
             {
-                await _matchCreationService.CreateSingleMatchAsync(round, top3Players.Take(3).ToList());
+                await _matchCreationService.CreateSingleMatchAsync(round, top3Players);
                 _logger.LogDebug("HybridSwiss", 
                     $"Final championship: {string.Join(", ", top3Players.Take(3).Select(p => p.Id))}");
             }
@@ -183,8 +211,8 @@ namespace TournamentSystem.API.Application.Strategies
         {
             foreach (var player in byePlayers)
             {
-                // Strategic bye points: help lower-ranked players more
-                int byePoints = player.Points <= 2 ? 2 : 1;
+                // Fair bye points: all players get same points regardless of standings
+                int byePoints = 1;
                 player.Points += byePoints;
                 
                 _logger.LogDebug("HybridSwiss", 
@@ -194,6 +222,70 @@ namespace TournamentSystem.API.Application.Strategies
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Gets tiebreaker matches needed to resolve podium standings (top 3 positions)
+        /// Includes ALL players who could potentially claim a top 3 spot based on their current statistics
+        /// </summary>
+        private List<IPlayerCombinationService.PlayerTriple> GetTiebreakerMatches(Tournament tournament)
+        {
+            var sortedPlayers = tournament.GetPlayersSortedByStandings();
 
+            // Find the score threshold for potential top 3 contenders
+            // Anyone tied with 3rd place (or better) should compete in tiebreaker
+            var thirdPlace = sortedPlayers[2];
+            var podiumContenders = new List<Player>();
+            
+            podiumContenders.AddRange(sortedPlayers.Skip(2).Where(p => p.ArePlayersTied(thirdPlace)));
+
+            if(podiumContenders.Count > 3)
+                podiumContenders.AddRange(sortedPlayers.Where(p => p.Points >= thirdPlace.Points));
+
+            podiumContenders = podiumContenders.GetPlayersSortedByStandings();
+
+            _logger.LogDebug("HybridSwiss", $"Podium contenders (tied for top 3): {podiumContenders.Count} players (threshold: {thirdPlace.Points} points, {thirdPlace.Wins} wins, {thirdPlace.Losses} losses) - IDs: {string.Join(", ", podiumContenders.Select(p => p.Id))}");
+
+            // If we have less than 2 contenders, no tiebreaker needed (top 3 is clear)
+            if (podiumContenders.Count < 2)
+            {
+                _logger.LogDebug("HybridSwiss", "Less than 2 podium contenders - top 3 is clear, no tiebreaker needed");
+                return new List<IPlayerCombinationService.PlayerTriple>();
+            }
+
+            // Get available players to fill out matches if needed (below podium contention level)
+            var availablePlayers = sortedPlayers
+                .Skip(2) // Except top 2 (if top should be included, they were added before)
+                .Except(podiumContenders)  // Not already in contender group
+                .Where(p => p.Points <= thirdPlace.Points)   // Only players clearly below podium level
+                .ToList();
+
+            var tiebreakerPlayers = new List<Player>(podiumContenders);
+
+            // Add players to reach multiple of 3 for proper matches
+            while (tiebreakerPlayers.Count % 3 != 0 && availablePlayers.Any())
+            {
+                var nextPlayer = availablePlayers.First();
+                tiebreakerPlayers.Add(nextPlayer);
+                availablePlayers.Remove(nextPlayer);
+                _logger.LogDebug("HybridSwiss", $"Added player {nextPlayer.Id} to reach multiple of 3");
+            }
+
+            _logger.LogDebug("HybridSwiss", $"Final tiebreaker participants: {tiebreakerPlayers.Count} players - IDs: {string.Join(", ", tiebreakerPlayers.Select(p => p.Id))}");
+
+            // Create PlayerTriple matches from the tiebreaker players
+            var tiebreakerMatches = new List<IPlayerCombinationService.PlayerTriple>();
+
+            for (int i = 0; i + 2 < tiebreakerPlayers.Count; i += 3)
+            {
+                var match = new IPlayerCombinationService.PlayerTriple(
+                    tiebreakerPlayers[i],
+                    tiebreakerPlayers[i + 1],
+                    tiebreakerPlayers[i + 2]
+                );
+                tiebreakerMatches.Add(match);
+                _logger.LogDebug("HybridSwiss", $"Created tiebreaker match: {tiebreakerPlayers[i].Id}, {tiebreakerPlayers[i + 1].Id}, {tiebreakerPlayers[i + 2].Id}");
+            }
+
+            return tiebreakerMatches;
+        }
     }
 }

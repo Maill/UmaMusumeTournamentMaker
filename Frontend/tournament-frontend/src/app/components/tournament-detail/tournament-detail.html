@@ -8,7 +8,7 @@
   @if (error) {
     <div class="error">
       {{ error }}
-      <button class="btn btn-secondary" (click)="loadTournament(tournament?.id || 0)">Retry</button>
+      <button class="btn btn-secondary" (click)="initializeTournament(tournament?.id || 0)">Retry</button>
     </div>
   }
 
@@ -54,28 +54,48 @@
           <span class="tournament-status" [class]="'status-' + tournament.status.toString().toLowerCase()">
             {{ getStatusText(tournament.status) }}
           </span>
+          @if (tournament.status === TournamentStatus.Completed && tournament.winnerId) {
+            <span class="tournament-winner">
+              🏆 Champion: {{ getWinnerName(tournament.winnerId) }}
+            </span>
+          }
         </div>
       </div>
       <div class="header-actions">
-        @if (!isEditingName) {
+        @if (!isInManagementMode) {
           <button 
-            class="btn btn-outline-primary btn-sm" 
-            (click)="startNameEdit()"
-            title="Edit tournament name">
-            Edit Name
+            class="btn btn-primary btn-sm" 
+            (click)="enterManagementMode()"
+            title="Enter management mode to edit tournament">
+            Enter Management
+          </button>
+        } @else {
+          @if (!isEditingName) {
+            <button 
+              class="btn btn-outline-primary btn-sm" 
+              (click)="startNameEdit()"
+              title="Edit tournament name">
+              Edit Name
+            </button>
+          }
+          <button 
+            class="btn btn-outline-danger btn-sm" 
+            (click)="deleteTournament()"
+            [disabled]="isDeletingTournament"
+            title="Delete tournament">
+            @if (isDeletingTournament) {
+              <span>Deleting...</span>
+            } @else {
+              <span>Delete</span>
+            }
+          </button>
+          <button 
+            class="btn btn-outline-secondary btn-sm" 
+            (click)="exitManagementMode()"
+            title="Exit management mode">
+            Exit Management
           </button>
         }
-        <button 
-          class="btn btn-outline-danger btn-sm" 
-          (click)="deleteTournament()"
-          [disabled]="isDeletingTournament"
-          title="Delete tournament">
-          @if (isDeletingTournament) {
-            <span>Deleting...</span>
-          } @else {
-            <span>Delete</span>
-          }
-        </button>
         <a routerLink="/tournaments" class="btn btn-secondary">Back to Tournaments</a>
       </div>
     </div>
@@ -87,36 +107,39 @@
         <h2>Players ({{ tournament.players.length }})</h2>
         
         <!-- Add Player Form -->
-        <div class="add-player-form">
-          <div class="form-group">
-            <label for="playerName">Add Player:</label>
-            <div class="input-group">
-              <input 
-                id="playerName"
-                type="text" 
-                [(ngModel)]="newPlayerName" 
-                class="form-control"
-                placeholder="Enter player name"
-                (keyup.enter)="addPlayer()"
-                [disabled]="isAddingPlayer">
-              <button 
-                class="btn btn-primary" 
-                (click)="addPlayer()"
-                [disabled]="isAddingPlayer || !newPlayerName.trim()">
-                @if (isAddingPlayer) {
-                  <span>Adding...</span>
-                } @else {
-                  <span>Add Player</span>
-                }
-              </button>
+        @if (isInManagementMode) {
+          <div class="add-player-form">
+            <div class="form-group">
+              <label for="playerName">Add Player:</label>
+              <div class="input-group">
+                <input 
+                  #playerNameInput
+                  id="playerName"
+                  type="text" 
+                  [(ngModel)]="newPlayerName" 
+                  class="form-control"
+                  placeholder="Enter player name"
+                  (keyup.enter)="addPlayer()"
+                  [disabled]="isAddingPlayer">
+                <button 
+                  class="btn btn-primary" 
+                  (click)="addPlayer()"
+                  [disabled]="isAddingPlayer || !newPlayerName.trim()">
+                  @if (isAddingPlayer) {
+                    <span>Adding...</span>
+                  } @else {
+                    <span>Add Player</span>
+                  }
+                </button>
+              </div>
             </div>
+            @if (addPlayerError) {
+              <div class="error">
+                {{ addPlayerError }}
+              </div>
+            }
           </div>
-          @if (addPlayerError) {
-            <div class="error">
-              {{ addPlayerError }}
-            </div>
-          }
-        </div>
+        }
 
         <!-- Players List -->
         @if (tournament.players.length > 0) {
@@ -125,13 +148,21 @@
               <div class="player-item">
                 <span class="player-number">{{ i + 1 }}.</span>
                 <span class="player-name">{{ player.name }}</span>
+                @if (isInManagementMode) {
+                  <button 
+                    class="btn btn-sm btn-outline-danger remove-player-btn" 
+                    (click)="removePlayer(player.id, player.name)"
+                    title="Remove player">
+                    ×
+                  </button>
+                }
               </div>
             }
           </div>
         }
 
         <!-- Start Tournament -->
-        @if (tournament.players.length >= 3) {
+        @if (tournament.players.length >= 3 && isInManagementMode) {
           <div class="start-tournament-section">
             <button 
               class="btn btn-success" 
@@ -179,7 +210,9 @@
                   <th>Players</th>
                   <th>Status</th>
                   <th>Winner</th>
-                  <th>Actions</th>
+                  @if (isInManagementMode) {
+                    <th>Actions</th>
+                  }
                 </tr>
               </thead>
               <tbody>
@@ -209,14 +242,13 @@
                       <span class="no-winner">-</span>
                     }
                   </td>
-                  <td>
-                    @if (!match.winnerId) {
+                  @if (isInManagementMode) {
+                    <td>
                       <div class="winner-selection">
                         <select 
                           class="form-control winner-select" 
-                          [value]="getSelectedWinnerValue(match.id)"
-                          (change)="onWinnerSelectionChange(match, $event)"
-                          [disabled]="isSettingWinner && currentSettingMatchId === match.id">
+                          [value]="match.winnerId || ''"
+                          (change)="onWinnerSelectionChange(match, $event)">
                           <option value="">Select Winner</option>
                           @for (player of match.players; track player.id) {
                             <option [value]="player.id">
@@ -224,16 +256,12 @@
                             </option>
                           }
                         </select>
-                        @if (isSettingWinner && currentSettingMatchId === match.id) {
-                          <span class="setting-winner">
-                            Setting...
-                          </span>
+                        @if (match.winnerId) {
+                          <span class="winner-set-indicator" title="Winner selected (can be changed)">✓</span>
                         }
                       </div>
-                    } @else {
-                      <span class="match-complete-indicator">✓</span>
-                    }
-                  </td>
+                    </td>
+                  }
                   </tr>
                 }
               </tbody>
@@ -241,7 +269,7 @@
           </div>
 
           <!-- Next Round Button -->
-          @if (canStartNextRound()) {
+          @if (canStartNextRound() && isInManagementMode) {
             <div class="round-actions">
               <button 
                 class="btn btn-primary" 
@@ -299,7 +327,17 @@
     <!-- Tournament Completed State: Final Results -->
     @if (tournament.status === TournamentStatus.Completed) {
       <div class="tournament-completed">
-      <h2>🏆 Tournament Results</h2>
+      
+      <!-- Winner Announcement -->
+      @if (tournament.winnerId) {
+        <div class="winner-announcement">
+          <h2>🏆 Tournament Champion</h2>
+          <div class="champion-name">{{ getWinnerName(tournament.winnerId) }}</div>
+          <p class="champion-subtitle">Congratulations to our tournament winner!</p>
+        </div>
+      }
+      
+      <h3>📊 Tournament Results</h3>
       
       <!-- Final Standings -->
       <div class="final-standings">

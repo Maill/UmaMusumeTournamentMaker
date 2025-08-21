@@ -18,6 +18,6 @@ namespace TournamentSystem.API.Application.Interfaces
         /// Updates all player statistics for a completed match
         /// Handles winner stats, loser stats, and opponent tracking
         /// </summary>
-        Task UpdateAllPlayerStatisticsAsync(Match match, int winnerId);
+        void UpdateAllPlayerStatistics(Match match, int winnerId);
     }
 }

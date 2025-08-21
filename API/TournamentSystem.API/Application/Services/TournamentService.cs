@@ -3,6 +3,7 @@ using TournamentSystem.API.Application.Interfaces;
 using TournamentSystem.API.Application.Extensions;
 using TournamentSystem.API.Domain.Entities;
 using TournamentSystem.API.Domain.Enums;
+using TournamentSystem.API.Application.Strategies;
 
 namespace TournamentSystem.API.Application.Services
 {
@@ -33,7 +34,7 @@ namespace TournamentSystem.API.Application.Services
 
         public async Task<TournamentDto?> GetTournamentByIdAsync(int id)
         {
-            var tournament = await _unitOfWork.Tournaments.GetByIdWithPlayersAsync(id);
+            var tournament = await _unitOfWork.Tournaments.GetByIdWithCompleteDetailsAsync(id);
             return tournament?.ToDto();
         }
 
@@ -183,30 +184,17 @@ namespace TournamentSystem.API.Application.Services
 
                 tournament.Status = TournamentStatus.InProgress;
                 tournament.StartedAt = DateTime.UtcNow;
-                tournament.CurrentRound = 1;
 
-                // Create the first round automatically
-                var firstRound = new Round
-                {
-                    RoundNumber = 1,
-                    TournamentId = tournamentId,
-                    CreatedAt = DateTime.UtcNow,
-                    IsCompleted = false
-                };
-
-                _unitOfWork.Tournaments.Update(tournament);
-                var createdRound = _unitOfWork.Rounds.Create(firstRound);
-                await _unitOfWork.SaveChangesAsync();
-
-                // Generate matches for the first round using the appropriate strategy
+                //// Generate matches for the first round using the appropriate strategy
                 var strategy = _strategyFactory.GetStrategy(tournament.Type);
-                await strategy.CreateMatchesForRoundAsync(tournament, createdRound);
+                await CreateRoundAsync(strategy, tournament);
 
                 await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
                 
-                // Get updated tournament for broadcasting
+                // Get updated tournament for broadcasting BEFORE committing transaction
                 var updatedTournament = await _unitOfWork.Tournaments.GetByIdWithCompleteDetailsAsync(tournamentId);
+                
+                await _unitOfWork.CommitTransactionAsync();
                 return updatedTournament!.ToDto();
             }
             catch (InvalidOperationException)
@@ -232,46 +220,48 @@ namespace TournamentSystem.API.Application.Services
             }
         }
 
-        public async Task<TournamentDto> StartNextRoundAsync(int tournamentId)
+        public async Task<TournamentDto> StartNextRoundAsync(int tournamentId, StartNextRoundDto startNextRoundDto)
         {
             using var transaction = await _unitOfWork.BeginTransactionAsync();
             
             try
             {
-                var tournament = await _unitOfWork.Tournaments.GetByIdWithCompleteDetailsAsync(tournamentId);
-                if (tournament == null)
-                    throw new ArgumentException("Tournament not found");
+                var tournament = await _unitOfWork.Tournaments.ValidatePasswordAndGetTournamentWithRoundsAsync(tournamentId, startNextRoundDto.Password);
 
                 if (tournament.Status != TournamentStatus.InProgress)
                     throw new InvalidOperationException("Tournament is not in progress");
 
-                // Check if current round is completed
+                // Get current round
                 var currentRound = tournament.Rounds.FirstOrDefault(r => r.RoundNumber == tournament.CurrentRound);
-                if (currentRound != null && !currentRound.IsCompleted)
-                    throw new InvalidOperationException("Current round is not completed yet");
+                if (currentRound == null)
+                    throw new InvalidOperationException("Current round not found");
 
-                // Create new round
-                tournament.CurrentRound++;
-                var newRound = new Round
+                // Process all match winners for the current round
+                bool roundCompleted = await _matchService.ProcessMatchWinnersAsync(currentRound, startNextRoundDto.MatchResults);
+                
+                if (!roundCompleted)
                 {
-                    RoundNumber = tournament.CurrentRound,
-                    TournamentId = tournamentId,
-                    CreatedAt = DateTime.UtcNow,
-                    IsCompleted = false
-                };
-
-                var createdRound = _unitOfWork.Rounds.Create(newRound);
+                    throw new InvalidOperationException("Cannot advance to next round - not all matches in the current round have winners assigned");
+                }
                 
-                // Generate matches for the new round
-                var strategy = _strategyFactory.GetStrategy(tournament.Type);
-                await strategy.CreateMatchesForRoundAsync(tournament, createdRound);
-
-                _unitOfWork.Tournaments.Update(tournament);
+                // Save the completed round
                 await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
                 
-                // Get updated tournament for broadcasting
+                // Check if tournament should be completed after this round
+                var strategy = _strategyFactory.GetStrategy(tournament.Type);                
+                if (!IsTournamentCompleted(strategy, tournament, currentRound))
+                {
+                    // Create next round and let the strategy determine its type and matches
+                    await CreateRoundAsync(strategy, tournament, ++tournament.CurrentRound);
+                }
+                
+                // Save tournament completion status if it was updated
+                await _unitOfWork.SaveChangesAsync();
+                
+                // Get updated tournament for broadcasting BEFORE committing transaction
                 var updatedTournament = await _unitOfWork.Tournaments.GetByIdWithCompleteDetailsAsync(tournamentId);
+                
+                await _unitOfWork.CommitTransactionAsync();
                 return updatedTournament!.ToDto();
             }
             catch (ArgumentException)
@@ -290,6 +280,48 @@ namespace TournamentSystem.API.Application.Services
                 await _unitOfWork.RollbackTransactionAsync();
                 throw new InvalidOperationException("An unexpected error occurred while starting the next round. Please try again.", ex);
             }
+        }
+
+        public async Task CreateRoundAsync(ITournamentStrategy strategy, Tournament tournament, int roundNumber = 1)
+        {
+            tournament.CurrentRound = roundNumber;
+            var newRound = new Round
+            {
+                RoundNumber = tournament.CurrentRound,
+                TournamentId = tournament.Id,
+                CreatedAt = DateTime.UtcNow,
+                IsCompleted = false,
+                RoundType = "Regular" // Strategy will update this as needed
+            };
+
+            var createdRound = _unitOfWork.Rounds.Create(newRound);
+            await _unitOfWork.SaveChangesAsync(); // Save to get database ID
+
+            // Let the strategy decide what type of round this should be and create matches
+            await strategy.CreateMatchesForRoundAsync(tournament, createdRound);
+            _unitOfWork.Tournaments.Update(tournament);
+        }
+
+        public bool IsTournamentCompleted(ITournamentStrategy strategy, Tournament tournament, Round currentRound)
+        {
+            bool tournamentCompleted = strategy.ShouldCompleteTournament(tournament);
+
+            if (tournamentCompleted)
+            {
+                _logger.LogTournamentCompletion(tournament.Id, tournament.CurrentRound, tournament.Type.ToString(), tournament.Players.Count);
+                
+                // Determine tournament winner
+                var winnerId = strategy.DetermineTournamentWinner(tournament);
+                tournament.WinnerId = winnerId;
+                _logger.LogDebug("TournamentService", $"Tournament {tournament.Id} completed with winner: {winnerId}");
+                
+                // Mark tournament as completed
+                tournament.Status = TournamentStatus.Completed;
+                tournament.CompletedAt = DateTime.UtcNow;
+                _unitOfWork.Tournaments.Update(tournament);
+            }
+
+            return tournamentCompleted;
         }
 
         public async Task<TournamentDto> GetTournamentWithCurrentRoundAsync(int tournamentId)
@@ -357,6 +389,24 @@ namespace TournamentSystem.API.Application.Services
                 _logger.LogError("TournamentService", $"Failed to delete tournament {tournamentId}: {ex.Message}", ex);
                 await _unitOfWork.RollbackTransactionAsync();
                 throw new InvalidOperationException("An unexpected error occurred while deleting the tournament. Please try again.", ex);
+            }
+        }
+
+        public async Task<bool> ValidatePasswordAsync(int tournamentId, string password)
+        {
+            try
+            {
+                await _unitOfWork.Tournaments.ValidatePasswordAsync(tournamentId, password);
+                return true;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return false;
+            }
+            catch (ArgumentException)
+            {
+                // Tournament not found
+                return false;
             }
         }
     }

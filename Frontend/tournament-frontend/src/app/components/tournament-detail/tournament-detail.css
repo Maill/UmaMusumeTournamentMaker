@@ -55,6 +55,8 @@
 .tournament-meta {
   display: flex;
   gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .tournament-type {
@@ -86,6 +88,16 @@
 .status-3 { /* Completed */
   background-color: #f8d7da;
   color: #721c24;
+}
+
+.tournament-winner {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 2px solid #ffc107;
 }
 
 /* Tournament Setup (Created State) */
@@ -238,6 +250,13 @@
   font-weight: bold;
 }
 
+.winner-set-indicator {
+  color: #27ae60;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: help;
+}
+
 .round-actions {
   text-align: center;
   margin-top: 2rem;
@@ -271,6 +290,37 @@
 .tournament-completed {
   display: grid;
   gap: 2rem;
+}
+
+.winner-announcement {
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  border: 3px solid #f39c12;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  margin-bottom: 1rem;
+}
+
+.winner-announcement h2 {
+  color: #2c3e50;
+  margin: 0 0 1rem 0;
+  font-size: 2rem;
+}
+
+.champion-name {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2c3e50;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0.5rem 0;
+}
+
+.champion-subtitle {
+  color: #34495e;
+  font-size: 1.1rem;
+  margin: 0.5rem 0 0 0;
+  font-style: italic;
 }
 
 .final-standings {
@@ -361,4 +411,26 @@
   .tournament-active {
     gap: 1rem;
   }
+}
+/* Remove player button styling */
+.player-item {
+  justify-content: space-between;
+}
+
+.remove-player-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.remove-player-btn:hover {
+  opacity: 1;
 }

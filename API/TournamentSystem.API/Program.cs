@@ -6,6 +6,7 @@ using TournamentSystem.API.Application.Strategies;
 using TournamentSystem.API.Infrastructure.Repositories;
 using TournamentSystem.API.Infrastructure.Services;
 using TournamentSystem.API.Infrastructure.Hubs;
+using TournamentSystem.API.Application.Interfaces.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,15 +14,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<TournamentDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register focused repositories
-builder.Services.AddScoped<TournamentSystem.API.Application.Interfaces.Repositories.ITournamentRepository, TournamentRepository>();
-builder.Services.AddScoped<TournamentSystem.API.Application.Interfaces.Repositories.IRoundRepository, RoundRepository>();
-builder.Services.AddScoped<TournamentSystem.API.Application.Interfaces.Repositories.IMatchRepository, MatchRepository>();
-builder.Services.AddScoped<TournamentSystem.API.Application.Interfaces.Repositories.IPlayerRepository, PlayerRepository>();
+builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
+builder.Services.AddScoped<IRoundRepository, RoundRepository>();
+builder.Services.AddScoped<IMatchRepository, MatchRepository>();
+builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
 
-// Register new refactored services
 builder.Services.AddSingleton<ITournamentLogger, TournamentLogger>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IPlayerCombinationService, PlayerCombinationService>();
 builder.Services.AddScoped<IMatchCreationService, MatchCreationService>();
 builder.Services.AddScoped<IPlayerStatisticsService, PlayerStatisticsService>();
 builder.Services.AddScoped<ITournamentStrategyFactory, TournamentStrategyFactory>();

@@ -10,184 +10,100 @@ namespace TournamentSystem.API.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITournamentStrategyFactory _strategyFactory;
+        private readonly IPlayerStatisticsService _playerStatisticsService;
         private readonly ITournamentLogger _logger;
 
         public TournamentMatchService(
             IUnitOfWork unitOfWork,
             ITournamentStrategyFactory strategyFactory,
+            IPlayerStatisticsService playerStatisticsService,
             ITournamentLogger logger)
         {
             _unitOfWork = unitOfWork;
             _strategyFactory = strategyFactory;
+            _playerStatisticsService = playerStatisticsService;
             _logger = logger;
         }
 
-        public async Task<(MatchDto Match, int TournamentId)> SetMatchWinnerAsync(int matchId, SetWinnerDto setWinnerDto)
+
+        // This method is now obsolete - tournament progression is handled by StartNextRoundAsync
+        // which properly uses the SwissTournamentStrategy for all round creation decisions
+
+        public async Task<bool> ProcessMatchWinnersAsync(Round round, List<MatchResultDto> matchResults)
         {
-            using var transaction = await _unitOfWork.BeginTransactionAsync();
+            _logger.LogDebug("ProcessMatchWinners", $"Round {round.RoundNumber} has {round.Matches.Count} matches, processing {matchResults.Count} results");
             
-            try
+            var matchWinnerPairs = new List<(Match match, int winnerId)>();
+            
+            // First pass: Validate all match results and prepare updates (without applying changes yet)
+            foreach (var matchResult in matchResults)
             {
-                _logger.LogMatchWinner(matchId, setWinnerDto.WinnerId);
+                _logger.LogDebug("ProcessMatchWinners", $"Processing match {matchResult.MatchId} with winner {matchResult.WinnerId}");
                 
-                var match = await _unitOfWork.Matches.GetByIdWithCompleteDetailsAsync(matchId);
+                var match = round.Matches.FirstOrDefault(m => m.Id == matchResult.MatchId);
                 if (match == null)
-                    throw new ArgumentException("Match not found");
+                {
+                    _logger.LogError("ProcessMatchWinners", $"Match {matchResult.MatchId} not found in round {round.RoundNumber}. Available matches: {string.Join(", ", round.Matches.Select(m => m.Id))}");
+                    throw new ArgumentException($"Match {matchResult.MatchId} not found in current round");
+                }
 
-                // Verify tournament password
-                var tournamentId = match.Round.Tournament.Id;
-                await _unitOfWork.Tournaments.ValidatePasswordAsync(tournamentId, setWinnerDto.Password);
+                var matchPlayerIds = match.MatchPlayers.Select(mp => mp.PlayerId).ToList();
+                _logger.LogDebug("ProcessMatchWinners", $"Match {matchResult.MatchId} has players: {string.Join(", ", matchPlayerIds)}");
 
-                if (match.WinnerId.HasValue)
-                    throw new InvalidOperationException("Match already has a winner");
-
-                var winner = match.MatchPlayers.FirstOrDefault(mp => mp.PlayerId == setWinnerDto.WinnerId)?.Player;
+                // Verify winner is a player in this match
+                var winner = match.MatchPlayers.FirstOrDefault(mp => mp.PlayerId == matchResult.WinnerId)?.Player;
                 if (winner == null)
-                    throw new ArgumentException("Winner must be one of the players in this match");
-
-                // Set match winner
-                match.WinnerId = setWinnerDto.WinnerId;
-                match.CompletedAt = DateTime.UtcNow;
-
-                // Update player statistics directly within this transaction
-                var playersToUpdate = new List<Player>();
-                var allOpponents = new List<PlayerOpponent>();
-                
-                foreach (var matchPlayer in match.MatchPlayers)
                 {
-                    var player = matchPlayer.Player;
-                    
-                    if (player.Id == setWinnerDto.WinnerId)
-                    {
-                        player.ApplyWinStatistics();
-                    }
-                    else
-                    {
-                        player.ApplyLossStatistics();
-                    }
-                    
-                    playersToUpdate.Add(player);
-                    
-                    // Collect opponent relationships
-                    var opponents = match.MatchPlayers
-                        .Where(mp => mp.PlayerId != player.Id)
-                        .Select(opponent => new PlayerOpponent
-                        {
-                            PlayerId = player.Id,
-                            OpponentId = opponent.PlayerId
-                        });
-                    
-                    allOpponents.AddRange(opponents);
+                    _logger.LogError("ProcessMatchWinners", $"Winner {matchResult.WinnerId} not found in match {matchResult.MatchId}. Match players: {string.Join(", ", matchPlayerIds)}");
+                    throw new ArgumentException($"Winner {matchResult.WinnerId} is not a player in match {matchResult.MatchId}");
                 }
 
-                _unitOfWork.Players.UpdateMultiplePlayers(playersToUpdate);
-
-                if (allOpponents.Any())
+                // Store match and winner for later processing (don't modify entities yet)
+                matchWinnerPairs.Add((match, matchResult.WinnerId));
+            }
+            
+            // Check if round will be completed after these updates
+            var allMatches = round.Matches;
+            var updatedMatchIds = matchWinnerPairs.Select(pair => pair.match.Id).ToHashSet();
+            
+            // Count matches that will have winners after the update
+            var matchesWithWinners = allMatches.Count(m => 
+                m.WinnerId.HasValue || updatedMatchIds.Contains(m.Id));
+            
+            _logger.LogRoundCompletion(round.RoundNumber, allMatches.Count, matchesWithWinners);
+            
+            if (matchesWithWinners == allMatches.Count)
+            {
+                // Round will be completed - apply all updates to existing tracked entities
+                _logger.LogDebug("MatchService", $"Round {round.RoundNumber} will be completed - applying all updates");
+                
+                // Update existing tracked entities directly (no new entities)
+                var matchesToUpdate = new List<Match>();
+                foreach (var (match, winnerId) in matchWinnerPairs)
                 {
-                    _unitOfWork.Players.AddMultipleOpponents(allOpponents);
+                    match.WinnerId = winnerId;
+                    match.CompletedAt = DateTime.UtcNow;
+                    matchesToUpdate.Add(match);
                 }
-
-                _unitOfWork.Matches.Update(match);
-
-                // Check if round is completed
-                var round = match.Round;
-                var allMatches = round.Matches;
-                _logger.LogRoundCompletion(round.RoundNumber, allMatches.Count(), allMatches.Count(m => m.WinnerId.HasValue));
                 
-                if (allMatches.All(m => m.WinnerId.HasValue))
+                // Update all matches in one batch operation
+                _unitOfWork.Matches.UpdateMultipleMatches(matchesToUpdate);
+                
+                // Apply player statistics updates in batch
+                foreach (var match in matchesToUpdate)
                 {
-                    round.IsCompleted = true;
-                    _unitOfWork.Rounds.Update(round);
-                    
-                    // Check if tournament is completed or needs final round
-                    var tournament = round.Tournament;
-                    var strategy = _strategyFactory.GetStrategy(tournament.Type);
-                    
-                    if (strategy.ShouldCompleteTournament(tournament))
-                    {
-                        _logger.LogTournamentCompletion(tournament.Id, tournament.CurrentRound, tournament.Type.ToString(), tournament.Players.Count);
-                        
-                        tournament.Status = Domain.Enums.TournamentStatus.Completed;
-                        tournament.CompletedAt = DateTime.UtcNow;
-                        _unitOfWork.Tournaments.Update(tournament);
-                    }
-                    else
-                    {
-                        // Check if we need to create a final round automatically
-                        await TryCreateFinalRoundIfNeeded(tournament, strategy);
-                    }
+                    _playerStatisticsService.UpdateAllPlayerStatistics(match, match.WinnerId!.Value);
                 }
-
-                await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
                 
-                return (match.ToDto(), tournamentId);
-            }
-            catch (ArgumentException)
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw; // Re-throw validation exceptions as-is
-            }
-            catch (InvalidOperationException)
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw; // Re-throw business logic exceptions as-is
-            }
-            catch (UnauthorizedAccessException)
-            {
-                await _unitOfWork.RollbackTransactionAsync();
-                throw; // Re-throw authentication exceptions as-is
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("TournamentMatchService", $"Failed to set winner for match {matchId}: {ex.Message}", ex);
-                await _unitOfWork.RollbackTransactionAsync();
-                throw new InvalidOperationException($"An unexpected error occurred while setting the match winner. Please try again.", ex);
-            }
-        }
-
-        private async Task TryCreateFinalRoundIfNeeded(Tournament tournament, ITournamentStrategy strategy)
-        {
-            // For Swiss tournaments, check if we need to create a final round
-            if (tournament.Type == Domain.Enums.TournamentType.Swiss)
-            {
-                var players = tournament.Players.ToList();
-                int targetMatchesPerPlayer = ((dynamic)strategy).CalculateTargetMatches(players.Count);
+                round.IsCompleted = true;
+                _unitOfWork.Rounds.Update(round);
                 
-                // Check if all players have reached their target match count
-                bool allPlayersReachedTarget = players.All(p => p.Wins + p.Losses >= targetMatchesPerPlayer);
-                
-                if (allPlayersReachedTarget)
-                {
-                    _logger.LogDebug("TournamentMatchService", "All players reached target matches - checking for final round creation");
-                    
-                    // Check if we already have a final round
-                    var existingFinalRound = tournament.Rounds
-                        .Where(r => r.RoundType == "Final")
-                        .FirstOrDefault();
-                    
-                    if (existingFinalRound == null)
-                    {
-                        _logger.LogDebug("TournamentMatchService", "No existing final round found - creating next round");
-                        
-                        // Create next round and let the strategy decide what type it should be
-                        tournament.CurrentRound++;
-                        var nextRound = new Round
-                        {
-                            RoundNumber = tournament.CurrentRound,
-                            TournamentId = tournament.Id,
-                            CreatedAt = DateTime.UtcNow,
-                            IsCompleted = false,
-                            RoundType = "Regular"
-                        };
-
-                        var createdRound = _unitOfWork.Rounds.Create(nextRound);
-                        
-                        await strategy.CreateMatchesForRoundAsync(tournament, createdRound);
-                        _unitOfWork.Tournaments.Update(tournament);
-                    }
-                }
+                _logger.LogDebug("MatchService", $"Round {round.RoundNumber} completed with batch updates applied");
+                return true; // Round is completed
             }
+            
+            _logger.LogDebug("MatchService", $"Round {round.RoundNumber} not yet completed - no changes applied to database");
+            return false; // Round is not completed - no database changes made
         }
 
     }

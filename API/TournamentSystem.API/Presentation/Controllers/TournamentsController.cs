@@ -162,11 +162,11 @@ namespace TournamentSystem.API.Presentation.Controllers
         }
 
         [HttpPost("{id}/next-round")]
-        public async Task<ActionResult> StartNextRound(int id)
+        public async Task<ActionResult> StartNextRound(int id, StartNextRoundDto startNextRoundDto)
         {
             try
             {
-                var tournament = await _tournamentService.StartNextRoundAsync(id);
+                var tournament = await _tournamentService.StartNextRoundAsync(id, startNextRoundDto);
                 await _broadcastService.BroadcastNewRound(id, tournament);
                 return Ok(new { message = "Next round started successfully" });
             }
@@ -224,6 +224,28 @@ namespace TournamentSystem.API.Presentation.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("{id}/validate-password")]
+        public async Task<ActionResult> ValidatePassword(int id, ValidatePasswordDto validatePasswordDto)
+        {
+            try
+            {
+                var isValid = await _tournamentService.ValidatePasswordAsync(id, validatePasswordDto.Password);
+                
+                if (isValid)
+                {
+                    return Ok(new { message = "Password is valid", isValid = true });
+                }
+                else
+                {
+                    return Unauthorized(new { message = "Invalid password", isValid = false });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message, isValid = false });
             }
         }
     }

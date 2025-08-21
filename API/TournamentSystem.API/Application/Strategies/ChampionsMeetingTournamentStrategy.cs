@@ -52,5 +52,9 @@ namespace TournamentSystem.API.Application.Strategies
             return 3; // Standard 3 rounds for Champions Meeting
         }
 
+        public int? DetermineTournamentWinner(Tournament tournament)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,3 +1,5 @@
+using TournamentSystem.API.Application.Extensions;
+using TournamentSystem.API.Application.Interfaces;
 using TournamentSystem.API.Domain.Entities;
 
 namespace TournamentSystem.API.Application.Services
@@ -6,72 +8,22 @@ namespace TournamentSystem.API.Application.Services
     /// Manages 3-player combinations for hybrid Swiss-Round-Robin tournaments
     /// Ensures no repeat opponents while enabling Swiss-style competitive pairing
     /// </summary>
-    public class PlayerCombinationService
+    public class PlayerCombinationService : IPlayerCombinationService
     {
-        /// <summary>
-        /// Represents a 3-player combination with Swiss-style ranking capabilities
-        /// </summary>
-        public class PlayerTriple
+
+        private readonly ITournamentLogger _logger;
+
+        public PlayerCombinationService(ITournamentLogger logger)
         {
-            public Player Player1 { get; }
-            public Player Player2 { get; }
-            public Player Player3 { get; }
-            public List<Player> Players { get; }
-
-            public PlayerTriple(Player p1, Player p2, Player p3)
-            {
-                // Always store players in ID order for consistent comparison
-                var sorted = new[] { p1, p2, p3 }.OrderBy(p => p.Id).ToArray();
-                Player1 = sorted[0];
-                Player2 = sorted[1];
-                Player3 = sorted[2];
-                Players = new List<Player> { Player1, Player2, Player3 };
-            }
-
-            /// <summary>
-            /// Gets unique key for this combination (for tracking used combinations)
-            /// </summary>
-            public string GetKey() => $"{Player1.Id}-{Player2.Id}-{Player3.Id}";
-
-            /// <summary>
-            /// Calculates Swiss-style competitiveness score (lower = more competitive)
-            /// </summary>
-            public double GetCompetitivenessScore()
-            {
-                var points = Players.Select(p => p.Points).ToArray();
-                var wins = Players.Select(p => p.Wins).ToArray();
-                
-                // Calculate variance in points and wins (lower variance = more competitive)
-                var pointVariance = CalculateVariance(points);
-                var winVariance = CalculateVariance(wins);
-                
-                return pointVariance + (winVariance * 0.5); // Weight points more than wins
-            }
-
-            private double CalculateVariance(int[] values)
-            {
-                if (values.Length == 0) return 0;
-                
-                double mean = values.Average();
-                return values.Sum(v => Math.Pow(v - mean, 2)) / values.Length;
-            }
-
-            /// <summary>
-            /// Checks if this combination contains any of the specified players
-            /// </summary>
-            public bool ContainsAnyPlayer(IEnumerable<int> playerIds)
-            {
-                var idSet = new HashSet<int>(playerIds);
-                return Players.Any(p => idSet.Contains(p.Id));
-            }
+            _logger = logger;
         }
 
         /// <summary>
         /// Generates all possible 3-player combinations from available players
         /// </summary>
-        public List<PlayerTriple> GenerateAllCombinations(List<Player> availablePlayers)
+        public List<IPlayerCombinationService.PlayerTriple> GenerateAllCombinations(List<Player> availablePlayers)
         {
-            var combinations = new List<PlayerTriple>();
+            var combinations = new List<IPlayerCombinationService.PlayerTriple>();
             
             for (int i = 0; i < availablePlayers.Count - 2; i++)
             {
@@ -79,7 +31,7 @@ namespace TournamentSystem.API.Application.Services
                 {
                     for (int k = j + 1; k < availablePlayers.Count; k++)
                     {
-                        combinations.Add(new PlayerTriple(
+                        combinations.Add(new IPlayerCombinationService.PlayerTriple(
                             availablePlayers[i], 
                             availablePlayers[j], 
                             availablePlayers[k]
@@ -94,7 +46,7 @@ namespace TournamentSystem.API.Application.Services
         /// <summary>
         /// Gets all combinations that haven't been used in previous rounds
         /// </summary>
-        public List<PlayerTriple> GetUnusedCombinations(List<Player> availablePlayers, Tournament tournament)
+        public List<IPlayerCombinationService.PlayerTriple> GetUnusedCombinations(List<Player> availablePlayers, Tournament tournament)
         {
             var allCombinations = GenerateAllCombinations(availablePlayers);
             var usedCombinations = GetUsedCombinationKeys(tournament);
@@ -106,16 +58,18 @@ namespace TournamentSystem.API.Application.Services
 
         /// <summary>
         /// Selects optimal matches for a round using hybrid Swiss-Round-Robin algorithm
+        /// Prioritizes balanced match participation to ensure all players get similar number of matches
         /// </summary>
-        public List<PlayerTriple> SelectOptimalMatches(List<Player> availablePlayers, Tournament tournament)
+        public List<IPlayerCombinationService.PlayerTriple> SelectOptimalMatches(List<Player> availablePlayers, Tournament tournament)
         {
             var unusedCombinations = GetUnusedCombinations(availablePlayers, tournament);
-            var selectedMatches = new List<PlayerTriple>();
+            var selectedMatches = new List<IPlayerCombinationService.PlayerTriple>();
             var usedPlayerIds = new HashSet<int>();
 
-            // Sort combinations by competitiveness (Swiss-style preference)
+            // Sort combinations to prioritize players who have played fewer matches
             var sortedCombinations = unusedCombinations
-                .OrderBy(combo => combo.GetCompetitivenessScore())
+                .OrderBy(combo => GetParticipationScore(combo))
+                .ThenBy(combo => combo.GetCompetitivenessScore()) // Tie-breaker: competitiveness
                 .ToList();
 
             // Greedily select non-conflicting matches
@@ -144,9 +98,22 @@ namespace TournamentSystem.API.Application.Services
         }
 
         /// <summary>
+        /// Calculates participation score using existing player statistics (Wins + Losses)
+        /// Lower score = better (players with fewer matches should be prioritized)
+        /// </summary>
+        private double GetParticipationScore(IPlayerCombinationService.PlayerTriple combination)
+        {
+            // Sum of matches played by all players in this combination (Wins + Losses = total matches)
+            var totalMatches = combination.Players.Sum(p => p.Wins + p.Losses);
+            
+            // Return average matches per player in this combination (lower = better for balance)
+            return (double)totalMatches / 3.0;
+        }
+
+        /// <summary>
         /// Gets players who should receive byes this round (strategic selection)
         /// </summary>
-        public List<Player> SelectByePlayers(List<Player> allPlayers, List<PlayerTriple> selectedMatches, Tournament tournament)
+        public List<Player> SelectByePlayers(List<Player> allPlayers, List<IPlayerCombinationService.PlayerTriple> selectedMatches, Tournament tournament)
         {
             var playersInMatches = selectedMatches
                 .SelectMany(match => match.Players.Select(p => p.Id))

@@ -48,5 +48,13 @@ namespace TournamentSystem.API.Application.Interfaces
         /// <param name="tournamentId">The tournament ID</param>
         /// <param name="tournament">The updated tournament</param>
         Task BroadcastTournamentUpdated(int tournamentId, TournamentDto tournament);
+
+        /// <summary>
+        /// Broadcasts winner selection for real-time UI updates (no database changes)
+        /// </summary>
+        /// <param name="tournamentId">The tournament ID</param>
+        /// <param name="matchId">The match ID</param>
+        /// <param name="winnerId">The selected winner ID</param>
+        Task BroadcastWinnerSelection(int tournamentId, int matchId, int winnerId);
     }
 }

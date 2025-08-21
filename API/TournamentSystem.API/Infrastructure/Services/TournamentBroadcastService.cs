@@ -58,5 +58,11 @@ namespace TournamentSystem.API.Infrastructure.Services
             await _hubContext.Clients.Group(GetTournamentGroup(tournamentId))
                 .SendAsync("TournamentUpdated", tournament);
         }
+
+        public async Task BroadcastWinnerSelection(int tournamentId, int matchId, int winnerId)
+        {
+            await _hubContext.Clients.Group(GetTournamentGroup(tournamentId))
+                .SendAsync("WinnerSelected", new { matchId, winnerId });
+        }
     }
 }

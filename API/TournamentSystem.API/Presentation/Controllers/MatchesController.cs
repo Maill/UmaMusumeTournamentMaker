@@ -17,30 +17,18 @@ namespace TournamentSystem.API.Presentation.Controllers
             _broadcastService = broadcastService;
         }
 
-        [HttpPut("{id}/winner")]
-        public async Task<ActionResult> SetMatchWinner(int id, SetWinnerDto setWinnerDto)
+        [HttpPost("broadcast-winner")]
+        public async Task<ActionResult> BroadcastWinnerSelection([FromBody] BroadcastWinnerDto broadcastWinnerDto)
         {
             try
             {
-                var (match, tournamentId) = await _tournamentMatchService.SetMatchWinnerAsync(id, setWinnerDto);
-                await _broadcastService.BroadcastMatchUpdated(tournamentId, match);
-                return Ok(new { message = "Match winner set successfully" });
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
+                // Simply broadcast the winner selection - no database updates, no password validation
+                await _broadcastService.BroadcastWinnerSelection(broadcastWinnerDto.TournamentId, broadcastWinnerDto.MatchId, broadcastWinnerDto.WinnerId);
+                return Ok(new { message = "Winner selection broadcasted successfully" });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new { message = "Failed to broadcast winner selection" });
             }
         }
     }

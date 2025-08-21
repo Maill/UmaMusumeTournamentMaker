@@ -9,10 +9,12 @@ namespace TournamentSystem.API.Presentation.Controllers
     public class TournamentsController : ControllerBase
     {
         private readonly ITournamentService _tournamentService;
+        private readonly ITournamentBroadcastService _broadcastService;
 
-        public TournamentsController(ITournamentService tournamentService)
+        public TournamentsController(ITournamentService tournamentService, ITournamentBroadcastService broadcastService)
         {
             _tournamentService = tournamentService;
+            _broadcastService = broadcastService;
         }
 
         [HttpGet]
@@ -79,12 +81,40 @@ namespace TournamentSystem.API.Presentation.Controllers
         }
 
         [HttpPost("{id}/players")]
-        public async Task<ActionResult<TournamentDto>> AddPlayer(int id, AddPlayerDto addPlayerDto)
+        public async Task<ActionResult> AddPlayer(int id, AddPlayerDto addPlayerDto)
         {
             try
             {
-                var tournament = await _tournamentService.AddPlayerAsync(id, addPlayerDto);
-                return Ok(tournament);
+                var addedPlayer = await _tournamentService.AddPlayerAsync(id, addPlayerDto);
+                await _broadcastService.BroadcastPlayerAdded(id, addedPlayer);
+                return Ok(new { message = "Player added successfully" });
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("players")]
+        public async Task<ActionResult> RemovePlayer(RemovePlayerDto removePlayerDto)
+        {
+            try
+            {
+                var removedPlayerId = await _tournamentService.RemovePlayerAsync(removePlayerDto);
+                await _broadcastService.BroadcastPlayerRemoved(removePlayerDto.TournamentId, removedPlayerId);
+                return Ok(new { message = "Player removed successfully" });
             }
             catch (ArgumentException ex)
             {
@@ -105,12 +135,13 @@ namespace TournamentSystem.API.Presentation.Controllers
         }
 
         [HttpPost("{id}/start")]
-        public async Task<ActionResult<TournamentDto>> StartTournament(int id, StartTournamentDto startTournamentDto)
+        public async Task<ActionResult> StartTournament(int id, StartTournamentDto startTournamentDto)
         {
             try
             {
                 var tournament = await _tournamentService.StartTournamentAsync(id, startTournamentDto);
-                return Ok(tournament);
+                await _broadcastService.BroadcastTournamentStarted(id, tournament);
+                return Ok(new { message = "Tournament started successfully" });
             }
             catch (ArgumentException ex)
             {
@@ -131,12 +162,13 @@ namespace TournamentSystem.API.Presentation.Controllers
         }
 
         [HttpPost("{id}/next-round")]
-        public async Task<ActionResult<RoundDto>> StartNextRound(int id)
+        public async Task<ActionResult> StartNextRound(int id, StartNextRoundDto startNextRoundDto)
         {
             try
             {
-                var round = await _tournamentService.StartNextRoundAsync(id);
-                return Ok(round);
+                var tournament = await _tournamentService.StartNextRoundAsync(id, startNextRoundDto);
+                await _broadcastService.BroadcastNewRound(id, tournament);
+                return Ok(new { message = "Next round started successfully" });
             }
             catch (ArgumentException ex)
             {
@@ -192,6 +224,28 @@ namespace TournamentSystem.API.Presentation.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("{id}/validate-password")]
+        public async Task<ActionResult> ValidatePassword(int id, ValidatePasswordDto validatePasswordDto)
+        {
+            try
+            {
+                var isValid = await _tournamentService.ValidatePasswordAsync(id, validatePasswordDto.Password);
+                
+                if (isValid)
+                {
+                    return Ok(new { message = "Password is valid", isValid = true });
+                }
+                else
+                {
+                    return Unauthorized(new { message = "Invalid password", isValid = false });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message, isValid = false });
             }
         }
     }

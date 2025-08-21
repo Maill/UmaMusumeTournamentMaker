@@ -18,6 +18,11 @@ namespace TournamentSystem.API.Infrastructure.Repositories
             _context = context;
         }
 
+        public async Task<Player?> GetByIdAsync(int playerId)
+        {
+            return await _context.Players.FindAsync(playerId);
+        }
+
         public async Task<bool> ExistsInTournamentAsync(int tournamentId, string playerName)
         {
             return await _context.Players
@@ -29,6 +34,11 @@ namespace TournamentSystem.API.Infrastructure.Repositories
         {
             _context.Players.Add(player);
             return player;
+        }
+
+        public void Remove(Player player)
+        {
+            _context.Players.Remove(player);
         }
 
         public Player Update(Player player)

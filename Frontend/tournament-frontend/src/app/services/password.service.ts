@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 })
 export class PasswordService {
   private passwords: Map<number, string> = new Map();
-  private sessionStorage = typeof window !== 'undefined' ? window.sessionStorage : null;
+  private localStorage = typeof window !== 'undefined' ? window.localStorage : null;
 
   constructor() {
     this.loadPasswordsFromSession();
@@ -35,21 +35,21 @@ export class PasswordService {
   }
 
   private savePasswordsToSession(): void {
-    if (this.sessionStorage) {
+    if (this.localStorage) {
       const passwordsObj = Object.fromEntries(this.passwords);
-      this.sessionStorage.setItem('tournamentPasswords', JSON.stringify(passwordsObj));
+      this.localStorage.setItem('tournamentPasswords', JSON.stringify(passwordsObj));
     }
   }
 
   private loadPasswordsFromSession(): void {
-    if (this.sessionStorage) {
-      const stored = this.sessionStorage.getItem('tournamentPasswords');
+    if (this.localStorage) {
+      const stored = this.localStorage.getItem('tournamentPasswords');
       if (stored) {
         try {
           const passwordsObj = JSON.parse(stored);
           this.passwords = new Map(Object.entries(passwordsObj).map(([key, value]) => [+key, value as string]));
         } catch (error) {
-          console.warn('Failed to load tournament passwords from session storage:', error);
+          console.warn('Failed to load tournament passwords from local storage:', error);
           this.passwords = new Map();
         }
       }

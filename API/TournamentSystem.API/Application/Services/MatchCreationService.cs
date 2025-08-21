@@ -21,12 +21,10 @@ namespace TournamentSystem.API.Application.Services
 
         /// <summary>
         /// Creates a single match with the specified players in the given round
-        /// Uses optimized batch operations for player assignment
+        /// Participates in the parent transaction - does not manage its own transaction
         /// </summary>
         public async Task CreateSingleMatchAsync(Round round, List<Player> players)
         {
-            using var transaction = await _unitOfWork.BeginTransactionAsync();
-            
             try
             {
                 var match = new Match
@@ -46,25 +44,21 @@ namespace TournamentSystem.API.Application.Services
 
                 _unitOfWork.Matches.AddMultipleMatchPlayers(matchPlayers);
                 await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError("MatchCreationService", $"Failed to create match in round {round.Id}: {ex.Message}", ex);
-                await _unitOfWork.RollbackTransactionAsync();
                 throw new InvalidOperationException($"An unexpected error occurred while creating the match. Please try again.", ex);
             }
         }
 
         /// <summary>
         /// Creates multiple matches from a list of player groups
-        /// Uses optimized batch operations for match players
+        /// Participates in the parent transaction - does not manage its own transaction
         /// Each group should contain 3 players for a single match
         /// </summary>
         public async Task CreateMatchesAsync(Round round, IEnumerable<List<Player>> playerGroups)
         {
-            using var transaction = await _unitOfWork.BeginTransactionAsync();
-            
             try
             {
                 var allMatchPlayers = new List<MatchPlayer>();
@@ -89,18 +83,15 @@ namespace TournamentSystem.API.Application.Services
                     allMatchPlayers.AddRange(matchPlayers);
                 }
                 
-                if (allMatchPlayers.Any())
+                if (allMatchPlayers.Count != 0)
                 {
                     _unitOfWork.Matches.AddMultipleMatchPlayers(allMatchPlayers);
                     await _unitOfWork.SaveChangesAsync();
                 }
-                
-                await _unitOfWork.CommitTransactionAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError("MatchCreationService", $"Failed to create matches for round {round.Id}: {ex.Message}", ex);
-                await _unitOfWork.RollbackTransactionAsync();
                 throw new InvalidOperationException($"An unexpected error occurred while creating matches for the round. Please try again.", ex);
             }
         }

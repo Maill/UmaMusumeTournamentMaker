@@ -1,16 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
-  AddPlayer,
   Match,
   Round,
-  SetWinner,
   Tournament,
   TournamentStatus,
   TournamentType,
 } from '../../models/tournament.model';
+import { RealTimeTournamentService } from '../../services/real-time-tournament.service';
 import { TournamentService } from '../../services/tournament.service';
 import { PasswordInputComponent } from '../password-input/password-input';
 
@@ -20,7 +19,9 @@ import { PasswordInputComponent } from '../password-input/password-input';
   templateUrl: './tournament-detail.html',
   styleUrl: './tournament-detail.css',
 })
-export class TournamentDetailComponent implements OnInit {
+export class TournamentDetailComponent implements OnInit, OnDestroy {
+  @ViewChild('playerNameInput') playerNameInput!: ElementRef<HTMLInputElement>;
+
   tournament: Tournament | null = null;
   isLoading = false;
   error = '';
@@ -34,10 +35,7 @@ export class TournamentDetailComponent implements OnInit {
   isStartingTournament = false;
   isStartingNextRound = false;
 
-  // Match management
-  isSettingWinner = false;
-  currentSettingMatchId: number | null = null;
-  selectedWinners: { [matchId: number]: number | null } = {};
+  // Match management (for local winner selection only)
 
   // Tournament management
   isDeletingTournament = false;
@@ -51,6 +49,9 @@ export class TournamentDetailComponent implements OnInit {
   passwordModalMessage = '';
   passwordModalError = '';
   passwordModalLoading = false;
+
+  // Management mode
+  isInManagementMode = false;
   pendingAction: (() => void) | null = null;
 
   TournamentStatus = TournamentStatus;
@@ -59,6 +60,7 @@ export class TournamentDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private realTimeTournamentService: RealTimeTournamentService,
     private tournamentService: TournamentService
   ) {}
 
@@ -66,27 +68,61 @@ export class TournamentDetailComponent implements OnInit {
     this.route.params.subscribe((params) => {
       const id = +params['id'];
       if (id) {
-        this.loadTournament(id);
+        this.initializeTournament(id);
       }
+    });
+
+    // Subscribe to real-time updates
+    this.realTimeTournamentService.currentTournament$.subscribe((tournament) => {
+      this.tournament = tournament;
+    });
+
+    this.realTimeTournamentService.loading$.subscribe((loading) => {
+      this.isLoading = loading;
+    });
+
+    this.realTimeTournamentService.error$.subscribe((error) => {
+      this.error = error || '';
     });
   }
 
-  loadTournament(id: number) {
-    this.isLoading = true;
-    this.error = '';
+  ngOnDestroy() {
+    this.realTimeTournamentService.cleanup();
+  }
 
-    this.tournamentService.getTournamentWithCurrentRound(id).subscribe({
-      next: (tournament) => {
-        this.tournament = tournament;
-        this.isLoading = false;
-        // Reset UI state to ensure dropdowns are cleared
-        this.resetUIState();
-      },
-      error: (error) => {
-        this.error = error.error?.message || 'Failed to load tournament';
-        this.isLoading = false;
-      },
-    });
+  async initializeTournament(id: number) {
+    try {
+      await this.realTimeTournamentService.initializeTournament(id);
+      this.resetUIState();
+
+      // Check if we have a stored password and automatically enter management mode
+      await this.checkAndEnterManagementMode(id);
+    } catch (error) {
+      console.error('Failed to initialize tournament:', error);
+    }
+  }
+
+  private async checkAndEnterManagementMode(tournamentId: number) {
+    if (this.realTimeTournamentService.hasTournamentPassword(tournamentId)) {
+      try {
+        const password = this.realTimeTournamentService.getTournamentPassword(tournamentId);
+        if (password) {
+          // Validate the stored password
+          const result = await this.tournamentService
+            .validatePassword(tournamentId, password)
+            .toPromise();
+          if (result?.isValid) {
+            this.isInManagementMode = true;
+          } else {
+            // Clear invalid stored password
+            this.realTimeTournamentService.clearTournamentPassword(tournamentId);
+          }
+        }
+      } catch (error) {
+        // Clear stored password on validation error
+        this.realTimeTournamentService.clearTournamentPassword(tournamentId);
+      }
+    }
   }
 
   addPlayer() {
@@ -98,32 +134,30 @@ export class TournamentDetailComponent implements OnInit {
     this.executeWithPasswordCheck(() => this.doAddPlayer(), 'add player');
   }
 
-  private doAddPlayer() {
+  private async doAddPlayer() {
     if (!this.tournament || !this.newPlayerName.trim()) return;
 
     this.isAddingPlayer = true;
     this.addPlayerError = '';
+    this.error = ''; // Clear any previous top-level errors
 
-    const addPlayerDto: AddPlayer = {
-      name: this.newPlayerName.trim(),
-    };
+    try {
+      await this.realTimeTournamentService.addPlayer(this.tournament.id, this.newPlayerName.trim());
+      this.newPlayerName = '';
+      this.isAddingPlayer = false;
 
-    this.tournamentService.addPlayer(this.tournament.id, addPlayerDto).subscribe({
-      next: (updatedTournament) => {
-        this.tournament = updatedTournament;
-        this.newPlayerName = '';
-        this.isAddingPlayer = false;
-      },
-      error: (error) => {
-        if (error.status === 401) {
-          this.handleAuthError(error, 'add player');
-          this.isAddingPlayer = false;
-        } else {
-          this.addPlayerError = error.error?.message || 'Failed to add player';
-          this.isAddingPlayer = false;
+      // Keep input focused for adding more players
+      setTimeout(() => {
+        if (this.playerNameInput) {
+          this.playerNameInput.nativeElement.focus();
         }
-      },
-    });
+      }, 0);
+    } catch (error: any) {
+      this.addPlayerError = error.error?.message || 'Failed to add player';
+      this.isAddingPlayer = false;
+      // Ensure top error is cleared for player addition errors
+      this.error = '';
+    }
   }
 
   startTournament() {
@@ -131,71 +165,73 @@ export class TournamentDetailComponent implements OnInit {
     this.executeWithPasswordCheck(() => this.doStartTournament(), 'start tournament');
   }
 
-  private doStartTournament() {
+  private async doStartTournament() {
     if (!this.tournament) return;
 
     this.isStartingTournament = true;
     this.error = '';
 
-    this.tournamentService.startTournament(this.tournament.id).subscribe({
-      next: (updatedTournament) => {
-        this.tournament = updatedTournament;
+    try {
+      await this.realTimeTournamentService.startTournament(this.tournament.id);
+      this.isStartingTournament = false;
+    } catch (error: any) {
+      if (error.status === 401) {
+        this.handleAuthError(error, 'start tournament');
         this.isStartingTournament = false;
-        // Reload tournament to get the first round data
-        this.loadTournament(this.tournament.id);
-      },
-      error: (error) => {
-        if (error.status === 401) {
-          this.handleAuthError(error, 'start tournament');
-          this.isStartingTournament = false;
-        } else {
-          this.error = error.error?.message || 'Failed to start tournament';
-          this.isStartingTournament = false;
-        }
-      },
-    });
+      } else {
+        this.error = error.error?.message || 'Failed to start tournament';
+        this.isStartingTournament = false;
+      }
+    }
   }
 
   startNextRound() {
+    if (!this.tournament) return;
+    this.executeWithPasswordCheck(() => this.doStartNextRound(), 'start next round');
+  }
+
+  private async doStartNextRound() {
     if (!this.tournament) return;
 
     this.isStartingNextRound = true;
     this.error = '';
 
-    this.tournamentService.startNextRound(this.tournament.id).subscribe({
-      next: (round) => {
-        // Reload tournament to get updated data
-        this.loadTournamentAndResetState(this.tournament!.id);
-      },
-      error: (error) => {
-        this.error = error.error?.message || 'Failed to start next round';
+    try {
+      // Collect all match winners from the current round
+      const currentRound = this.getCurrentRound();
+      if (!currentRound) {
+        this.error = 'No current round found';
         this.isStartingNextRound = false;
-      },
-    });
-  }
+        return;
+      }
 
-  private loadTournamentAndResetState(id: number) {
-    this.tournamentService.getTournamentWithCurrentRound(id).subscribe({
-      next: (tournament) => {
-        this.tournament = tournament;
+      const matchResults = currentRound.matches.map((match) => {
+        if (!match.winnerId) {
+          throw new Error(`Match ${match.id} does not have a winner selected`);
+        }
+        return {
+          matchId: match.id,
+          winnerId: match.winnerId,
+        };
+      });
+
+      await this.realTimeTournamentService.startNextRound(this.tournament.id, matchResults);
+      this.isStartingNextRound = false;
+      this.resetUIState();
+    } catch (error: any) {
+      if (error.status === 401) {
+        this.handleAuthError(error, 'start next round');
         this.isStartingNextRound = false;
-        this.isLoading = false;
-        // Reset any UI state that might be lingering
-        this.resetUIState();
-      },
-      error: (error) => {
-        this.error = error.error?.message || 'Failed to load tournament';
+      } else {
+        this.error = error.error?.message || error.message || 'Failed to start next round';
         this.isStartingNextRound = false;
-        this.isLoading = false;
-      },
-    });
+      }
+    }
   }
 
   private resetUIState() {
     // Reset any form states or UI elements that might need clearing
-    this.isSettingWinner = false;
-    this.currentSettingMatchId = null;
-    this.selectedWinners = {};
+    // (No longer need match winner setting state since it's local only)
 
     // Force a UI refresh by updating the DOM
     setTimeout(() => {
@@ -208,60 +244,46 @@ export class TournamentDetailComponent implements OnInit {
     const selectElement = event.target as HTMLSelectElement;
     const winnerId = +selectElement.value;
 
-    if (winnerId) {
-      this.selectedWinners[match.id] = winnerId;
-      this.setMatchWinner(match, winnerId);
+    if (winnerId && this.tournament) {
+      this.executeWithPasswordCheck(() => this.doWinnerSelection(match, winnerId), 'select winner');
     } else {
-      this.selectedWinners[match.id] = null;
+      // Clear the winner locally only (no password needed for clearing)
+      this.updateMatchWinnerLocally(match, null);
     }
   }
 
-  setMatchWinner(match: Match, winnerId: number) {
-    this.executeWithPasswordCheck(() => this.doSetMatchWinner(match, winnerId), 'set match winner');
+  private doWinnerSelection(match: Match, winnerId: number) {
+    if (!this.tournament) return;
+
+    // Broadcast winner selection to other users (no DB update)
+    this.realTimeTournamentService.broadcastWinnerSelection(this.tournament.id, match.id, winnerId);
   }
 
-  private doSetMatchWinner(match: Match, winnerId: number) {
-    this.isSettingWinner = true;
-    this.currentSettingMatchId = match.id;
-    this.error = '';
+  private updateMatchWinnerLocally(match: Match, winnerId: number | null) {
+    if (!this.tournament) return;
 
-    const setWinner: SetWinner = { winnerId };
+    // Find the winner player if winnerId is provided (but don't update their stats)
+    const winner = winnerId ? match.players.find((p) => p.id === winnerId) : undefined;
 
-    this.tournamentService.setMatchWinner(match.id, setWinner, this.tournament?.id).subscribe({
-      next: (updatedMatch) => {
-        // Update the match in the tournament
-        if (this.tournament) {
-          const currentRound = this.getCurrentRound();
-          if (currentRound) {
-            const matchIndex = currentRound.matches.findIndex((m) => m.id === match.id);
-            if (matchIndex !== -1) {
-              currentRound.matches[matchIndex] = updatedMatch;
-            }
-          }
-        }
-        this.isSettingWinner = false;
-        this.currentSettingMatchId = null;
-        // Clear the selected value for this match since it's now completed
-        delete this.selectedWinners[match.id];
+    // Update ONLY the match winner fields locally, don't touch player statistics
+    const updatedTournament = {
+      ...this.tournament,
+      rounds: this.tournament.rounds.map((round) => ({
+        ...round,
+        matches: round.matches.map((m) =>
+          m.id === match.id
+            ? {
+                ...m,
+                winnerId: winnerId || undefined,
+                winner: winner ? { ...winner } : undefined, // Create a copy to avoid reference issues
+              }
+            : m
+        ),
+      })),
+    };
 
-        // Check if round is completed and reload tournament
-        this.loadTournament(this.tournament!.id);
-      },
-      error: (error) => {
-        if (error.status === 401) {
-          this.handleAuthError(error, 'set match winner');
-          this.isSettingWinner = false;
-          this.currentSettingMatchId = null;
-          this.selectedWinners[match.id] = null;
-        } else {
-          this.error = error.error?.message || 'Failed to set match winner';
-          this.isSettingWinner = false;
-          this.currentSettingMatchId = null;
-          // Reset the dropdown to empty on error
-          this.selectedWinners[match.id] = null;
-        }
-      },
-    });
+    // Update the tournament subject to trigger UI refresh
+    this.realTimeTournamentService['currentTournamentSubject'].next(updatedTournament);
   }
 
   getCurrentRound(): Round | null {
@@ -281,63 +303,63 @@ export class TournamentDetailComponent implements OnInit {
 
   canStartNextRound(): boolean {
     return (
-      this.tournament?.status === TournamentStatus.InProgress && 
-      this.isCurrentRoundCompleted() &&
-      !this.isCurrentRoundFinal()
+      this.tournament?.status === TournamentStatus.InProgress && this.isCurrentRoundCompleted()
     );
   }
 
   isCurrentRoundFinal(): boolean {
     const currentRound = this.getCurrentRound();
-    if (!currentRound || !this.tournament) return false;
-    
-    // A final round in Swiss tournament has exactly one match with 3 players
-    // and is for tournaments with Swiss type
-    if (this.tournament.type === TournamentType.Swiss) {
-      return currentRound.matches.length === 1 && 
-             currentRound.matches[0]?.players?.length === 3;
-    }
-    
-    return false;
+    if (!currentRound) return false;
+
+    // Use the actual roundType from the backend
+    return currentRound.roundType === 'Final';
   }
 
   getFinalRoundTitle(): string {
-    if (this.isCurrentRoundFinal()) {
+    const currentRound = this.getCurrentRound();
+    if (!currentRound || !this.tournament) {
+      return `Round ${this.tournament?.currentRound}`;
+    }
+
+    // Use the actual roundType from the backend
+    if (currentRound.roundType === 'Final') {
       return 'Final Round - Top 3 Championship';
     }
-    if (this.isCurrentRoundTiebreaker()) {
-      return `Tiebreaker Round ${this.tournament?.currentRound}`;
+    if (currentRound.roundType === 'Tiebreaker') {
+      return `Tiebreaker - Round ${this.tournament.currentRound}`;
     }
-    return `Round ${this.tournament?.currentRound}`;
+
+    return `Round ${this.tournament.currentRound}`;
   }
 
   isCurrentRoundTiebreaker(): boolean {
     if (!this.tournament || this.tournament.type !== TournamentType.Swiss) {
       return false;
     }
-    
+
     // Check if all players have reached target matches (indicating we're in tiebreaker phase)
     const targetMatches = this.calculateTargetMatches(this.tournament.players.length);
-    const allPlayersReachedTarget = this.tournament.players.every(p => 
-      (p.wins + p.losses) >= targetMatches
+    const allPlayersReachedTarget = this.tournament.players.every(
+      (p) => p.wins + p.losses >= targetMatches
     );
-    
+
     return allPlayersReachedTarget && !this.isCurrentRoundFinal();
   }
 
   getNextRoundButtonText(): string {
     if (!this.tournament) return 'Start Next Round';
-    
+
+    // If current round is final, show tournament winner selection
+    if (this.isCurrentRoundFinal()) {
+      return 'Select Tournament Winner';
+    }
+
     // Check if next round would be the final round
     const targetMatches = this.calculateTargetMatches(this.tournament.players.length);
-    const allPlayersReachedTarget = this.tournament.players.every(p => 
-      (p.wins + p.losses) >= targetMatches
+    const allPlayersReachedTarget = this.tournament.players.every(
+      (p) => p.wins + p.losses >= targetMatches
     );
-    
-    if (allPlayersReachedTarget && this.tournament.type === TournamentType.Swiss) {
-      return 'Start Final Championship';
-    }
-    
+
     return 'Start Next Round';
   }
 
@@ -347,7 +369,7 @@ export class TournamentDetailComponent implements OnInit {
     if (playerCount <= 6) return 4;
     if (playerCount <= 9) return 5;
     if (playerCount <= 12) return 6;
-    
+
     return Math.min(8, Math.floor((playerCount - 1) / 2) + 2);
   }
 
@@ -375,6 +397,13 @@ export class TournamentDetailComponent implements OnInit {
     }
   }
 
+  getWinnerName(winnerId: number): string {
+    if (!this.tournament) return 'Unknown';
+
+    const winner = this.tournament.players.find((p) => p.id === winnerId);
+    return winner ? winner.name : 'Unknown';
+  }
+
   getPlayersSortedByPoints() {
     if (!this.tournament) return [];
     return [...this.tournament.players].sort((a, b) => {
@@ -384,14 +413,11 @@ export class TournamentDetailComponent implements OnInit {
     });
   }
 
-  getSelectedWinnerValue(matchId: number): string {
-    const selectedValue = this.selectedWinners[matchId];
-    return selectedValue ? selectedValue.toString() : '';
-  }
-
   // Password management methods
   private requiresPassword(): boolean {
-    return this.tournament ? !this.tournamentService.hasTournamentPassword(this.tournament.id) : false;
+    return this.tournament
+      ? !this.realTimeTournamentService.hasTournamentPassword(this.tournament.id)
+      : false;
   }
 
   private showPasswordPrompt(title: string, message: string, action: () => void) {
@@ -410,11 +436,16 @@ export class TournamentDetailComponent implements OnInit {
     this.passwordModalError = '';
 
     // Store the password
-    this.tournamentService.setTournamentPassword(this.tournament.id, password);
+    this.realTimeTournamentService.setTournamentPassword(this.tournament.id, password);
 
-    // Execute the pending action
+    // Execute the pending action (for management mode, this will handle hiding the modal)
     this.pendingAction();
-    this.hidePasswordModal();
+
+    // Only hide modal immediately for non-management mode actions
+    // Management mode will hide the modal after successful validation
+    if (this.passwordModalTitle !== 'Enter Management Mode') {
+      this.hidePasswordModal();
+    }
   }
 
   onPasswordCancelled() {
@@ -428,6 +459,65 @@ export class TournamentDetailComponent implements OnInit {
     this.passwordModalError = '';
     this.passwordModalLoading = false;
     this.pendingAction = null;
+  }
+
+  // Management mode methods
+  enterManagementMode() {
+    if (!this.tournament) return;
+    this.showPasswordPrompt(
+      'Enter Management Mode',
+      'Enter the tournament password to access management features.',
+      () => this.doEnterManagementMode()
+    );
+  }
+
+  private async doEnterManagementMode() {
+    if (!this.tournament) return;
+
+    // Don't hide the modal yet - we need to validate first
+    // The password was already stored by onPasswordSubmitted
+    const password = this.realTimeTournamentService.getTournamentPassword(this.tournament.id);
+    if (!password) {
+      this.passwordModalError = 'Password is required.';
+      this.passwordModalLoading = false;
+      return;
+    }
+
+    try {
+      // Validate password with dedicated API endpoint
+      const result = await this.tournamentService
+        .validatePassword(this.tournament.id, password)
+        .toPromise();
+
+      if (result?.isValid) {
+        this.isInManagementMode = true;
+        this.hidePasswordModal();
+      } else {
+        // Clear stored password and show error, keep modal open
+        this.realTimeTournamentService.clearTournamentPassword(this.tournament.id);
+        this.passwordModalError = 'Invalid password. Access denied.';
+        this.passwordModalLoading = false;
+        this.isInManagementMode = false;
+      }
+    } catch (error: any) {
+      // Clear stored password on any error
+      if (this.tournament) {
+        this.realTimeTournamentService.clearTournamentPassword(this.tournament.id);
+      }
+
+      this.passwordModalLoading = false;
+
+      if (error.status === 401) {
+        this.passwordModalError = 'Invalid password. Access denied.';
+      } else {
+        this.passwordModalError = 'Failed to validate password. Please try again.';
+      }
+      this.isInManagementMode = false;
+    }
+  }
+
+  exitManagementMode() {
+    this.isInManagementMode = false;
   }
 
   private executeWithPasswordCheck(action: () => void, actionName: string) {
@@ -448,7 +538,7 @@ export class TournamentDetailComponent implements OnInit {
     if (error.status === 401) {
       // Clear stored password and prompt again
       if (this.tournament) {
-        this.tournamentService.clearTournamentPassword(this.tournament.id);
+        this.realTimeTournamentService.clearTournamentPassword(this.tournament.id);
       }
       this.passwordModalError = 'Invalid password. Please try again.';
       this.passwordModalLoading = false;
@@ -462,8 +552,12 @@ export class TournamentDetailComponent implements OnInit {
   // Tournament management methods
   deleteTournament() {
     if (!this.tournament) return;
-    
-    if (confirm(`Are you sure you want to delete the tournament "${this.tournament.name}"? This action cannot be undone.`)) {
+
+    if (
+      confirm(
+        `Are you sure you want to delete the tournament "${this.tournament.name}"? This action cannot be undone.`
+      )
+    ) {
       this.executeWithPasswordCheck(() => this.doDeleteTournament(), 'delete tournament');
     }
   }
@@ -475,7 +569,7 @@ export class TournamentDetailComponent implements OnInit {
     this.error = '';
 
     const deleteData = {
-      password: this.tournamentService.getTournamentPassword(this.tournament.id) || ''
+      password: this.realTimeTournamentService.getTournamentPassword(this.tournament.id) || '',
     };
 
     this.tournamentService.deleteTournament(this.tournament.id, deleteData).subscribe({
@@ -497,10 +591,10 @@ export class TournamentDetailComponent implements OnInit {
 
   startNameEdit() {
     if (!this.tournament) return;
-    
+
     this.isEditingName = true;
     this.editingTournamentName = this.tournament.name;
-    
+
     // Focus the input after the view updates
     setTimeout(() => {
       const input = document.querySelector('.tournament-name-input') as HTMLInputElement;
@@ -519,7 +613,7 @@ export class TournamentDetailComponent implements OnInit {
 
   saveNameEdit() {
     if (!this.tournament || !this.editingTournamentName.trim()) return;
-    
+
     if (this.editingTournamentName.trim() === this.tournament.name) {
       // No change, just cancel
       this.cancelNameEdit();
@@ -537,7 +631,7 @@ export class TournamentDetailComponent implements OnInit {
 
     const updateData = {
       name: this.editingTournamentName.trim(),
-      password: this.tournamentService.getTournamentPassword(this.tournament.id) || ''
+      password: this.realTimeTournamentService.getTournamentPassword(this.tournament.id) || '',
     };
 
     this.tournamentService.updateTournament(this.tournament.id, updateData).subscribe({
@@ -555,5 +649,27 @@ export class TournamentDetailComponent implements OnInit {
         }
       },
     });
+  }
+
+  removePlayer(playerId: number, playerName: string) {
+    if (!this.tournament) return;
+
+    if (confirm(`Are you sure you want to remove ${playerName} from the tournament?`)) {
+      this.executeWithPasswordCheck(() => this.doRemovePlayer(playerId), 'remove player');
+    }
+  }
+
+  private async doRemovePlayer(playerId: number) {
+    if (!this.tournament) return;
+
+    try {
+      await this.realTimeTournamentService.removePlayer(this.tournament.id, playerId);
+    } catch (error: any) {
+      if (error.status === 401) {
+        this.handleAuthError(error, 'remove player');
+      } else {
+        this.error = error.error?.message || 'Failed to remove player';
+      }
+    }
   }
 }

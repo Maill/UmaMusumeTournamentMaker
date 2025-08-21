@@ -24,6 +24,7 @@ namespace TournamentSystem.API.Application.Extensions
                 StartedAt = tournament.StartedAt,
                 CompletedAt = tournament.CompletedAt,
                 CurrentRound = tournament.CurrentRound,
+                WinnerId = tournament.WinnerId,
                 Players = tournament.Players?.Select(p => p.ToDto()).ToList() ?? new(),
                 Rounds = tournament.Rounds?.Select(r => r.ToDto()).ToList() ?? new()
             };

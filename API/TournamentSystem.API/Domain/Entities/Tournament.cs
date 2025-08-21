@@ -13,6 +13,7 @@ namespace TournamentSystem.API.Domain.Entities
         public DateTime? CompletedAt { get; set; }
         public int CurrentRound { get; set; }
         public string? Password { get; set; }
+        public int? WinnerId { get; set; }
         
         public ICollection<Player> Players { get; set; } = new List<Player>();
         public ICollection<Round> Rounds { get; set; } = new List<Round>();

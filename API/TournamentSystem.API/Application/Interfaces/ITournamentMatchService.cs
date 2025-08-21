@@ -1,9 +1,10 @@
 using TournamentSystem.API.Application.DTOs;
+using TournamentSystem.API.Domain.Entities;
 
 namespace TournamentSystem.API.Application.Interfaces
 {
     public interface ITournamentMatchService
     {
-        Task<MatchDto> SetMatchWinnerAsync(int matchId, SetWinnerDto setWinnerDto);
+        Task<bool> ProcessMatchWinnersAsync(Round round, List<MatchResultDto> matchResults);
     }
 }

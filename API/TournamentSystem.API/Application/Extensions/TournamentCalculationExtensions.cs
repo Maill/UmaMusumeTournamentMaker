@@ -1,5 +1,6 @@
 using TournamentSystem.API.Domain.Entities;
 using TournamentSystem.API.Application.Services;
+using TournamentSystem.API.Application.Interfaces;
 
 namespace TournamentSystem.API.Application.Extensions
 {
@@ -34,7 +35,12 @@ namespace TournamentSystem.API.Application.Extensions
         /// </summary>
         public static List<Player> GetPlayersSortedByStandings(this Tournament tournament)
         {
-            return tournament.Players
+            return tournament.Players.GetPlayersSortedByStandings();
+        }
+
+        public static List<Player> GetPlayersSortedByStandings(this IEnumerable<Player> players)
+        {
+            return players
                 .OrderByDescending(p => p.Points)
                 .ThenByDescending(p => p.Wins)
                 .ThenBy(p => p.Losses)
@@ -80,16 +86,16 @@ namespace TournamentSystem.API.Application.Extensions
         /// <summary>
         /// Creates truly random 3-player match combinations for the first round
         /// </summary>
-        public static List<PlayerCombinationService.PlayerTriple> CreateRandomFirstRound(this List<Player> players)
+        public static List<IPlayerCombinationService.PlayerTriple> CreateRandomFirstRound(this List<Player> players)
         {
             // Shuffle players randomly
             var shuffledPlayers = players.OrderBy(p => Guid.NewGuid()).ToList();
-            var matches = new List<PlayerCombinationService.PlayerTriple>();
+            var matches = new List<IPlayerCombinationService.PlayerTriple>();
             
             // Create 3-player matches from shuffled list
             for (int i = 0; i + 2 < shuffledPlayers.Count; i += 3)
             {
-                var triple = new PlayerCombinationService.PlayerTriple(
+                var triple = new IPlayerCombinationService.PlayerTriple(
                     shuffledPlayers[i], 
                     shuffledPlayers[i + 1], 
                     shuffledPlayers[i + 2]
@@ -152,7 +158,7 @@ namespace TournamentSystem.API.Application.Extensions
             bool hasClearTop3 = tournament.HasClearTop3();
             int tiebreakerRounds = tournament.GetTiebreakerRoundCount();
             
-            return !hasClearTop3 && tiebreakerRounds < 2;
+            return !hasClearTop3;
         }
     }
 }

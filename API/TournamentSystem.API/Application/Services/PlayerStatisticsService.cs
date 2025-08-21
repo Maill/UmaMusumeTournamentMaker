@@ -45,62 +45,48 @@ namespace TournamentSystem.API.Application.Services
         /// Uses batch operations and Unit of Work for optimal performance
         /// Single transaction for all updates
         /// </summary>
-        public async Task UpdateAllPlayerStatisticsAsync(Match match, int winnerId)
+        public void UpdateAllPlayerStatistics(Match match, int winnerId)
         {
-            using var transaction = await _unitOfWork.BeginTransactionAsync();
+            var playersToUpdate = new List<Player>();
             
-            try
+            foreach (var matchPlayer in match.MatchPlayers)
             {
-                var playersToUpdate = new List<Player>();
+                var player = matchPlayer.Player;
                 
-                foreach (var matchPlayer in match.MatchPlayers)
+                if (player.Id == winnerId)
                 {
-                    var player = matchPlayer.Player;
-                    
-                    if (player.Id == winnerId)
-                    {
-                        player.ApplyWinStatistics();
-                    }
-                    else
-                    {
-                        player.ApplyLossStatistics();
-                    }
-                    
-                    playersToUpdate.Add(player);
+                    player.ApplyWinStatistics();
                 }
-
-                _unitOfWork.Players.UpdateMultiplePlayers(playersToUpdate);
-
-                // Batch record all opponent relationships
-                var allOpponents = new List<PlayerOpponent>();
+                else
+                {
+                    player.ApplyLossStatistics();
+                }
                 
-                foreach (var matchPlayer in match.MatchPlayers)
-                {
-                    var player = matchPlayer.Player;
-                    var opponents = match.MatchPlayers
-                        .Where(mp => mp.PlayerId != player.Id)
-                        .Select(opponent => new PlayerOpponent
-                        {
-                            PlayerId = player.Id,
-                            OpponentId = opponent.PlayerId
-                        });
-                    
-                    allOpponents.AddRange(opponents);
-                }
-
-                if (allOpponents.Any())
-                {
-                    _unitOfWork.Players.AddMultipleOpponents(allOpponents);
-                }
-
-                await _unitOfWork.SaveChangesAsync();
-                await _unitOfWork.CommitTransactionAsync();
+                playersToUpdate.Add(player);
             }
-            catch (Exception ex)
+
+            _unitOfWork.Players.UpdateMultiplePlayers(playersToUpdate);
+
+            // Batch record all opponent relationships
+            var allOpponents = new List<PlayerOpponent>();
+            
+            foreach (var matchPlayer in match.MatchPlayers)
             {
-                _logger.LogError("PlayerStatisticsService", $"Failed to update player statistics for match {match.Id}: {ex.Message}");
-                await _unitOfWork.RollbackTransactionAsync();
-                throw new InvalidOperationException($"Failed to update player statistics for match {match.Id}", ex);
+                var player = matchPlayer.Player;
+                var opponents = match.MatchPlayers
+                    .Where(mp => mp.PlayerId != player.Id)
+                    .Select(opponent => new PlayerOpponent
+                    {
+                        PlayerId = player.Id,
+                        OpponentId = opponent.PlayerId
+                    });
+                
+                allOpponents.AddRange(opponents);
+            }
+
+            if (allOpponents.Any())
+            {
+                _unitOfWork.Players.AddMultipleOpponents(allOpponents);
             }
         }
     }

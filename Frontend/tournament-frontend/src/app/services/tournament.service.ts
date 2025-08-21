@@ -7,8 +7,9 @@ import {
   CreateTournament,
   DeleteTournament,
   Match,
+  MatchResult,
   Round,
-  SetWinner,
+  StartNextRound,
   StartTournament,
   Tournament,
   UpdateTournament,
@@ -50,6 +51,17 @@ export class TournamentService {
     );
   }
 
+  removePlayer(tournamentId: number, playerId: number): Observable<void> {
+    const requestBody = {
+      tournamentId: tournamentId,
+      playerId: playerId,
+      password: this.passwordService.getPassword(tournamentId)
+    };
+    return this.http.delete<void>(
+      `${this.apiUrl}/tournaments/players`,
+      { body: requestBody }
+    );
+  }
   startTournament(tournamentId: number, startTournament?: StartTournament): Observable<Tournament> {
     const requestBody: StartTournament = {
       password: startTournament?.password || this.passwordService.getPassword(tournamentId),
@@ -60,19 +72,15 @@ export class TournamentService {
     );
   }
 
-  startNextRound(tournamentId: number): Observable<Round> {
-    return this.http.post<Round>(`${this.apiUrl}/tournaments/${tournamentId}/next-round`, {});
+  startNextRound(tournamentId: number, matchResults: MatchResult[]): Observable<Tournament> {
+    const requestBody: StartNextRound = {
+      password: this.passwordService.getPassword(tournamentId),
+      matchResults: matchResults
+    };
+    return this.http.post<Tournament>(`${this.apiUrl}/tournaments/${tournamentId}/next-round`, requestBody);
   }
 
-  setMatchWinner(matchId: number, setWinner: SetWinner, tournamentId?: number): Observable<Match> {
-    const setWinnerWithPassword = {
-      ...setWinner,
-      password:
-        setWinner.password ||
-        (tournamentId ? this.passwordService.getPassword(tournamentId) : undefined),
-    };
-    return this.http.put<Match>(`${this.apiUrl}/matches/${matchId}/winner`, setWinnerWithPassword);
-  }
+  // Note: setMatchWinner method removed - winners are now submitted in batch with Next Round
 
   updateTournament(tournamentId: number, updateData: UpdateTournament): Observable<Tournament> {
     return this.http.put<Tournament>(`${this.apiUrl}/tournaments/${tournamentId}`, updateData);
@@ -82,6 +90,20 @@ export class TournamentService {
     return this.http.delete<void>(`${this.apiUrl}/tournaments/${tournamentId}`, {
       body: deleteData,
     });
+  }
+
+  broadcastWinnerSelection(tournamentId: number, matchId: number, winnerId: number): Observable<any> {
+    const broadcastData = {
+      tournamentId: tournamentId,
+      matchId: matchId,
+      winnerId: winnerId
+    };
+    return this.http.post<any>(`${this.apiUrl}/matches/broadcast-winner`, broadcastData);
+  }
+
+  validatePassword(tournamentId: number, password: string): Observable<{message: string, isValid: boolean}> {
+    const validateData = { password: password };
+    return this.http.post<{message: string, isValid: boolean}>(`${this.apiUrl}/tournaments/${tournamentId}/validate-password`, validateData);
   }
 
   // Password management helper methods
@@ -101,12 +123,4 @@ export class TournamentService {
     this.passwordService.clearPassword(tournamentId);
   }
 
-  private addPasswordToSetWinner(setWinner: SetWinner, tournamentId?: number): SetWinner {
-    return {
-      ...setWinner,
-      password:
-        setWinner.password ||
-        (tournamentId ? this.passwordService.getPassword(tournamentId) : undefined),
-    };
-  }
 }

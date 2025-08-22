@@ -20,9 +20,7 @@
   "typescript.preferences.importModuleSpecifier": "relative",
   "angular.enable-strict-mode-prompt": false,
   "angular.experimental-ivy": true,
-  "eslint.workingDirectories": [
-    "Frontend/tournament-frontend"
-  ],
+  "eslint.workingDirectories": ["Frontend"],
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"
   },

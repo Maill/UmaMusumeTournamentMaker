@@ -1,4 +1,4 @@
-namespace TournamentSystem.API.Domain.Entities
+namespace UmaMusumeTournamerMaker.API.Domain.Entities
 {
     public class Match
     {

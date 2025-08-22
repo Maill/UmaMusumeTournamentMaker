@@ -1,8 +1,8 @@
-using TournamentSystem.API.Domain.Entities;
-using TournamentSystem.API.Domain.Enums;
-using TournamentSystem.API.Application.Interfaces;
+using UmaMusumeTournamerMaker.API.Application.Interfaces;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
+using UmaMusumeTournamerMaker.API.Domain.Enums;
 
-namespace TournamentSystem.API.Application.Strategies
+namespace UmaMusumeTournamerMaker.API.Application.Strategies
 {
     /// <summary>
     /// W.I.P : Will follow the same rules of the official Champions Meeting competition (https://gametora.com/umamusume/events/champions-meeting)
@@ -23,7 +23,7 @@ namespace TournamentSystem.API.Application.Strategies
         {
             // Keep the simple logic for Champions Meeting for now
             var availablePlayers = tournament.Players.ToList();
-            
+
             while (availablePlayers.Count >= 3)
             {
                 var matchPlayers = availablePlayers.Take(3).ToList();

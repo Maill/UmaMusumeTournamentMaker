@@ -1,7 +1,7 @@
-using TournamentSystem.API.Application.DTOs;
-using TournamentSystem.API.Domain.Entities;
+using UmaMusumeTournamerMaker.API.Application.DTOs;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
 
-namespace TournamentSystem.API.Application.Interfaces
+namespace UmaMusumeTournamerMaker.API.Application.Interfaces
 {
     public interface ITournamentMatchService
     {

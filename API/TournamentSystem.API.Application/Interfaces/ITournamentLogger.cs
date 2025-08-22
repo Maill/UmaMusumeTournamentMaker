@@ -1,4 +1,4 @@
-namespace TournamentSystem.API.Application.Interfaces
+namespace UmaMusumeTournamerMaker.API.Application.Interfaces
 {
     public interface ITournamentLogger
     {
@@ -6,7 +6,7 @@ namespace TournamentSystem.API.Application.Interfaces
         void LogInfo(string component, string message);
         void LogWarning(string component, string message);
         void LogError(string component, string message, Exception? exception = null);
-        
+
         // Specific logging methods for common tournament events
         void LogMatchWinner(int matchId, int winnerId);
         void LogRoundCompletion(int roundNumber, int totalMatches, int completedMatches);

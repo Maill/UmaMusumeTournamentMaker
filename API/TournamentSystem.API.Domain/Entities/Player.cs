@@ -1,4 +1,4 @@
-namespace TournamentSystem.API.Domain.Entities
+namespace UmaMusumeTournamerMaker.API.Domain.Entities
 {
     public class Player
     {
@@ -11,12 +11,12 @@ namespace TournamentSystem.API.Domain.Entities
         public int RoundLosses { get; set; }
         public string Group { get; set; } = string.Empty;
         public int TournamentId { get; set; }
-        
+
         public Tournament Tournament { get; set; } = null!;
         public ICollection<MatchPlayer> MatchPlayers { get; set; } = new List<MatchPlayer>();
         public ICollection<PlayerOpponent> PlayerOpponents { get; set; } = new List<PlayerOpponent>();
 
-        public double WinRate => (Wins + Losses) == 0 ? 0 : (double)Wins / (Wins + Losses);
+        public double WinRate => Wins + Losses == 0 ? 0 : (double)Wins / (Wins + Losses);
         public int TotalMatches => Wins + Losses;
         public int RoundMatches => RoundWins + RoundLosses;
     }

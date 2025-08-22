@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TournamentSystem.API.Application.DTOs
+namespace UmaMusumeTournamerMaker.API.Application.DTOs
 {
     public class ValidatePasswordDto
     {

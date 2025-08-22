@@ -1,6 +1,6 @@
-using TournamentSystem.API.Domain.Entities;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
 
-namespace TournamentSystem.API.Application.Interfaces
+namespace UmaMusumeTournamerMaker.API.Application.Interfaces
 {
     /// <summary>
     /// Service interface for match creation operations

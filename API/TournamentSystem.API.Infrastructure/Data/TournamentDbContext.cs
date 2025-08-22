@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using TournamentSystem.API.Domain.Entities;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
 
-namespace TournamentSystem.API.Infrastructure.Data
+namespace UmaMusumeTournamerMaker.API.Infrastructure.Data
 {
     public class TournamentDbContext : DbContext
     {

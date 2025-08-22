@@ -1,6 +1,6 @@
-using TournamentSystem.API.Domain.Entities;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
 
-namespace TournamentSystem.API.Application.Interfaces.Repositories
+namespace UmaMusumeTournamerMaker.API.Application.Interfaces.Repositories
 {
     /// <summary>
     /// Repository interface for Match-specific operations
@@ -25,12 +25,12 @@ namespace TournamentSystem.API.Application.Interfaces.Repositories
 
 
         // Batch Operations
-        
+
         /// <summary>
         /// Adds multiple match players in a single transaction
         /// </summary>
         void AddMultipleMatchPlayers(List<MatchPlayer> matchPlayers);
-        
+
         /// <summary>
         /// Updates multiple matches in a single transaction
         /// </summary>

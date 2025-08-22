@@ -1,10 +1,8 @@
-using TournamentSystem.API.Application.DTOs;
-using TournamentSystem.API.Application.Interfaces;
-using TournamentSystem.API.Application.Extensions;
-using TournamentSystem.API.Application.Strategies;
-using TournamentSystem.API.Domain.Entities;
+using UmaMusumeTournamerMaker.API.Application.DTOs;
+using UmaMusumeTournamerMaker.API.Application.Interfaces;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
 
-namespace TournamentSystem.API.Application.Services
+namespace UmaMusumeTournamerMaker.API.Application.Services
 {
     public class TournamentMatchService : ITournamentMatchService
     {
@@ -32,14 +30,14 @@ namespace TournamentSystem.API.Application.Services
         public async Task<bool> ProcessMatchWinnersAsync(Round round, List<MatchResultDto> matchResults)
         {
             _logger.LogDebug("ProcessMatchWinners", $"Round {round.RoundNumber} has {round.Matches.Count} matches, processing {matchResults.Count} results");
-            
+
             var matchWinnerPairs = new List<(Match match, int winnerId)>();
-            
+
             // First pass: Validate all match results and prepare updates (without applying changes yet)
             foreach (var matchResult in matchResults)
             {
                 _logger.LogDebug("ProcessMatchWinners", $"Processing match {matchResult.MatchId} with winner {matchResult.WinnerId}");
-                
+
                 var match = round.Matches.FirstOrDefault(m => m.Id == matchResult.MatchId);
                 if (match == null)
                 {
@@ -61,22 +59,22 @@ namespace TournamentSystem.API.Application.Services
                 // Store match and winner for later processing (don't modify entities yet)
                 matchWinnerPairs.Add((match, matchResult.WinnerId));
             }
-            
+
             // Check if round will be completed after these updates
             var allMatches = round.Matches;
             var updatedMatchIds = matchWinnerPairs.Select(pair => pair.match.Id).ToHashSet();
-            
+
             // Count matches that will have winners after the update
-            var matchesWithWinners = allMatches.Count(m => 
+            var matchesWithWinners = allMatches.Count(m =>
                 m.WinnerId.HasValue || updatedMatchIds.Contains(m.Id));
-            
+
             _logger.LogRoundCompletion(round.RoundNumber, allMatches.Count, matchesWithWinners);
-            
+
             if (matchesWithWinners == allMatches.Count)
             {
                 // Round will be completed - apply all updates to existing tracked entities
                 _logger.LogDebug("MatchService", $"Round {round.RoundNumber} will be completed - applying all updates");
-                
+
                 // Update existing tracked entities directly (no new entities)
                 var matchesToUpdate = new List<Match>();
                 foreach (var (match, winnerId) in matchWinnerPairs)
@@ -85,23 +83,23 @@ namespace TournamentSystem.API.Application.Services
                     match.CompletedAt = DateTime.UtcNow;
                     matchesToUpdate.Add(match);
                 }
-                
+
                 // Update all matches in one batch operation
                 _unitOfWork.Matches.UpdateMultipleMatches(matchesToUpdate);
-                
+
                 // Apply player statistics updates in batch
                 foreach (var match in matchesToUpdate)
                 {
                     _playerStatisticsService.UpdateAllPlayerStatistics(match, match.WinnerId!.Value);
                 }
-                
+
                 round.IsCompleted = true;
                 _unitOfWork.Rounds.Update(round);
-                
+
                 _logger.LogDebug("MatchService", $"Round {round.RoundNumber} completed with batch updates applied");
                 return true; // Round is completed
             }
-            
+
             _logger.LogDebug("MatchService", $"Round {round.RoundNumber} not yet completed - no changes applied to database");
             return false; // Round is not completed - no database changes made
         }

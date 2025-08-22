@@ -1,8 +1,7 @@
-using TournamentSystem.API.Application.Extensions;
-using TournamentSystem.API.Application.Interfaces;
-using TournamentSystem.API.Domain.Entities;
+using UmaMusumeTournamerMaker.API.Application.Interfaces;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
 
-namespace TournamentSystem.API.Application.Services
+namespace UmaMusumeTournamerMaker.API.Application.Services
 {
     /// <summary>
     /// Manages 3-player combinations for hybrid Swiss-Round-Robin tournaments
@@ -24,7 +23,7 @@ namespace TournamentSystem.API.Application.Services
         public List<IPlayerCombinationService.PlayerTriple> GenerateAllCombinations(List<Player> availablePlayers)
         {
             var combinations = new List<IPlayerCombinationService.PlayerTriple>();
-            
+
             for (int i = 0; i < availablePlayers.Count - 2; i++)
             {
                 for (int j = i + 1; j < availablePlayers.Count - 1; j++)
@@ -32,14 +31,14 @@ namespace TournamentSystem.API.Application.Services
                     for (int k = j + 1; k < availablePlayers.Count; k++)
                     {
                         combinations.Add(new IPlayerCombinationService.PlayerTriple(
-                            availablePlayers[i], 
-                            availablePlayers[j], 
+                            availablePlayers[i],
+                            availablePlayers[j],
                             availablePlayers[k]
                         ));
                     }
                 }
             }
-            
+
             return combinations;
         }
 
@@ -50,7 +49,7 @@ namespace TournamentSystem.API.Application.Services
         {
             var allCombinations = GenerateAllCombinations(availablePlayers);
             var usedCombinations = GetUsedCombinationKeys(tournament);
-            
+
             return allCombinations
                 .Where(combo => !usedCombinations.Contains(combo.GetKey()))
                 .ToList();
@@ -79,13 +78,13 @@ namespace TournamentSystem.API.Application.Services
                 if (!combination.ContainsAnyPlayer(usedPlayerIds))
                 {
                     selectedMatches.Add(combination);
-                    
+
                     // Mark these players as used
                     foreach (var player in combination.Players)
                     {
                         usedPlayerIds.Add(player.Id);
                     }
-                    
+
                     // Stop if we can't form more 3-player matches
                     if (availablePlayers.Count - usedPlayerIds.Count < 3)
                     {
@@ -105,9 +104,9 @@ namespace TournamentSystem.API.Application.Services
         {
             // Sum of matches played by all players in this combination (Wins + Losses = total matches)
             var totalMatches = combination.Players.Sum(p => p.Wins + p.Losses);
-            
+
             // Return average matches per player in this combination (lower = better for balance)
-            return (double)totalMatches / 3.0;
+            return totalMatches / 3.0;
         }
 
         /// <summary>
@@ -139,9 +138,9 @@ namespace TournamentSystem.API.Application.Services
 
             foreach (var round in tournament.Rounds.Where(r => r.IsCompleted))
             {
-                bool playerInRound = round.Matches.Any(m => 
+                bool playerInRound = round.Matches.Any(m =>
                     m.MatchPlayers.Any(mp => mp.PlayerId == player.Id));
-                
+
                 if (playerInRound)
                     roundsPlayed++;
             }
@@ -155,7 +154,7 @@ namespace TournamentSystem.API.Application.Services
         private HashSet<string> GetUsedCombinationKeys(Tournament tournament)
         {
             var usedKeys = new HashSet<string>();
-            
+
             foreach (var round in tournament.Rounds)
             {
                 foreach (var match in round.Matches)
@@ -164,7 +163,7 @@ namespace TournamentSystem.API.Application.Services
                         .Select(mp => mp.PlayerId)
                         .OrderBy(id => id)
                         .ToList();
-                        
+
                     if (playerIds.Count == 3)
                     {
                         var key = $"{playerIds[0]}-{playerIds[1]}-{playerIds[2]}";
@@ -172,7 +171,7 @@ namespace TournamentSystem.API.Application.Services
                     }
                 }
             }
-            
+
             return usedKeys;
         }
     }

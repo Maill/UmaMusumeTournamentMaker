@@ -1,7 +1,7 @@
-using TournamentSystem.API.Application.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore.Storage;
+using UmaMusumeTournamerMaker.API.Application.Interfaces.Repositories;
 
-namespace TournamentSystem.API.Application.Interfaces
+namespace UmaMusumeTournamerMaker.API.Application.Interfaces
 {
     /// <summary>
     /// Unit of Work pattern interface for managing database transactions

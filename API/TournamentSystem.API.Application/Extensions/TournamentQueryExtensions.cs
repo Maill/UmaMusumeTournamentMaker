@@ -1,6 +1,6 @@
-using TournamentSystem.API.Domain.Entities;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
 
-namespace TournamentSystem.API.Application.Extensions
+namespace UmaMusumeTournamerMaker.API.Application.Extensions
 {
     /// <summary>
     /// Extension methods for tournament queries that access entity collections but don't modify data

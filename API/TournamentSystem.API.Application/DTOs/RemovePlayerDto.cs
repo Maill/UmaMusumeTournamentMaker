@@ -1,4 +1,4 @@
-namespace TournamentSystem.API.Application.DTOs
+namespace UmaMusumeTournamerMaker.API.Application.DTOs
 {
     /// <summary>
     /// DTO for removing a player from a tournament

@@ -1,8 +1,7 @@
-using TournamentSystem.API.Domain.Entities;
-using TournamentSystem.API.Application.Services;
-using TournamentSystem.API.Application.Interfaces;
+using UmaMusumeTournamerMaker.API.Application.Interfaces;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
 
-namespace TournamentSystem.API.Application.Extensions
+namespace UmaMusumeTournamerMaker.API.Application.Extensions
 {
     /// <summary>
     /// Extension methods for tournament calculations and logic that don't require database access
@@ -26,7 +25,7 @@ namespace TournamentSystem.API.Application.Extensions
             if (playerCount <= 6) return 4;
             if (playerCount <= 9) return 5;
             if (playerCount <= 12) return 6;
-            
+
             return Math.Min(8, (playerCount - 1) / 2 + 2);
         }
 
@@ -61,8 +60,8 @@ namespace TournamentSystem.API.Application.Extensions
         /// </summary>
         public static bool ArePlayersTied(this Player player1, Player player2)
         {
-            return player1.Points == player2.Points && 
-                   player1.Wins == player2.Wins && 
+            return player1.Points == player2.Points &&
+                   player1.Wins == player2.Wins &&
                    player1.Losses == player2.Losses;
         }
 
@@ -72,13 +71,13 @@ namespace TournamentSystem.API.Application.Extensions
         public static bool HasClearTop3(this Tournament tournament)
         {
             var sortedPlayers = tournament.GetPlayersSortedByStandings();
-            
+
             if (sortedPlayers.Count < 4)
                 return true;
-                
+
             var third = sortedPlayers[2];
             var fourth = sortedPlayers[3];
-            
+
             // Check if 3rd and 4th are tied
             return !third.ArePlayersTied(fourth);
         }
@@ -91,18 +90,18 @@ namespace TournamentSystem.API.Application.Extensions
             // Shuffle players randomly
             var shuffledPlayers = players.OrderBy(p => Guid.NewGuid()).ToList();
             var matches = new List<IPlayerCombinationService.PlayerTriple>();
-            
+
             // Create 3-player matches from shuffled list
             for (int i = 0; i + 2 < shuffledPlayers.Count; i += 3)
             {
                 var triple = new IPlayerCombinationService.PlayerTriple(
-                    shuffledPlayers[i], 
-                    shuffledPlayers[i + 1], 
+                    shuffledPlayers[i],
+                    shuffledPlayers[i + 1],
                     shuffledPlayers[i + 2]
                 );
                 matches.Add(triple);
             }
-            
+
             return matches;
         }
 
@@ -132,15 +131,15 @@ namespace TournamentSystem.API.Application.Extensions
         {
             if (!tournament.AllPlayersReachedTargetMatches())
                 return false;
-                
+
             // Check if we already have a final round
             if (tournament.GetFinalRound() != null)
                 return false;
-                
+
             // Check if we have clear top 3 or have exhausted tiebreakers
             bool hasClearTop3 = tournament.HasClearTop3();
             int tiebreakerRounds = tournament.GetTiebreakerRoundCount();
-            
+
             return hasClearTop3 || tiebreakerRounds >= 2;
         }
 
@@ -151,13 +150,13 @@ namespace TournamentSystem.API.Application.Extensions
         {
             if (!tournament.AllPlayersReachedTargetMatches())
                 return false;
-                
+
             if (tournament.GetFinalRound() != null)
                 return false;
-                
+
             bool hasClearTop3 = tournament.HasClearTop3();
             int tiebreakerRounds = tournament.GetTiebreakerRoundCount();
-            
+
             return !hasClearTop3;
         }
     }

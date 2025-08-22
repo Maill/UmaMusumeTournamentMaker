@@ -1,8 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
-using TournamentSystem.API.Application.Strategies;
-using TournamentSystem.API.Domain.Enums;
+using UmaMusumeTournamerMaker.API.Application.Strategies;
+using UmaMusumeTournamerMaker.API.Domain.Enums;
 
-namespace TournamentSystem.API.Application.Services
+namespace UmaMusumeTournamerMaker.API.Application.Services
 {
     public class TournamentStrategyFactory : ITournamentStrategyFactory
     {

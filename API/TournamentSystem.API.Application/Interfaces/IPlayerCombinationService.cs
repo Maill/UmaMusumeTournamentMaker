@@ -1,6 +1,5 @@
-using TournamentSystem.API.Domain.Entities;
-
-namespace TournamentSystem.API.Application.Interfaces
+using UmaMusumeTournamerMaker.API.Domain.Entities;
+namespace UmaMusumeTournamerMaker.API.Application.Interfaces
 {
     /// <summary>
     /// Manages 3-player combinations for hybrid Swiss-Round-Robin tournaments
@@ -40,18 +39,18 @@ namespace TournamentSystem.API.Application.Interfaces
             {
                 var points = Players.Select(p => p.Points).ToArray();
                 var wins = Players.Select(p => p.Wins).ToArray();
-                
+
                 // Calculate variance in points and wins (lower variance = more competitive)
                 var pointVariance = CalculateVariance(points);
                 var winVariance = CalculateVariance(wins);
-                
-                return pointVariance + (winVariance * 0.5); // Weight points more than wins
+
+                return pointVariance + winVariance * 0.5; // Weight points more than wins
             }
 
             private double CalculateVariance(int[] values)
             {
                 if (values.Length == 0) return 0;
-                
+
                 double mean = values.Average();
                 return values.Sum(v => Math.Pow(v - mean, 2)) / values.Length;
             }

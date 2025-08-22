@@ -1,9 +1,8 @@
-using Microsoft.EntityFrameworkCore;
-using TournamentSystem.API.Application.Interfaces.Repositories;
-using TournamentSystem.API.Domain.Entities;
-using TournamentSystem.API.Infrastructure.Data;
+using UmaMusumeTournamerMaker.API.Application.Interfaces.Repositories;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
+using UmaMusumeTournamerMaker.API.Infrastructure.Data;
 
-namespace TournamentSystem.API.Infrastructure.Repositories
+namespace UmaMusumeTournamerMaker.API.Infrastructure.Repositories
 {
     /// <summary>
     /// Repository implementation for Round-specific operations

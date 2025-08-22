@@ -4,17 +4,17 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{D82C56D6-B2CD-F611-9E31-04638F7EC30E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentSystem.API", "API\TournamentSystem.API\TournamentSystem.API.csproj", "{FEF667F3-7DCC-D152-0B68-0DB2E12EAAFE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UmaMusumeTournamerMaker.API", "API\TournamentSystem.API\UmaMusumeTournamerMaker.API.csproj", "{FEF667F3-7DCC-D152-0B68-0DB2E12EAAFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentSystem.API.PostgreSQLMigrations", "API\TournamentSystem.API.PostgreSQLMigrations\TournamentSystem.API.PostgreSQLMigrations.csproj", "{8C5AFC8D-D97B-4144-B62A-F152D9C52D7C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UmaMusumeTournamerMaker.API.PostgreSQLMigrations", "API\TournamentSystem.API.PostgreSQLMigrations\UmaMusumeTournamerMaker.API.PostgreSQLMigrations.csproj", "{8C5AFC8D-D97B-4144-B62A-F152D9C52D7C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentSystem.API.SQLiteMigrations", "API\TournamentSystem.API.SQLiteMigrations\TournamentSystem.API.SQLiteMigrations.csproj", "{600D8B02-42F1-43BF-911A-A752ADF98FD5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UmaMusumeTournamerMaker.API.SQLiteMigrations", "API\TournamentSystem.API.SQLiteMigrations\UmaMusumeTournamerMaker.API.SQLiteMigrations.csproj", "{600D8B02-42F1-43BF-911A-A752ADF98FD5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentSystem.API.Infrastructure", "API\TournamentSystem.API.Infrastructure\TournamentSystem.API.Infrastructure.csproj", "{C3639269-237E-44FC-BEC2-0E042F26D5EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UmaMusumeTournamerMaker.API.Infrastructure", "API\TournamentSystem.API.Infrastructure\UmaMusumeTournamerMaker.API.Infrastructure.csproj", "{C3639269-237E-44FC-BEC2-0E042F26D5EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentSystem.API.Domain", "API\TournamentSystem.API.Domain\TournamentSystem.API.Domain.csproj", "{EFCF3609-F84B-459A-A335-A281AF1B900E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UmaMusumeTournamerMaker.API.Domain", "API\TournamentSystem.API.Domain\UmaMusumeTournamerMaker.API.Domain.csproj", "{EFCF3609-F84B-459A-A335-A281AF1B900E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TournamentSystem.API.Application", "API\TournamentSystem.API.Application\TournamentSystem.API.Application.csproj", "{1B9831A3-5995-4CFA-A8B7-ED365C18A085}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UmaMusumeTournamerMaker.API.Application", "API\TournamentSystem.API.Application\UmaMusumeTournamerMaker.API.Application.csproj", "{1B9831A3-5995-4CFA-A8B7-ED365C18A085}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

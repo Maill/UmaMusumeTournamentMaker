@@ -1,7 +1,7 @@
-using TournamentSystem.API.Application.Interfaces;
-using TournamentSystem.API.Domain.Entities;
+using UmaMusumeTournamerMaker.API.Application.Interfaces;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
 
-namespace TournamentSystem.API.Application.Services
+namespace UmaMusumeTournamerMaker.API.Application.Services
 {
     /// <summary>
     /// Service for match creation operations
@@ -62,7 +62,7 @@ namespace TournamentSystem.API.Application.Services
             try
             {
                 var allMatchPlayers = new List<MatchPlayer>();
-                
+
                 foreach (var playerGroup in playerGroups)
                 {
                     var match = new Match
@@ -70,19 +70,19 @@ namespace TournamentSystem.API.Application.Services
                         RoundId = round.Id,
                         CreatedAt = DateTime.UtcNow
                     };
-                    
+
                     var createdMatch = _unitOfWork.Matches.Create(match);
                     await _unitOfWork.SaveChangesAsync();
-                    
+
                     var matchPlayers = playerGroup.Select(player => new MatchPlayer
                     {
                         MatchId = createdMatch.Id,
                         PlayerId = player.Id
                     });
-                    
+
                     allMatchPlayers.AddRange(matchPlayers);
                 }
-                
+
                 if (allMatchPlayers.Count != 0)
                 {
                     _unitOfWork.Matches.AddMultipleMatchPlayers(allMatchPlayers);

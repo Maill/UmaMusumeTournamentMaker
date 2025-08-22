@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
-using TournamentSystem.API.Application.Interfaces;
+using UmaMusumeTournamerMaker.API.Application.Interfaces;
 
-namespace TournamentSystem.API.Application.Services
+namespace UmaMusumeTournamerMaker.API.Application.Services
 {
     public class TournamentLogger : ITournamentLogger
     {
@@ -11,7 +11,7 @@ namespace TournamentSystem.API.Application.Services
         public TournamentLogger(IConfiguration configuration)
         {
             _debugLogPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tournament_debug.log");
-            _enableLogging = configuration.GetValue<bool>("TournamentLogging:EnableDebugLogging", true);
+            _enableLogging = configuration.GetValue("TournamentLogging:EnableDebugLogging", true);
         }
 
         public void LogDebug(string component, string message)
@@ -34,8 +34,8 @@ namespace TournamentSystem.API.Application.Services
 
         public void LogError(string component, string message, Exception? exception = null)
         {
-            var fullMessage = exception != null 
-                ? $"{message} | Exception: {exception.Message}" 
+            var fullMessage = exception != null
+                ? $"{message} | Exception: {exception.Message}"
                 : message;
             WriteToFile("ERROR", component, fullMessage);
         }
@@ -48,7 +48,7 @@ namespace TournamentSystem.API.Application.Services
         public void LogRoundCompletion(int roundNumber, int totalMatches, int completedMatches)
         {
             LogDebug("MatchService", $"Round {roundNumber} has {totalMatches} matches, {completedMatches} completed");
-            
+
             if (totalMatches == completedMatches)
             {
                 LogDebug("MatchService", $"Round {roundNumber} completed, checking tournament completion");

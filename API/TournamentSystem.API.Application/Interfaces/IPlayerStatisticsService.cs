@@ -1,6 +1,5 @@
-using TournamentSystem.API.Domain.Entities;
-
-namespace TournamentSystem.API.Application.Interfaces
+using UmaMusumeTournamerMaker.API.Domain.Entities;
+namespace UmaMusumeTournamerMaker.API.Application.Interfaces
 {
     /// <summary>
     /// Service interface for player statistics operations

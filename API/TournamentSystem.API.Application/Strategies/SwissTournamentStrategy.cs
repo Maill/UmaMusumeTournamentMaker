@@ -1,11 +1,9 @@
-using TournamentSystem.API.Domain.Entities;
-using TournamentSystem.API.Domain.Enums;
-using TournamentSystem.API.Application.Interfaces;
-using TournamentSystem.API.Application.Services;
-using TournamentSystem.API.Application.Extensions;
-using System.Numerics;
+using UmaMusumeTournamerMaker.API.Application.Extensions;
+using UmaMusumeTournamerMaker.API.Application.Interfaces;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
+using UmaMusumeTournamerMaker.API.Domain.Enums;
 
-namespace TournamentSystem.API.Application.Strategies
+namespace UmaMusumeTournamerMaker.API.Application.Strategies
 {
     /// <summary>
     /// Hybrid Swiss-Round-Robin Tournament Strategy
@@ -38,23 +36,23 @@ namespace TournamentSystem.API.Application.Strategies
         {
             var players = tournament.Players.ToList();
             int targetMatches = tournament.CalculateTargetMatches();
-            
+
             _logger.LogDebug("HybridSwiss", $"Round {round.RoundNumber} - Players: {players.Count}, Target: {targetMatches}");
-            
+
             // Check if we should create final championship round
             if (tournament.ShouldCreateFinalRound(targetMatches))
             {
                 await CreateFinalChampionshipRound(tournament, round);
                 return;
             }
-            
+
             // Check if we need tiebreaker rounds
             if (tournament.ShouldCreateTiebreakerRound(targetMatches))
             {
                 await CreateTiebreakerRound(tournament, round);
                 return;
             }
-            
+
             // Create regular round with hybrid algorithm
             await CreateRegularRound(tournament, round);
         }
@@ -66,7 +64,7 @@ namespace TournamentSystem.API.Application.Strategies
         {
             var players = tournament.Players.ToList();
             round.RoundType = "Regular";
-            
+
             _logger.LogDebug("HybridSwiss", $"Creating regular round {round.RoundNumber}");
 
             List<IPlayerCombinationService.PlayerTriple> selectedMatches;
@@ -89,7 +87,7 @@ namespace TournamentSystem.API.Application.Strategies
             foreach (var matchCombo in selectedMatches)
             {
                 //await _matchCreationService.CreateSingleMatchAsync(round, matchCombo.Players);
-                _logger.LogDebug("HybridSwiss", 
+                _logger.LogDebug("HybridSwiss",
                     $"Created match with players: {string.Join(", ", matchCombo.Players.Select(p => p.Id))}");
             }
 
@@ -97,7 +95,7 @@ namespace TournamentSystem.API.Application.Strategies
             var byePlayers = _combinationService.SelectByePlayers(players, selectedMatches, tournament);
             await HandleByePlayers(byePlayers, round.RoundNumber);
 
-            _logger.LogDebug("HybridSwiss", 
+            _logger.LogDebug("HybridSwiss",
                 $"Round {round.RoundNumber} completed: {selectedMatches.Count} matches, {byePlayers.Count} byes");
         }
 
@@ -105,24 +103,24 @@ namespace TournamentSystem.API.Application.Strategies
         public bool ShouldCompleteTournament(Tournament tournament)
         {
             int targetMatches = tournament.CalculateTargetMatches();
-            
-            _logger.LogDebug("HybridSwiss", 
+
+            _logger.LogDebug("HybridSwiss",
                 $"Tournament completion check - Players: {tournament.Players.Count}, Target: {targetMatches}");
-            
+
             // Check if final round exists and is completed
             if (tournament.HasCompletedFinalRound())
             {
                 _logger.LogDebug("HybridSwiss", "Tournament complete: Final round finished");
                 return true;
             }
-            
+
             // Continue if we haven't reached target matches yet
             if (!tournament.AllPlayersReachedTargetMatches())
             {
                 _logger.LogDebug("HybridSwiss", "Tournament continues: Players haven't reached target matches");
                 return false;
             }
-            
+
             // Need to create final or tiebreaker round
             _logger.LogDebug("HybridSwiss", "Tournament continues: Need final/tiebreaker round");
             return false;
@@ -144,19 +142,19 @@ namespace TournamentSystem.API.Application.Strategies
         {
             var finalRound = tournament.GetFinalRound();
             _logger.LogDebug("SwissTournament", $"Final round found: {finalRound != null}, IsCompleted: {finalRound?.IsCompleted}");
-            
+
             if (finalRound?.IsCompleted == true)
             {
                 var finalMatch = finalRound.Matches.FirstOrDefault();
                 _logger.LogDebug("SwissTournament", $"Final match found: {finalMatch != null}, WinnerId: {finalMatch?.WinnerId}");
-                
+
                 if (finalMatch?.WinnerId.HasValue == true)
                 {
                     _logger.LogDebug("SwissTournament", $"Tournament winner: Player {finalMatch.WinnerId}");
                     return finalMatch.WinnerId;
                 }
             }
-            
+
             _logger.LogDebug("SwissTournament", "Tournament has no winner yet - final round not completed");
             return null;
         }
@@ -169,7 +167,7 @@ namespace TournamentSystem.API.Application.Strategies
         {
             round.RoundType = "Tiebreaker";
             _logger.LogDebug("HybridSwiss", $"Creating tiebreaker round {round.RoundNumber}");
-            
+
             // Get the specific tiebreaker matches we want to create
             var tiebreakerMatches = GetTiebreakerMatches(tournament);
             _logger.LogDebug("HybridSwiss", $"Tiebreaker involves {tiebreakerMatches.Count} matches");
@@ -181,8 +179,8 @@ namespace TournamentSystem.API.Application.Strategies
                 //await _matchCreationService.CreateSingleMatchAsync(round, matchCombo.Players);
                 _logger.LogDebug("HybridSwiss", $"Created tiebreaker match: {string.Join(", ", matchCombo.Players.Select(p => p.Id))}");
             }
-            
-            _logger.LogDebug("HybridSwiss", 
+
+            _logger.LogDebug("HybridSwiss",
                 $"Tiebreaker round {round.RoundNumber}: {tiebreakerMatches.Count} matches, no bye points awarded");
         }
 
@@ -193,13 +191,13 @@ namespace TournamentSystem.API.Application.Strategies
         {
             round.RoundType = "Final";
             _logger.LogDebug("HybridSwiss", $"Creating final championship round {round.RoundNumber}");
-            
+
             var top3Players = tournament.GetTop3Players();
-            
+
             if (top3Players.Count >= 3)
             {
                 await _matchCreationService.CreateSingleMatchAsync(round, top3Players);
-                _logger.LogDebug("HybridSwiss", 
+                _logger.LogDebug("HybridSwiss",
                     $"Final championship: {string.Join(", ", top3Players.Take(3).Select(p => p.Id))}");
             }
         }
@@ -214,11 +212,11 @@ namespace TournamentSystem.API.Application.Strategies
                 // Fair bye points: all players get same points regardless of standings
                 int byePoints = 1;
                 player.Points += byePoints;
-                
-                _logger.LogDebug("HybridSwiss", 
+
+                _logger.LogDebug("HybridSwiss",
                     $"Player {player.Id} gets {byePoints} bye points in round {roundNumber}");
             }
-            
+
             return Task.CompletedTask;
         }
 
@@ -234,10 +232,10 @@ namespace TournamentSystem.API.Application.Strategies
             // Anyone tied with 3rd place (or better) should compete in tiebreaker
             var thirdPlace = sortedPlayers[2];
             var podiumContenders = new List<Player>();
-            
+
             podiumContenders.AddRange(sortedPlayers.Skip(2).Where(p => p.ArePlayersTied(thirdPlace)));
 
-            if(podiumContenders.Count > 3)
+            if (podiumContenders.Count > 3)
                 podiumContenders.AddRange(sortedPlayers.Where(p => p.Points >= thirdPlace.Points));
 
             podiumContenders = podiumContenders.GetPlayersSortedByStandings();

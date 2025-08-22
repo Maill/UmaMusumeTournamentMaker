@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using TournamentSystem.API.Domain.Entities;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
 
-namespace TournamentSystem.API.Infrastructure.Extensions
+namespace UmaMusumeTournamerMaker.API.Infrastructure.Extensions
 {
     /// <summary>
     /// Extension methods for building complex Match queries with includes

@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using TournamentSystem.API.Application.Interfaces;
-using TournamentSystem.API.Application.Services;
-using TournamentSystem.API.Application.Strategies;
-using TournamentSystem.API.Infrastructure.Repositories;
-using TournamentSystem.API.Infrastructure.Services;
-using TournamentSystem.API.Application.Interfaces.Repositories;
-using TournamentSystem.API.Infrastructure.Data;
-using TournamentSystem.API.Infrastructure.Hubs;
+using UmaMusumeTournamerMaker.API.Application.Interfaces;
+using UmaMusumeTournamerMaker.API.Application.Interfaces.Repositories;
+using UmaMusumeTournamerMaker.API.Application.Services;
+using UmaMusumeTournamerMaker.API.Application.Strategies;
+using UmaMusumeTournamerMaker.API.Infrastructure.Data;
+using UmaMusumeTournamerMaker.API.Infrastructure.Hubs;
+using UmaMusumeTournamerMaker.API.Infrastructure.Repositories;
+using UmaMusumeTournamerMaker.API.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +22,8 @@ builder.Services.AddDbContext<TournamentDbContext>(options => _ = provider switc
 {
     "SQLite" => options.UseSqlite(connectionString, sqliteOptions => sqliteOptions.MigrationsAssembly("TournamentSystem.API.SQLiteMigrations")),
     "PostgreSQL" => options.UseNpgsql(connectionString,
-            npgsqlOptions => {
+            npgsqlOptions =>
+            {
                 npgsqlOptions.EnableRetryOnFailure(
                 maxRetryCount: 3,
                 maxRetryDelay: TimeSpan.FromSeconds(5),

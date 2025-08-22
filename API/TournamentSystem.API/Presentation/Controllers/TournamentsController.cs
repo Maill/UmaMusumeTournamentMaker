@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using TournamentSystem.API.Application.DTOs;
-using TournamentSystem.API.Application.Interfaces;
+using UmaMusumeTournamerMaker.API.Application.DTOs;
+using UmaMusumeTournamerMaker.API.Application.Interfaces;
 
-namespace TournamentSystem.API.Presentation.Controllers
+namespace UmaMusumeTournamerMaker.API.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -233,7 +233,7 @@ namespace TournamentSystem.API.Presentation.Controllers
             try
             {
                 var isValid = await _tournamentService.ValidatePasswordAsync(id, validatePasswordDto.Password);
-                
+
                 if (isValid)
                 {
                     return Ok(new { message = "Password is valid", isValid = true });

@@ -1,6 +1,6 @@
-using TournamentSystem.API.Domain.Enums;
+using UmaMusumeTournamerMaker.API.Domain.Enums;
 
-namespace TournamentSystem.API.Application.DTOs
+namespace UmaMusumeTournamerMaker.API.Application.DTOs
 {
     public class TournamentDto
     {

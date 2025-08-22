@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using TournamentSystem.API.Application.Interfaces.Repositories;
-using TournamentSystem.API.Domain.Entities;
-using TournamentSystem.API.Infrastructure.Data;
-using TournamentSystem.API.Infrastructure.Extensions;
+using UmaMusumeTournamerMaker.API.Application.Interfaces.Repositories;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
+using UmaMusumeTournamerMaker.API.Infrastructure.Data;
+using UmaMusumeTournamerMaker.API.Infrastructure.Extensions;
 
-namespace TournamentSystem.API.Infrastructure.Repositories
+namespace UmaMusumeTournamerMaker.API.Infrastructure.Repositories
 {
     /// <summary>
     /// Repository implementation for Tournament-specific operations
@@ -57,7 +57,7 @@ namespace TournamentSystem.API.Infrastructure.Repositories
             var tournament = await _context.Tournaments
                 .WithFullDeletionGraph()
                 .FirstOrDefaultAsync(t => t.Id == id);
-                
+
             if (tournament == null)
                 return false;
 

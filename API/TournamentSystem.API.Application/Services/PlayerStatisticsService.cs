@@ -1,8 +1,8 @@
-using TournamentSystem.API.Application.Interfaces;
-using TournamentSystem.API.Application.Extensions;
-using TournamentSystem.API.Domain.Entities;
+using UmaMusumeTournamerMaker.API.Application.Extensions;
+using UmaMusumeTournamerMaker.API.Application.Interfaces;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
 
-namespace TournamentSystem.API.Application.Services
+namespace UmaMusumeTournamerMaker.API.Application.Services
 {
     /// <summary>
     /// Optimized service for player statistics operations using Unit of Work and batch operations
@@ -48,11 +48,11 @@ namespace TournamentSystem.API.Application.Services
         public void UpdateAllPlayerStatistics(Match match, int winnerId)
         {
             var playersToUpdate = new List<Player>();
-            
+
             foreach (var matchPlayer in match.MatchPlayers)
             {
                 var player = matchPlayer.Player;
-                
+
                 if (player.Id == winnerId)
                 {
                     player.ApplyWinStatistics();
@@ -61,7 +61,7 @@ namespace TournamentSystem.API.Application.Services
                 {
                     player.ApplyLossStatistics();
                 }
-                
+
                 playersToUpdate.Add(player);
             }
 
@@ -69,7 +69,7 @@ namespace TournamentSystem.API.Application.Services
 
             // Batch record all opponent relationships
             var allOpponents = new List<PlayerOpponent>();
-            
+
             foreach (var matchPlayer in match.MatchPlayers)
             {
                 var player = matchPlayer.Player;
@@ -80,7 +80,7 @@ namespace TournamentSystem.API.Application.Services
                         PlayerId = player.Id,
                         OpponentId = opponent.PlayerId
                     });
-                
+
                 allOpponents.AddRange(opponents);
             }
 

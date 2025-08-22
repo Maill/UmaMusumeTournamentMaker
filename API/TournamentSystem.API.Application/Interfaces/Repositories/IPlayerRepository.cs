@@ -1,6 +1,5 @@
-using TournamentSystem.API.Domain.Entities;
-
-namespace TournamentSystem.API.Application.Interfaces.Repositories
+using UmaMusumeTournamerMaker.API.Domain.Entities;
+namespace UmaMusumeTournamerMaker.API.Application.Interfaces.Repositories
 {
     /// <summary>
     /// Repository interface for Player-specific operations
@@ -36,18 +35,18 @@ namespace TournamentSystem.API.Application.Interfaces.Repositories
 
 
         // Batch Operations
-        
+
         /// <summary>
         /// Adds multiple opponent relationships in a single transaction
         /// Optimizes opponent tracking by avoiding multiple database calls
         /// </summary>
         void AddMultipleOpponents(List<PlayerOpponent> opponents);
-        
+
         /// <summary>
         /// Updates multiple players' statistics in a single transaction
         /// </summary>
         void UpdateMultiplePlayers(List<Player> players);
-        
+
         /// <summary>
         /// Adds multiple players to a tournament in a single transaction
         /// </summary>

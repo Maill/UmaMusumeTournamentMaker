@@ -1,11 +1,11 @@
-using TournamentSystem.API.Application.DTOs;
-using TournamentSystem.API.Application.Interfaces;
-using TournamentSystem.API.Application.Extensions;
-using TournamentSystem.API.Domain.Entities;
-using TournamentSystem.API.Domain.Enums;
-using TournamentSystem.API.Application.Strategies;
+using UmaMusumeTournamerMaker.API.Application.DTOs;
+using UmaMusumeTournamerMaker.API.Application.Extensions;
+using UmaMusumeTournamerMaker.API.Application.Interfaces;
+using UmaMusumeTournamerMaker.API.Application.Strategies;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
+using UmaMusumeTournamerMaker.API.Domain.Enums;
 
-namespace TournamentSystem.API.Application.Services
+namespace UmaMusumeTournamerMaker.API.Application.Services
 {
     public class TournamentService : ITournamentService
     {
@@ -41,7 +41,7 @@ namespace TournamentSystem.API.Application.Services
         public async Task<TournamentDto> CreateTournamentAsync(CreateTournamentDto createTournamentDto)
         {
             using var transaction = await _unitOfWork.BeginTransactionAsync();
-            
+
             try
             {
                 var tournament = new Tournament
@@ -57,7 +57,7 @@ namespace TournamentSystem.API.Application.Services
                 var createdTournament = _unitOfWork.Tournaments.Create(tournament);
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
-                
+
                 return createdTournament.ToDto();
             }
             catch (Exception ex)
@@ -71,7 +71,7 @@ namespace TournamentSystem.API.Application.Services
         public async Task<PlayerDto> AddPlayerAsync(int tournamentId, AddPlayerDto addPlayerDto)
         {
             using var transaction = await _unitOfWork.BeginTransactionAsync();
-            
+
             try
             {
                 var tournament = await _unitOfWork.Tournaments.ValidatePasswordAndGetTournamentAsync(tournamentId, addPlayerDto.Password);
@@ -97,7 +97,7 @@ namespace TournamentSystem.API.Application.Services
                 var addedPlayer = _unitOfWork.Players.AddPlayer(player);
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
-                
+
                 return addedPlayer.ToDto();
             }
             catch (InvalidOperationException)
@@ -126,7 +126,7 @@ namespace TournamentSystem.API.Application.Services
         public async Task<int> RemovePlayerAsync(RemovePlayerDto removePlayerDto)
         {
             using var transaction = await _unitOfWork.BeginTransactionAsync();
-            
+
             try
             {
                 var tournament = await _unitOfWork.Tournaments.ValidatePasswordAndGetTournamentAsync(removePlayerDto.TournamentId, removePlayerDto.Password);
@@ -142,7 +142,7 @@ namespace TournamentSystem.API.Application.Services
                 _unitOfWork.Players.Remove(player);
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
-                
+
                 return playerId;
             }
             catch (InvalidOperationException)
@@ -171,7 +171,7 @@ namespace TournamentSystem.API.Application.Services
         public async Task<TournamentDto> StartTournamentAsync(int tournamentId, StartTournamentDto startTournamentDto)
         {
             using var transaction = await _unitOfWork.BeginTransactionAsync();
-            
+
             try
             {
                 var tournament = await _unitOfWork.Tournaments.ValidatePasswordAndGetTournamentAsync(tournamentId, startTournamentDto.Password);
@@ -190,10 +190,10 @@ namespace TournamentSystem.API.Application.Services
                 await CreateRoundAsync(strategy, tournament);
 
                 await _unitOfWork.SaveChangesAsync();
-                
+
                 // Get updated tournament for broadcasting BEFORE committing transaction
                 var updatedTournament = await _unitOfWork.Tournaments.GetByIdWithCompleteDetailsAsync(tournamentId);
-                
+
                 await _unitOfWork.CommitTransactionAsync();
                 return updatedTournament!.ToDto();
             }
@@ -223,7 +223,7 @@ namespace TournamentSystem.API.Application.Services
         public async Task<TournamentDto> StartNextRoundAsync(int tournamentId, StartNextRoundDto startNextRoundDto)
         {
             using var transaction = await _unitOfWork.BeginTransactionAsync();
-            
+
             try
             {
                 var tournament = await _unitOfWork.Tournaments.ValidatePasswordAndGetTournamentWithRoundsAsync(tournamentId, startNextRoundDto.Password);
@@ -238,29 +238,29 @@ namespace TournamentSystem.API.Application.Services
 
                 // Process all match winners for the current round
                 bool roundCompleted = await _matchService.ProcessMatchWinnersAsync(currentRound, startNextRoundDto.MatchResults);
-                
+
                 if (!roundCompleted)
                 {
                     throw new InvalidOperationException("Cannot advance to next round - not all matches in the current round have winners assigned");
                 }
-                
+
                 // Save the completed round
                 await _unitOfWork.SaveChangesAsync();
-                
+
                 // Check if tournament should be completed after this round
-                var strategy = _strategyFactory.GetStrategy(tournament.Type);                
+                var strategy = _strategyFactory.GetStrategy(tournament.Type);
                 if (!IsTournamentCompleted(strategy, tournament, currentRound))
                 {
                     // Create next round and let the strategy determine its type and matches
                     await CreateRoundAsync(strategy, tournament, ++tournament.CurrentRound);
                 }
-                
+
                 // Save tournament completion status if it was updated
                 await _unitOfWork.SaveChangesAsync();
-                
+
                 // Get updated tournament for broadcasting BEFORE committing transaction
                 var updatedTournament = await _unitOfWork.Tournaments.GetByIdWithCompleteDetailsAsync(tournamentId);
-                
+
                 await _unitOfWork.CommitTransactionAsync();
                 return updatedTournament!.ToDto();
             }
@@ -309,12 +309,12 @@ namespace TournamentSystem.API.Application.Services
             if (tournamentCompleted)
             {
                 _logger.LogTournamentCompletion(tournament.Id, tournament.CurrentRound, tournament.Type.ToString(), tournament.Players.Count);
-                
+
                 // Determine tournament winner
                 var winnerId = strategy.DetermineTournamentWinner(tournament);
                 tournament.WinnerId = winnerId;
                 _logger.LogDebug("TournamentService", $"Tournament {tournament.Id} completed with winner: {winnerId}");
-                
+
                 // Mark tournament as completed
                 tournament.Status = TournamentStatus.Completed;
                 tournament.CompletedAt = DateTime.UtcNow;
@@ -336,7 +336,7 @@ namespace TournamentSystem.API.Application.Services
         public async Task<TournamentDto> UpdateTournamentAsync(int tournamentId, UpdateTournamentDto updateTournamentDto)
         {
             using var transaction = await _unitOfWork.BeginTransactionAsync();
-            
+
             try
             {
                 var tournament = await _unitOfWork.Tournaments.ValidatePasswordAndGetTournamentAsync(tournamentId, updateTournamentDto.Password);
@@ -369,14 +369,14 @@ namespace TournamentSystem.API.Application.Services
         public async Task<bool> DeleteTournamentAsync(int tournamentId, DeleteTournamentDto deleteTournamentDto)
         {
             using var transaction = await _unitOfWork.BeginTransactionAsync();
-            
+
             try
             {
                 await _unitOfWork.Tournaments.ValidatePasswordAsync(tournamentId, deleteTournamentDto.Password);
                 var result = await _unitOfWork.Tournaments.DeleteAsync(tournamentId);
                 await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
-                
+
                 return result;
             }
             catch (UnauthorizedAccessException)

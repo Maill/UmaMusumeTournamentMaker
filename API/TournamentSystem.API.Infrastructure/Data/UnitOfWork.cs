@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore.Storage;
-using TournamentSystem.API.Application.Interfaces;
-using TournamentSystem.API.Application.Interfaces.Repositories;
+using UmaMusumeTournamerMaker.API.Application.Interfaces;
+using UmaMusumeTournamerMaker.API.Application.Interfaces.Repositories;
 
-namespace TournamentSystem.API.Infrastructure.Data
+namespace UmaMusumeTournamerMaker.API.Infrastructure.Data
 {
     /// <summary>
     /// Unit of Work implementation for managing database transactions

@@ -1,6 +1,6 @@
-using TournamentSystem.API.Domain.Entities;
+using UmaMusumeTournamerMaker.API.Domain.Entities;
 
-namespace TournamentSystem.API.Application.Interfaces.Repositories
+namespace UmaMusumeTournamerMaker.API.Application.Interfaces.Repositories
 {
     /// <summary>
     /// Repository interface for Round-specific operations
@@ -21,7 +21,7 @@ namespace TournamentSystem.API.Application.Interfaces.Repositories
 
 
         // Batch Operations
-        
+
         /// <summary>
         /// Updates multiple rounds in a single transaction
         /// </summary>

@@ -1,4 +1,4 @@
-namespace TournamentSystem.API.Domain.Entities
+namespace UmaMusumeTournamerMaker.API.Domain.Entities
 {
     public class Round
     {
@@ -8,7 +8,7 @@ namespace TournamentSystem.API.Domain.Entities
         public DateTime CreatedAt { get; set; }
         public bool IsCompleted { get; set; }
         public string RoundType { get; set; } = "Regular"; // Regular, Tiebreaker, Final
-        
+
         public Tournament Tournament { get; set; } = null!;
         public ICollection<Match> Matches { get; set; } = new List<Match>();
     }

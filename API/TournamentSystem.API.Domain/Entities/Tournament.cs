@@ -1,6 +1,6 @@
-using TournamentSystem.API.Domain.Enums;
+using UmaMusumeTournamerMaker.API.Domain.Enums;
 
-namespace TournamentSystem.API.Domain.Entities
+namespace UmaMusumeTournamerMaker.API.Domain.Entities
 {
     public class Tournament
     {
@@ -14,7 +14,7 @@ namespace TournamentSystem.API.Domain.Entities
         public int CurrentRound { get; set; }
         public string? Password { get; set; }
         public int? WinnerId { get; set; }
-        
+
         public ICollection<Player> Players { get; set; } = new List<Player>();
         public ICollection<Round> Rounds { get; set; } = new List<Round>();
     }

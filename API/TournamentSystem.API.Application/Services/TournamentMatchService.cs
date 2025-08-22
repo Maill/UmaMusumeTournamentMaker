@@ -27,7 +27,7 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
         // This method is now obsolete - tournament progression is handled by StartNextRoundAsync
         // which properly uses the SwissTournamentStrategy for all round creation decisions
 
-        public async Task<bool> ProcessMatchWinnersAsync(Round round, List<MatchResultDto> matchResults)
+        public bool ProcessMatchWinners(Round round, List<MatchResultDto> matchResults)
         {
             _logger.LogDebug("ProcessMatchWinners", $"Round {round.RoundNumber} has {round.Matches.Count} matches, processing {matchResults.Count} results");
 

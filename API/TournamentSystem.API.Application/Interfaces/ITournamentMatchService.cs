@@ -5,6 +5,6 @@ namespace UmaMusumeTournamentMaker.API.Application.Interfaces
 {
     public interface ITournamentMatchService
     {
-        Task<bool> ProcessMatchWinnersAsync(Round round, List<MatchResultDto> matchResults);
+        bool ProcessMatchWinners(Round round, List<MatchResultDto> matchResults);
     }
 }

@@ -237,7 +237,7 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
                     throw new InvalidOperationException("Current round not found");
 
                 // Process all match winners for the current round
-                bool roundCompleted = await _matchService.ProcessMatchWinnersAsync(currentRound, startNextRoundDto.MatchResults);
+                bool roundCompleted = _matchService.ProcessMatchWinners(currentRound, startNextRoundDto.MatchResults);
 
                 if (!roundCompleted)
                 {

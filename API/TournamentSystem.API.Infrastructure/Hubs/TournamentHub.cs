@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 
-namespace UmaMusumeTournamerMaker.API.Infrastructure.Hubs
+namespace UmaMusumeTournamentMaker.API.Infrastructure.Hubs
 {
     /// <summary>
     /// SignalR hub for real-time tournament updates

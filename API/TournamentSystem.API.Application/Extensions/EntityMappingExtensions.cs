@@ -1,7 +1,7 @@
-using UmaMusumeTournamerMaker.API.Application.DTOs;
-using UmaMusumeTournamerMaker.API.Domain.Entities;
+using UmaMusumeTournamentMaker.API.Application.DTOs;
+using UmaMusumeTournamentMaker.API.Domain.Entities;
 
-namespace UmaMusumeTournamerMaker.API.Application.Extensions
+namespace UmaMusumeTournamentMaker.API.Application.Extensions
 {
     /// <summary>
     /// Extension methods for mapping domain entities to DTOs

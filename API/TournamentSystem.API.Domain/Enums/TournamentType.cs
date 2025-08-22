@@ -1,4 +1,4 @@
-namespace UmaMusumeTournamerMaker.API.Domain.Enums
+namespace UmaMusumeTournamentMaker.API.Domain.Enums
 {
     public enum TournamentType
     {

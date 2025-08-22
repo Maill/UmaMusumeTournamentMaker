@@ -1,11 +1,11 @@
-using UmaMusumeTournamerMaker.API.Application.DTOs;
-using UmaMusumeTournamerMaker.API.Application.Extensions;
-using UmaMusumeTournamerMaker.API.Application.Interfaces;
-using UmaMusumeTournamerMaker.API.Application.Strategies;
-using UmaMusumeTournamerMaker.API.Domain.Entities;
-using UmaMusumeTournamerMaker.API.Domain.Enums;
+using UmaMusumeTournamentMaker.API.Application.DTOs;
+using UmaMusumeTournamentMaker.API.Application.Extensions;
+using UmaMusumeTournamentMaker.API.Application.Interfaces;
+using UmaMusumeTournamentMaker.API.Application.Strategies;
+using UmaMusumeTournamentMaker.API.Domain.Entities;
+using UmaMusumeTournamentMaker.API.Domain.Enums;
 
-namespace UmaMusumeTournamerMaker.API.Application.Services
+namespace UmaMusumeTournamentMaker.API.Application.Services
 {
     public class TournamentService : ITournamentService
     {

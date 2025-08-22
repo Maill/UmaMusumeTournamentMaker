@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TournamentSystem.API.Infrastructure\UmaMusumeTournamerMaker.API.Infrastructure.csproj" />
+    <ProjectReference Include="..\TournamentSystem.API.Infrastructure\UmaMusumeTournamentMaker.API.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

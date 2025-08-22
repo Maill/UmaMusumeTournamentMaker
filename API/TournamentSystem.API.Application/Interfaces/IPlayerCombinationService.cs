@@ -1,5 +1,6 @@
-using UmaMusumeTournamerMaker.API.Domain.Entities;
-namespace UmaMusumeTournamerMaker.API.Application.Interfaces
+using UmaMusumeTournamentMaker.API.Domain.Entities;
+
+namespace UmaMusumeTournamentMaker.API.Application.Interfaces
 {
     /// <summary>
     /// Manages 3-player combinations for hybrid Swiss-Round-Robin tournaments

@@ -1,7 +1,7 @@
-using UmaMusumeTournamerMaker.API.Domain.Entities;
-using UmaMusumeTournamerMaker.API.Domain.Enums;
+using UmaMusumeTournamentMaker.API.Domain.Entities;
+using UmaMusumeTournamentMaker.API.Domain.Enums;
 
-namespace UmaMusumeTournamerMaker.API.Application.Strategies
+namespace UmaMusumeTournamentMaker.API.Application.Strategies
 {
     public interface ITournamentStrategy
     {

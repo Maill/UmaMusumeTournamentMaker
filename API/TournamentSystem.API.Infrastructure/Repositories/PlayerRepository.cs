@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using UmaMusumeTournamerMaker.API.Application.Interfaces.Repositories;
-using UmaMusumeTournamerMaker.API.Domain.Entities;
-using UmaMusumeTournamerMaker.API.Infrastructure.Data;
+using UmaMusumeTournamentMaker.API.Application.Interfaces.Repositories;
+using UmaMusumeTournamentMaker.API.Domain.Entities;
+using UmaMusumeTournamentMaker.API.Infrastructure.Data;
 
-namespace UmaMusumeTournamerMaker.API.Infrastructure.Repositories
+namespace UmaMusumeTournamentMaker.API.Infrastructure.Repositories
 {
     /// <summary>
     /// Repository implementation for Player-specific operations

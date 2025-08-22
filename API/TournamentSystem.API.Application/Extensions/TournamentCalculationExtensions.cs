@@ -1,7 +1,7 @@
-using UmaMusumeTournamerMaker.API.Application.Interfaces;
-using UmaMusumeTournamerMaker.API.Domain.Entities;
+using UmaMusumeTournamentMaker.API.Application.Interfaces;
+using UmaMusumeTournamentMaker.API.Domain.Entities;
 
-namespace UmaMusumeTournamerMaker.API.Application.Extensions
+namespace UmaMusumeTournamentMaker.API.Application.Extensions
 {
     /// <summary>
     /// Extension methods for tournament calculations and logic that don't require database access

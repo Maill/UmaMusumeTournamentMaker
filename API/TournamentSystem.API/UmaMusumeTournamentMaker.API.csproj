@@ -22,11 +22,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TournamentSystem.API.Application\UmaMusumeTournamerMaker.API.Application.csproj" />
-    <ProjectReference Include="..\TournamentSystem.API.Domain\UmaMusumeTournamerMaker.API.Domain.csproj" />
-    <ProjectReference Include="..\TournamentSystem.API.Infrastructure\UmaMusumeTournamerMaker.API.Infrastructure.csproj" />
-    <ProjectReference Include="..\TournamentSystem.API.PostgreSQLMigrations\UmaMusumeTournamerMaker.API.PostgreSQLMigrations.csproj" />
-    <ProjectReference Include="..\TournamentSystem.API.SQLiteMigrations\UmaMusumeTournamerMaker.API.SQLiteMigrations.csproj" />
+    <ProjectReference Include="..\TournamentSystem.API.Application\UmaMusumeTournamentMaker.API.Application.csproj" />
+    <ProjectReference Include="..\TournamentSystem.API.Domain\UmaMusumeTournamentMaker.API.Domain.csproj" />
+    <ProjectReference Include="..\TournamentSystem.API.Infrastructure\UmaMusumeTournamentMaker.API.Infrastructure.csproj" />
+    <ProjectReference Include="..\TournamentSystem.API.PostgreSQLMigrations\UmaMusumeTournamentMaker.API.PostgreSQLMigrations.csproj" />
+    <ProjectReference Include="..\TournamentSystem.API.SQLiteMigrations\UmaMusumeTournamentMaker.API.SQLiteMigrations.csproj" />
   </ItemGroup>
 
 </Project>

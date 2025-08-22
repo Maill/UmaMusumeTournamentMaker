@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
-using UmaMusumeTournamerMaker.API.Application.Interfaces;
+using UmaMusumeTournamentMaker.API.Application.Interfaces;
 
-namespace UmaMusumeTournamerMaker.API.Application.Services
+namespace UmaMusumeTournamentMaker.API.Application.Services
 {
     public class TournamentLogger : ITournamentLogger
     {

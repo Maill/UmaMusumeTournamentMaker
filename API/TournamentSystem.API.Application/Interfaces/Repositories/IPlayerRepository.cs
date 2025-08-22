@@ -1,5 +1,6 @@
-using UmaMusumeTournamerMaker.API.Domain.Entities;
-namespace UmaMusumeTournamerMaker.API.Application.Interfaces.Repositories
+using UmaMusumeTournamentMaker.API.Domain.Entities;
+
+namespace UmaMusumeTournamentMaker.API.Application.Interfaces.Repositories
 {
     /// <summary>
     /// Repository interface for Player-specific operations

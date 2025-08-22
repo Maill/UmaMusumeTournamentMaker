@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using UmaMusumeTournamerMaker.API.Infrastructure.Data;
+using UmaMusumeTournamentMaker.API.Infrastructure.Data;
 
 #nullable disable
 

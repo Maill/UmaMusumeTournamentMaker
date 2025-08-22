@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TournamentSystem.API.Application\UmaMusumeTournamerMaker.API.Application.csproj" />
-    <ProjectReference Include="..\TournamentSystem.API.Domain\UmaMusumeTournamerMaker.API.Domain.csproj" />
+    <ProjectReference Include="..\TournamentSystem.API.Application\UmaMusumeTournamentMaker.API.Application.csproj" />
+    <ProjectReference Include="..\TournamentSystem.API.Domain\UmaMusumeTournamentMaker.API.Domain.csproj" />
   </ItemGroup>
 </Project>

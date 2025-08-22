@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace UmaMusumeTournamerMaker.API.Application.DTOs
+namespace UmaMusumeTournamentMaker.API.Application.DTOs
 {
     /// <summary>
     /// DTO for starting the next round with all match winners

@@ -1,4 +1,4 @@
-namespace UmaMusumeTournamerMaker.API.Domain.Entities
+namespace UmaMusumeTournamentMaker.API.Domain.Entities
 {
     public class MatchPlayer
     {

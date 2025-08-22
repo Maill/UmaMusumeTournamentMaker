@@ -1,6 +1,5 @@
-using UmaMusumeTournamerMaker.API.Application.DTOs;
-
-namespace UmaMusumeTournamerMaker.API.Application.Interfaces
+using UmaMusumeTournamentMaker.API.Application.DTOs;
+namespace UmaMusumeTournamentMaker.API.Application.Interfaces
 {
     /// <summary>
     /// Service for broadcasting tournament updates to all connected clients

@@ -1,8 +1,8 @@
-using UmaMusumeTournamerMaker.API.Application.Interfaces;
-using UmaMusumeTournamerMaker.API.Domain.Entities;
-using UmaMusumeTournamerMaker.API.Domain.Enums;
+using UmaMusumeTournamentMaker.API.Application.Interfaces;
+using UmaMusumeTournamentMaker.API.Domain.Entities;
+using UmaMusumeTournamentMaker.API.Domain.Enums;
 
-namespace UmaMusumeTournamerMaker.API.Application.Strategies
+namespace UmaMusumeTournamentMaker.API.Application.Strategies
 {
     /// <summary>
     /// W.I.P : Will follow the same rules of the official Champions Meeting competition (https://gametora.com/umamusume/events/champions-meeting)

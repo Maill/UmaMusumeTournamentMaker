@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using UmaMusumeTournamerMaker.API.Application.DTOs;
-using UmaMusumeTournamerMaker.API.Application.Interfaces;
+using UmaMusumeTournamentMaker.API.Application.DTOs;
+using UmaMusumeTournamentMaker.API.Application.Interfaces;
 
-namespace UmaMusumeTournamerMaker.API.Presentation.Controllers
+namespace UmaMusumeTournamentMaker.API.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

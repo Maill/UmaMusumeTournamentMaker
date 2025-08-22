@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.SignalR;
-using UmaMusumeTournamerMaker.API.Application.DTOs;
-using UmaMusumeTournamerMaker.API.Application.Interfaces;
-using UmaMusumeTournamerMaker.API.Infrastructure.Hubs;
+using UmaMusumeTournamentMaker.API.Application.DTOs;
+using UmaMusumeTournamentMaker.API.Application.Interfaces;
+using UmaMusumeTournamentMaker.API.Infrastructure.Hubs;
 
-namespace UmaMusumeTournamerMaker.API.Infrastructure.Services
+namespace UmaMusumeTournamentMaker.API.Infrastructure.Services
 {
     /// <summary>
     /// Implementation of tournament broadcast service using SignalR

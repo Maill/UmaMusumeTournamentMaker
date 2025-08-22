@@ -1,8 +1,8 @@
-using UmaMusumeTournamerMaker.API.Application.Extensions;
-using UmaMusumeTournamerMaker.API.Application.Interfaces;
-using UmaMusumeTournamerMaker.API.Domain.Entities;
+using UmaMusumeTournamentMaker.API.Application.Extensions;
+using UmaMusumeTournamentMaker.API.Application.Interfaces;
+using UmaMusumeTournamentMaker.API.Domain.Entities;
 
-namespace UmaMusumeTournamerMaker.API.Application.Services
+namespace UmaMusumeTournamentMaker.API.Application.Services
 {
     /// <summary>
     /// Optimized service for player statistics operations using Unit of Work and batch operations

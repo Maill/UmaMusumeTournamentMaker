@@ -1,4 +1,4 @@
-namespace UmaMusumeTournamerMaker.API.Application.DTOs
+namespace UmaMusumeTournamentMaker.API.Application.DTOs
 {
     public class PlayerDto
     {

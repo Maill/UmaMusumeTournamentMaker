@@ -1,9 +1,9 @@
-using UmaMusumeTournamerMaker.API.Application.Extensions;
-using UmaMusumeTournamerMaker.API.Application.Interfaces;
-using UmaMusumeTournamerMaker.API.Domain.Entities;
-using UmaMusumeTournamerMaker.API.Domain.Enums;
+using UmaMusumeTournamentMaker.API.Application.Extensions;
+using UmaMusumeTournamentMaker.API.Application.Interfaces;
+using UmaMusumeTournamentMaker.API.Domain.Entities;
+using UmaMusumeTournamentMaker.API.Domain.Enums;
 
-namespace UmaMusumeTournamerMaker.API.Application.Strategies
+namespace UmaMusumeTournamentMaker.API.Application.Strategies
 {
     /// <summary>
     /// Hybrid Swiss-Round-Robin Tournament Strategy

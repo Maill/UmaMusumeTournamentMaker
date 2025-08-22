@@ -1,6 +1,6 @@
-using UmaMusumeTournamerMaker.API.Application.DTOs;
+using UmaMusumeTournamentMaker.API.Application.DTOs;
 
-namespace UmaMusumeTournamerMaker.API.Application.Interfaces
+namespace UmaMusumeTournamentMaker.API.Application.Interfaces
 {
     public interface ITournamentService
     {

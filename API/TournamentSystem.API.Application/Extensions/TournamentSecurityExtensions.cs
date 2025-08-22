@@ -1,7 +1,7 @@
-using UmaMusumeTournamerMaker.API.Application.Interfaces.Repositories;
-using UmaMusumeTournamerMaker.API.Domain.Entities;
+using UmaMusumeTournamentMaker.API.Application.Interfaces.Repositories;
+using UmaMusumeTournamentMaker.API.Domain.Entities;
 
-namespace UmaMusumeTournamerMaker.API.Application.Extensions
+namespace UmaMusumeTournamentMaker.API.Application.Extensions
 {
     /// <summary>
     /// Extension methods for tournament security and password validation

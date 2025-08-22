@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using UmaMusumeTournamerMaker.API.Application.Interfaces;
-using UmaMusumeTournamerMaker.API.Application.Interfaces.Repositories;
-using UmaMusumeTournamerMaker.API.Application.Services;
-using UmaMusumeTournamerMaker.API.Application.Strategies;
-using UmaMusumeTournamerMaker.API.Infrastructure.Data;
-using UmaMusumeTournamerMaker.API.Infrastructure.Hubs;
-using UmaMusumeTournamerMaker.API.Infrastructure.Repositories;
-using UmaMusumeTournamerMaker.API.Infrastructure.Services;
+using UmaMusumeTournamentMaker.API.Application.Interfaces;
+using UmaMusumeTournamentMaker.API.Application.Interfaces.Repositories;
+using UmaMusumeTournamentMaker.API.Application.Services;
+using UmaMusumeTournamentMaker.API.Application.Strategies;
+using UmaMusumeTournamentMaker.API.Infrastructure.Data;
+using UmaMusumeTournamentMaker.API.Infrastructure.Hubs;
+using UmaMusumeTournamentMaker.API.Infrastructure.Repositories;
+using UmaMusumeTournamentMaker.API.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

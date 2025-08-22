@@ -1,6 +1,6 @@
-using UmaMusumeTournamerMaker.API.Domain.Entities;
+using UmaMusumeTournamentMaker.API.Domain.Entities;
 
-namespace UmaMusumeTournamerMaker.API.Application.Extensions
+namespace UmaMusumeTournamentMaker.API.Application.Extensions
 {
     /// <summary>
     /// Extension methods for player statistics operations

@@ -11,6 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\TournamentSystem.API.Infrastructure\TournamentSystem.API.Infrastructure.csproj" />
+    <ProjectReference Include="..\TournamentSystem.API.Infrastructure\TournamentSystem.API.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

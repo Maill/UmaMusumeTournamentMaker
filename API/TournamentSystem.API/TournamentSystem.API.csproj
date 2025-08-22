@@ -22,9 +22,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\TournamentSystem.API.Application\TournamentSystem.API.Application.csproj" />
-    <ProjectReference Include="..\..\TournamentSystem.API.Domain\TournamentSystem.API.Domain.csproj" />
-    <ProjectReference Include="..\..\TournamentSystem.API.Infrastructure\TournamentSystem.API.Infrastructure.csproj" />
+    <ProjectReference Include="..\TournamentSystem.API.Application\TournamentSystem.API.Application.csproj" />
+    <ProjectReference Include="..\TournamentSystem.API.Domain\TournamentSystem.API.Domain.csproj" />
+    <ProjectReference Include="..\TournamentSystem.API.Infrastructure\TournamentSystem.API.Infrastructure.csproj" />
     <ProjectReference Include="..\TournamentSystem.API.PostgreSQLMigrations\TournamentSystem.API.PostgreSQLMigrations.csproj" />
     <ProjectReference Include="..\TournamentSystem.API.SQLiteMigrations\TournamentSystem.API.SQLiteMigrations.csproj" />
   </ItemGroup>

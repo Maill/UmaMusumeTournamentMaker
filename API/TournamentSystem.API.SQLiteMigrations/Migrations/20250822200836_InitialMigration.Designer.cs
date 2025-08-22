@@ -8,11 +8,11 @@ using TournamentSystem.API.Infrastructure.Data;
 
 #nullable disable
 
-namespace TournamentSystem.API.Migrations
+namespace TournamentSystem.API.SQLiteMigrations.Migrations
 {
     [DbContext(typeof(TournamentDbContext))]
-    [Migration("20250821182158_AddWinnerIdToTournament")]
-    partial class AddWinnerIdToTournament
+    [Migration("20250822200836_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using TournamentSystem.API.Application.Interfaces;
 
 namespace TournamentSystem.API.Application.Services

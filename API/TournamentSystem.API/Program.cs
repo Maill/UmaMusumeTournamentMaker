@@ -1,18 +1,37 @@
 using Microsoft.EntityFrameworkCore;
-using TournamentSystem.API.Infrastructure.Data;
 using TournamentSystem.API.Application.Interfaces;
 using TournamentSystem.API.Application.Services;
 using TournamentSystem.API.Application.Strategies;
 using TournamentSystem.API.Infrastructure.Repositories;
 using TournamentSystem.API.Infrastructure.Services;
-using TournamentSystem.API.Infrastructure.Hubs;
 using TournamentSystem.API.Application.Interfaces.Repositories;
+using TournamentSystem.API.Infrastructure.Data;
+using TournamentSystem.API.Infrastructure.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDbContext<TournamentDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Configure database based on environment
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+#if DEBUG
+var provider = builder.Configuration.GetValue("Provider", "SQLite");
+#else
+var provider = builder.Configuration.GetValue("Provider", "PostgreSQL");
+#endif
+builder.Services.AddDbContext<TournamentDbContext>(options => _ = provider switch
+{
+    "SQLite" => options.UseSqlite(connectionString, sqliteOptions => sqliteOptions.MigrationsAssembly("TournamentSystem.API.SQLiteMigrations")),
+    "PostgreSQL" => options.UseNpgsql(connectionString,
+            npgsqlOptions => {
+                npgsqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 3,
+                maxRetryDelay: TimeSpan.FromSeconds(5),
+                errorCodesToAdd: null);
+
+                npgsqlOptions.MigrationsAssembly("TournamentSystem.API.PostgreSQLMigrations");
+            }),
+    _ => throw new Exception($"Unsupported provider: {provider}")
+});
 
 builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
 builder.Services.AddScoped<IRoundRepository, RoundRepository>();
@@ -63,6 +82,11 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.MapFallbackToFile("index.html");
 
 app.UseCors();
 app.UseHttpsRedirection();

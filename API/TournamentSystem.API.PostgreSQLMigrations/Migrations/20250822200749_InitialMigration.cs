@@ -1,12 +1,13 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace TournamentSystem.API.Migrations
+namespace TournamentSystem.API.PostgreSQLMigrations.Migrations
 {
     /// <inheritdoc />
-    public partial class AddRoundType : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,15 +16,17 @@ namespace TournamentSystem.API.Migrations
                 name: "Tournaments",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    Type = table.Column<int>(type: "INTEGER", nullable: false),
-                    Status = table.Column<int>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    StartedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    CompletedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    CurrentRound = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    StartedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CompletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CurrentRound = table.Column<int>(type: "integer", nullable: false),
+                    Password = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    WinnerId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -34,16 +37,16 @@ namespace TournamentSystem.API.Migrations
                 name: "Players",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Wins = table.Column<int>(type: "INTEGER", nullable: false),
-                    Losses = table.Column<int>(type: "INTEGER", nullable: false),
-                    Points = table.Column<int>(type: "INTEGER", nullable: false),
-                    RoundWins = table.Column<int>(type: "INTEGER", nullable: false),
-                    RoundLosses = table.Column<int>(type: "INTEGER", nullable: false),
-                    Group = table.Column<string>(type: "TEXT", nullable: false),
-                    TournamentId = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Wins = table.Column<int>(type: "integer", nullable: false),
+                    Losses = table.Column<int>(type: "integer", nullable: false),
+                    Points = table.Column<int>(type: "integer", nullable: false),
+                    RoundWins = table.Column<int>(type: "integer", nullable: false),
+                    RoundLosses = table.Column<int>(type: "integer", nullable: false),
+                    Group = table.Column<string>(type: "text", nullable: false),
+                    TournamentId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -60,13 +63,13 @@ namespace TournamentSystem.API.Migrations
                 name: "Rounds",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    RoundNumber = table.Column<int>(type: "INTEGER", nullable: false),
-                    TournamentId = table.Column<int>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    IsCompleted = table.Column<bool>(type: "INTEGER", nullable: false),
-                    RoundType = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false, defaultValue: "Regular")
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RoundNumber = table.Column<int>(type: "integer", nullable: false),
+                    TournamentId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsCompleted = table.Column<bool>(type: "boolean", nullable: false),
+                    RoundType = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "Regular")
                 },
                 constraints: table =>
                 {
@@ -83,10 +86,10 @@ namespace TournamentSystem.API.Migrations
                 name: "PlayerOpponents",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    PlayerId = table.Column<int>(type: "INTEGER", nullable: false),
-                    OpponentId = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    PlayerId = table.Column<int>(type: "integer", nullable: false),
+                    OpponentId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -96,7 +99,7 @@ namespace TournamentSystem.API.Migrations
                         column: x => x.OpponentId,
                         principalTable: "Players",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_PlayerOpponents_Players_PlayerId",
                         column: x => x.PlayerId,
@@ -109,12 +112,12 @@ namespace TournamentSystem.API.Migrations
                 name: "Matches",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    RoundId = table.Column<int>(type: "INTEGER", nullable: false),
-                    WinnerId = table.Column<int>(type: "INTEGER", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CompletedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RoundId = table.Column<int>(type: "integer", nullable: false),
+                    WinnerId = table.Column<int>(type: "integer", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -137,10 +140,10 @@ namespace TournamentSystem.API.Migrations
                 name: "MatchPlayers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    MatchId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlayerId = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    MatchId = table.Column<int>(type: "integer", nullable: false),
+                    PlayerId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

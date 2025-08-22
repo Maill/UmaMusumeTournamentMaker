@@ -13,6 +13,7 @@ DEV_LOG.md
 PROJECT_OVERVIEW.md
 .claude
 appsettings.ProductionLocal.json
+tournament.db*
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

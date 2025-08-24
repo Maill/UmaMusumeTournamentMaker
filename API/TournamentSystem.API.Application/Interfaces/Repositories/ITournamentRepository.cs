@@ -13,6 +13,10 @@ namespace UmaMusumeTournamentMaker.API.Application.Interfaces.Repositories
         /// </summary>
         Task<List<Tournament>> GetAllAsync();
 
+        /// <summary>
+        /// Gets tournament by ID
+        /// </summary>
+        Task<Tournament?> GetByIdAsync(int id);
 
         /// <summary>
         /// Gets tournament by ID with players included
@@ -42,6 +46,6 @@ namespace UmaMusumeTournamentMaker.API.Application.Interfaces.Repositories
         /// <summary>
         /// Verifies tournament password for access control
         /// </summary>
-        Task<bool> VerifyPasswordAsync(int tournamentId, string? password);
+        Task VerifyPasswordAsync(int tournamentId, string? password);
     }
 }

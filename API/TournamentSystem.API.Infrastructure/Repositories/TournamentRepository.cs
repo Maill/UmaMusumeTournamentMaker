@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using UmaMusumeTournamentMaker.API.Application.Extensions;
 using UmaMusumeTournamentMaker.API.Application.Interfaces.Repositories;
 using UmaMusumeTournamentMaker.API.Domain.Entities;
 using UmaMusumeTournamentMaker.API.Infrastructure.Data;
@@ -22,8 +23,14 @@ namespace UmaMusumeTournamentMaker.API.Infrastructure.Repositories
         public async Task<List<Tournament>> GetAllAsync()
         {
             return await _context.Tournaments
-                .WithPlayers()
+                //.WithPlayers()
                 .ToListAsync();
+        }
+
+        public async Task<Tournament?> GetByIdAsync(int id)
+        {
+            return await _context.Tournaments
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
 
         public async Task<Tournament?> GetByIdWithPlayersAsync(int id)
@@ -65,16 +72,10 @@ namespace UmaMusumeTournamentMaker.API.Infrastructure.Repositories
             return true;
         }
 
-        public async Task<bool> VerifyPasswordAsync(int tournamentId, string? password)
+        public async Task VerifyPasswordAsync(int tournamentId, string? password)
         {
             var tournament = await _context.Tournaments.FindAsync(tournamentId);
-            if (tournament == null)
-                return false;
-
-            if (string.IsNullOrEmpty(tournament.Password))
-                return true;
-
-            return tournament.Password == password;
+            tournament.ValidatePassword(password);
         }
     }
 }

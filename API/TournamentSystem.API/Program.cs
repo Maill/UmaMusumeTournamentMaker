@@ -29,6 +29,8 @@ builder.Services.AddDbContext<TournamentDbContext>(options => _ = provider switc
                 maxRetryDelay: TimeSpan.FromSeconds(5),
                 errorCodesToAdd: null);
 
+                //npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+
                 npgsqlOptions.MigrationsAssembly("TournamentSystem.API.PostgreSQLMigrations");
             }),
     _ => throw new Exception($"Unsupported provider: {provider}")
@@ -53,6 +55,9 @@ builder.Services.AddScoped<ITournamentService, TournamentService>();
 // Register SignalR and broadcast service
 builder.Services.AddSignalR();
 builder.Services.AddScoped<ITournamentBroadcastService, TournamentBroadcastService>();
+
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<ICacheService, CacheService>();
 
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>

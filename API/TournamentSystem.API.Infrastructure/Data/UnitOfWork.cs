@@ -33,6 +33,11 @@ namespace UmaMusumeTournamentMaker.API.Infrastructure.Data
             Players = players;
         }
 
+        public IExecutionStrategy GetStrategy()
+        {
+            return _context.Database.CreateExecutionStrategy();
+        }
+
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();

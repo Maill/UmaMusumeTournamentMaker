@@ -31,6 +31,24 @@ namespace UmaMusumeTournamentMaker.API.Application.Extensions
         }
 
         /// <summary>
+        /// Maps a Tournament entity to a simple TournamentDto
+        /// </summary>
+        public static TournamentDto ToSimpleDto(this Tournament tournament)
+        {
+            return new TournamentDto
+            {
+                Id = tournament.Id,
+                Name = tournament.Name,
+                Type = tournament.Type,
+                Status = tournament.Status,
+                CreatedAt = tournament.CreatedAt,
+                StartedAt = tournament.StartedAt,
+                CompletedAt = tournament.CompletedAt,
+                CurrentRound = tournament.CurrentRound
+            };
+        }
+
+        /// <summary>
         /// Maps a Player entity to PlayerDto
         /// </summary>
         public static PlayerDto ToDto(this Player player)
@@ -90,6 +108,14 @@ namespace UmaMusumeTournamentMaker.API.Application.Extensions
         public static List<TournamentDto> ToDto(this IEnumerable<Tournament> tournaments)
         {
             return tournaments.Select(t => t.ToDto()).ToList();
+        }
+
+        /// <summary>
+        /// Maps a collection of Tournament entities to a simple TournamentDto list
+        /// </summary>
+        public static List<TournamentDto> ToSimpleDto(this IEnumerable<Tournament> tournaments)
+        {
+            return tournaments.Select(t => t.ToSimpleDto()).ToList();
         }
 
         /// <summary>

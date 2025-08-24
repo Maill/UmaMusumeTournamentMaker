@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { TournamentService } from './tournament.service';
-import { TournamentWebSocketService, TournamentUpdate } from './tournament-websocket.service';
-import { PasswordService } from './password.service';
-import { Tournament, Player, Match, MatchResult } from '../models/tournament.model';
 import { HubConnectionState } from '@microsoft/signalr';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { Match, MatchResult, Player, Tournament } from '../models/tournament.model';
+import { PasswordService } from './password.service';
+import { TournamentUpdate, TournamentWebSocketService } from './tournament-websocket.service';
+import { TournamentService } from './tournament.service';
 
 // Extended Player interface for optimistic updates
 interface OptimisticPlayer extends Player {
@@ -12,7 +12,7 @@ interface OptimisticPlayer extends Player {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class RealTimeTournamentService {
   private readonly currentTournamentSubject = new BehaviorSubject<Tournament | null>(null);
@@ -53,27 +53,27 @@ export class RealTimeTournamentService {
       case 'PlayerAdded':
         this.handlePlayerAdded(update.data, currentTournament);
         break;
-        
+
       case 'PlayerRemoved':
         this.handlePlayerRemoved(update.data, currentTournament);
         break;
-        
+
       case 'MatchUpdated':
         this.handleMatchUpdated(update.data, currentTournament);
         break;
-        
+
       case 'TournamentStarted':
         this.handleTournamentStarted(update.data);
         break;
-        
+
       case 'NewRound':
         this.handleNewRound(update.data);
         break;
-        
+
       case 'TournamentUpdated':
         this.handleTournamentUpdated(update.data);
         break;
-        
+
       case 'WinnerSelected':
         this.handleWinnerSelected(update.data, currentTournament);
         break;
@@ -82,16 +82,16 @@ export class RealTimeTournamentService {
 
   private handlePlayerAdded(player: Player, currentTournament: Tournament): void {
     console.log('WebSocket PlayerAdded received:', player);
-    
+
     // Remove any temporary players with the same name (optimistic updates)
-    const playersWithoutTemp = currentTournament.players.filter(p => 
-      !((p as OptimisticPlayer).isTemporary && p.name === player.name)
+    const playersWithoutTemp = currentTournament.players.filter(
+      (p) => !((p as OptimisticPlayer).isTemporary && p.name === player.name)
     );
-    
+
     // Add the real player
     const updatedTournament = {
       ...currentTournament,
-      players: [...playersWithoutTemp, player]
+      players: [...playersWithoutTemp, player],
     };
     this.currentTournamentSubject.next(updatedTournament);
   }
@@ -99,7 +99,7 @@ export class RealTimeTournamentService {
   private handlePlayerRemoved(playerId: number, currentTournament: Tournament): void {
     const updatedTournament = {
       ...currentTournament,
-      players: currentTournament.players.filter(p => p.id !== playerId)
+      players: currentTournament.players.filter((p) => p.id !== playerId),
     };
     this.currentTournamentSubject.next(updatedTournament);
   }
@@ -107,23 +107,23 @@ export class RealTimeTournamentService {
   private handleMatchUpdated(match: Match, currentTournament: Tournament): void {
     const updatedTournament = {
       ...currentTournament,
-      rounds: currentTournament.rounds.map(round => ({
+      rounds: currentTournament.rounds.map((round) => ({
         ...round,
-        matches: round.matches.map(m => m.id === match.id ? match : m)
-      }))
+        matches: round.matches.map((m) => (m.id === match.id ? match : m)),
+      })),
     };
-    
+
     // Also update player statistics if the match has a winner
     if (match.winnerId) {
       // Find updated players from the match data and update them
-      const updatedPlayers = currentTournament.players.map(player => {
-        const matchPlayer = match.players.find(mp => mp.id === player.id);
+      const updatedPlayers = currentTournament.players.map((player) => {
+        const matchPlayer = match.players.find((mp) => mp.id === player.id);
         return matchPlayer ? { ...player, ...matchPlayer } : player;
       });
-      
+
       updatedTournament.players = updatedPlayers;
     }
-    
+
     this.currentTournamentSubject.next(updatedTournament);
   }
 
@@ -133,21 +133,21 @@ export class RealTimeTournamentService {
 
     const updatedTournament = {
       ...currentTournament,
-      rounds: currentTournament.rounds.map(round => ({
+      rounds: currentTournament.rounds.map((round) => ({
         ...round,
-        matches: round.matches.map(match => {
+        matches: round.matches.map((match) => {
           if (match.id === matchId) {
             // Find the winner player from the match players
-            const winner = match.players.find(p => p.id === winnerId);
-            return { 
-              ...match, 
+            const winner = match.players.find((p) => p.id === winnerId);
+            return {
+              ...match,
               winnerId: winnerId,
-              winner: winner ? { ...winner } : undefined
+              winner: winner ? { ...winner } : undefined,
             };
           }
           return match;
-        })
-      }))
+        }),
+      })),
     };
 
     this.currentTournamentSubject.next(updatedTournament);
@@ -166,7 +166,10 @@ export class RealTimeTournamentService {
     this.currentTournamentSubject.next(tournament);
   }
 
-  private handleWinnerSelected(winnerData: { matchId: number, winnerId: number }, currentTournament: Tournament): void {
+  private handleWinnerSelected(
+    winnerData: { matchId: number; winnerId: number },
+    currentTournament: Tournament
+  ): void {
     console.log('WebSocket WinnerSelected received:', winnerData);
     this.updateLocalMatchWinner(winnerData.matchId, winnerData.winnerId);
   }
@@ -181,13 +184,13 @@ export class RealTimeTournamentService {
 
       // Start WebSocket connection
       await this.webSocketService.startConnection();
-      
+
       // Load tournament data
-      const tournament = await this.tournamentService.getTournamentWithCurrentRound(tournamentId).toPromise();
-      
+      const tournament = await this.tournamentService.getTournament(tournamentId).toPromise();
+
       if (tournament) {
         this.currentTournamentSubject.next(tournament);
-        
+
         // Join tournament group for real-time updates
         await this.webSocketService.joinTournament(tournamentId);
       }
@@ -220,12 +223,12 @@ export class RealTimeTournamentService {
         winRate: 0,
         totalMatches: 0,
         roundMatches: 0,
-        isTemporary: true
+        isTemporary: true,
       };
 
       const optimisticTournament = {
         ...currentTournament,
-        players: [...currentTournament.players, tempPlayer]
+        players: [...currentTournament.players, tempPlayer],
       };
       this.currentTournamentSubject.next(optimisticTournament);
 
@@ -233,39 +236,44 @@ export class RealTimeTournamentService {
       console.log('Making API call to add player:', playerName);
       await this.tournamentService.addPlayer(tournamentId, { name: playerName }).toPromise();
       console.log('API call successful, waiting for WebSocket event');
-      
+
       // Success! WebSocket should provide the real data with the actual player ID
       // Set a fallback timeout in case WebSocket event doesn't arrive
       setTimeout(() => {
         const currentState = this.currentTournamentSubject.value;
         if (currentState) {
           // Check if we still have the temporary player (WebSocket event didn't arrive)
-          const hasTemp = currentState.players.some(p => (p as OptimisticPlayer).isTemporary && p.name === playerName);
+          const hasTemp = currentState.players.some(
+            (p) => (p as OptimisticPlayer).isTemporary && p.name === playerName
+          );
           if (hasTemp) {
-            console.warn('WebSocket PlayerAdded event may not have arrived, cleaning up temporary player');
+            console.warn(
+              'WebSocket PlayerAdded event may not have arrived, cleaning up temporary player'
+            );
             // Remove the temporary player
             const cleanedTournament = {
               ...currentState,
-              players: currentState.players.filter(p => !((p as OptimisticPlayer).isTemporary && p.name === playerName))
+              players: currentState.players.filter(
+                (p) => !((p as OptimisticPlayer).isTemporary && p.name === playerName)
+              ),
             };
             this.currentTournamentSubject.next(cleanedTournament);
           }
         }
       }, 2000); // 2 second fallback
-
     } catch (error) {
       console.error('Error adding player:', error);
-      
+
       // Revert optimistic update on error
       const currentTournament = this.currentTournamentSubject.value;
       if (currentTournament) {
         const revertedTournament = {
           ...currentTournament,
-          players: currentTournament.players.filter(p => !(p as OptimisticPlayer).isTemporary)
+          players: currentTournament.players.filter((p) => !(p as OptimisticPlayer).isTemporary),
         };
         this.currentTournamentSubject.next(revertedTournament);
       }
-      
+
       this.errorSubject.next('Failed to add player');
       throw error;
     }
@@ -279,30 +287,29 @@ export class RealTimeTournamentService {
     if (!currentTournament) throw new Error('No tournament loaded');
 
     // Store removed player for potential rollback
-    const removedPlayer = currentTournament.players.find(p => p.id === playerId);
+    const removedPlayer = currentTournament.players.find((p) => p.id === playerId);
     if (!removedPlayer) throw new Error('Player not found');
-    
+
     try {
       // Optimistic update
       const optimisticTournament = {
         ...currentTournament,
-        players: currentTournament.players.filter(p => p.id !== playerId)
+        players: currentTournament.players.filter((p) => p.id !== playerId),
       };
       this.currentTournamentSubject.next(optimisticTournament);
 
       // Make API call
       await this.tournamentService.removePlayer(tournamentId, playerId).toPromise();
-
     } catch (error) {
       console.error('Error removing player:', error);
-      
+
       // Revert optimistic update on error
       const revertedTournament = {
         ...currentTournament,
-        players: [...currentTournament.players, removedPlayer]
+        players: [...currentTournament.players, removedPlayer],
       };
       this.currentTournamentSubject.next(revertedTournament);
-      
+
       this.errorSubject.next('Failed to remove player');
       throw error;
     }
@@ -341,9 +348,15 @@ export class RealTimeTournamentService {
   /**
    * Broadcast winner selection to all users (no database update)
    */
-  public async broadcastWinnerSelection(tournamentId: number, matchId: number, winnerId: number): Promise<void> {
+  public async broadcastWinnerSelection(
+    tournamentId: number,
+    matchId: number,
+    winnerId: number
+  ): Promise<void> {
     try {
-      await this.tournamentService.broadcastWinnerSelection(tournamentId, matchId, winnerId).toPromise();
+      await this.tournamentService
+        .broadcastWinnerSelection(tournamentId, matchId, winnerId)
+        .toPromise();
       // Also update local state immediately
       this.updateLocalMatchWinner(matchId, winnerId);
     } catch (error) {

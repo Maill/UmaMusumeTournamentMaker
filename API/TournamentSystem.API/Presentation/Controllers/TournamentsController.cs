@@ -42,20 +42,6 @@ namespace UmaMusumeTournamentMaker.API.Presentation.Controllers
 
                 return Ok(tournament);
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        [HttpGet("{id}/current-round")]
-        public async Task<ActionResult<TournamentDto>> GetTournamentWithCurrentRound(int id)
-        {
-            try
-            {
-                var tournament = await _tournamentService.GetTournamentWithCurrentRoundAsync(id);
-                return Ok(tournament);
-            }
             catch (ArgumentException ex)
             {
                 return NotFound(new { message = ex.Message });

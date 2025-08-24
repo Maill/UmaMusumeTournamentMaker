@@ -29,6 +29,8 @@ namespace UmaMusumeTournamentMaker.API.Application.Interfaces
         /// </summary>
         IPlayerRepository Players { get; }
 
+        IExecutionStrategy GetStrategy();
+
         /// <summary>
         /// Saves all changes to the database in a single transaction
         /// </summary>

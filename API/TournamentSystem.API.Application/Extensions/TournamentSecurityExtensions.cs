@@ -10,7 +10,7 @@ namespace UmaMusumeTournamentMaker.API.Application.Extensions
     public static class TournamentSecurityExtensions
     {
         /// <summary>
-        /// Validates tournament password and returns the tournament if valid
+        /// Validates tournament password and returns the tournament with rounds and matches if valid
         /// Throws UnauthorizedAccessException if password is invalid
         /// Throws ArgumentException if tournament is not found
         /// </summary>
@@ -19,47 +19,23 @@ namespace UmaMusumeTournamentMaker.API.Application.Extensions
             int tournamentId,
             string? password)
         {
-            if (!await repository.VerifyPasswordAsync(tournamentId, password))
-                throw new UnauthorizedAccessException("Invalid tournament password");
-
-            var tournament = await repository.GetByIdWithPlayersAsync(tournamentId);
-            if (tournament == null)
-                throw new ArgumentException("Tournament not found");
-
-            return tournament;
-        }
-
-        /// <summary>
-        /// Validates tournament password and returns the tournament with rounds and matches if valid
-        /// Throws UnauthorizedAccessException if password is invalid
-        /// Throws ArgumentException if tournament is not found
-        /// </summary>
-        public static async Task<Tournament> ValidatePasswordAndGetTournamentWithRoundsAsync(
-            this ITournamentRepository repository,
-            int tournamentId,
-            string? password)
-        {
-            if (!await repository.VerifyPasswordAsync(tournamentId, password))
-                throw new UnauthorizedAccessException("Invalid tournament password");
-
             var tournament = await repository.GetByIdWithCompleteDetailsAsync(tournamentId);
+            tournament.ValidatePassword(password);
+
+            return tournament!;
+        }
+
+        public static void ValidatePassword(
+            this Tournament? tournament,
+            string? password)
+        {
             if (tournament == null)
                 throw new ArgumentException("Tournament not found");
 
-            return tournament;
-        }
+            if (string.IsNullOrEmpty(tournament.Password) || tournament.Password == password)
+                return;
 
-        /// <summary>
-        /// Validates tournament password only
-        /// Throws UnauthorizedAccessException if password is invalid
-        /// </summary>
-        public static async Task ValidatePasswordAsync(
-            this ITournamentRepository repository,
-            int tournamentId,
-            string? password)
-        {
-            if (!await repository.VerifyPasswordAsync(tournamentId, password))
-                throw new UnauthorizedAccessException("Invalid tournament password");
+            throw new UnauthorizedAccessException("Invalid tournament password");
         }
     }
 }

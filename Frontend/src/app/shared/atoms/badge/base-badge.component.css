@@ -1,0 +1,94 @@
+.badge {
+  display: inline-block;
+  padding: 0.25em 0.4em;
+  font-size: 0.75em;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.25rem;
+}
+
+.badge-pill {
+  padding-right: 0.6em;
+  padding-left: 0.6em;
+  border-radius: 10rem;
+}
+
+/* Badge variants */
+.badge-primary {
+  color: #fff;
+  background-color: #007bff;
+}
+
+.badge-secondary {
+  color: #fff;
+  background-color: #6c757d;
+}
+
+.badge-success {
+  color: #fff;
+  background-color: #28a745;
+}
+
+.badge-danger {
+  color: #fff;
+  background-color: #dc3545;
+}
+
+.badge-warning {
+  color: #212529;
+  background-color: #ffc107;
+}
+
+.badge-info {
+  color: #fff;
+  background-color: #17a2b8;
+}
+
+.badge-light {
+  color: #212529;
+  background-color: #f8f9fa;
+}
+
+.badge-dark {
+  color: #fff;
+  background-color: #343a40;
+}
+
+/* Dismissible badges */
+.badge-dismissible {
+  padding-right: 1.25em;
+  position: relative;
+}
+
+.badge-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.25em 0.4em;
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  font-weight: 700;
+  line-height: 1;
+  color: inherit;
+  opacity: 0.5;
+  cursor: pointer;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.badge-close:hover {
+  opacity: 0.75;
+}
+
+.badge-close:focus {
+  outline: 0;
+  opacity: 1;
+}
+
+/* Empty badge handling */
+.badge:empty {
+  display: none;
+}

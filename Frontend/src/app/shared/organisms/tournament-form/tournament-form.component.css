@@ -1,0 +1,201 @@
+.tournament-form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Form Header */
+.form-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.form-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 0.5rem 0;
+}
+
+.form-subtitle {
+  font-size: 1rem;
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Tournament Form */
+.tournament-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Type Description */
+.type-description {
+  margin: -0.5rem 0 0 0;
+}
+
+.description-card {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.description-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+.description-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* Input group styling */
+.tournament-form ::ng-deep .input-wrapper {
+  margin-bottom: 0;
+}
+
+.tournament-form ::ng-deep .select-wrapper {
+  margin-bottom: 0;
+}
+
+/* Focus states */
+.tournament-form ::ng-deep .form-control:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.tournament-form ::ng-deep .form-select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Error display adjustments */
+.tournament-form-container ::ng-deep .error-display {
+  margin: 0 0 1.5rem 0;
+}
+
+/* Loading state */
+.tournament-form.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .tournament-form-container {
+    padding: 1.5rem;
+    margin: 1rem;
+    border-radius: 0.375rem;
+  }
+  
+  .form-title {
+    font-size: 1.75rem;
+  }
+  
+  .form-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .tournament-form {
+    gap: 1.25rem;
+  }
+  
+  .description-card {
+    padding: 0.75rem;
+  }
+  
+  .description-card h3 {
+    font-size: 1rem;
+  }
+  
+  .description-card p {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .tournament-form-container {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+  
+  .form-header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-title {
+    font-size: 1.5rem;
+  }
+  
+  .tournament-form {
+    gap: 1rem;
+  }
+  
+  .form-actions {
+    gap: 0.5rem;
+  }
+}
+
+/* Animation for type description */
+.description-card {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* High contrast support */
+@media (prefers-contrast: high) {
+  .tournament-form-container {
+    border: 2px solid #000;
+  }
+  
+  .description-card {
+    border: 2px solid #6c757d;
+    background-color: #fff;
+  }
+  
+  .form-title {
+    color: #000;
+  }
+}
+
+/* Print styles */
+@media print {
+  .tournament-form-container {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+  
+  .form-actions {
+    display: none;
+  }
+}

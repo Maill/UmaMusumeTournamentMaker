@@ -1,0 +1,324 @@
+.match-table-container {
+  background: #fff;
+  border-radius: 0.5rem;
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+}
+
+/* Table Header */
+.table-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 1px solid #dee2e6;
+  padding: 1.5rem;
+}
+
+.header-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.table-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.round-status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.match-count {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* Loading Container */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 2rem;
+  background-color: #f8f9fa;
+}
+
+/* Table Container */
+.table-container {
+  overflow-x: auto;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.matches-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.matches-table th {
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  text-align: left;
+  padding: 1rem 0.75rem;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+/* Column widths */
+.match-col { width: 80px; }
+.players-col { min-width: 200px; }
+.status-col { width: 120px; }
+.winner-col { width: 150px; }
+.actions-col { width: 200px; }
+.completed-col { width: 120px; }
+
+/* Table Summary */
+.table-summary {
+  background-color: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  padding: 1rem 1.5rem;
+}
+
+.summary-stats {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #495057;
+}
+
+/* Progress Bar */
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffc107 0%, #28a745 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease-in-out;
+}
+
+.progress-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #495057;
+  min-width: 80px;
+  text-align: right;
+}
+
+/* Next Round Section */
+.next-round-section {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  border-top: 1px solid #c3e6cb;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.next-round-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.next-round-text h4 {
+  margin: 0 0 0.25rem 0;
+  color: #155724;
+  font-size: 1.1rem;
+}
+
+.next-round-text p {
+  margin: 0;
+  color: #155724;
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+
+/* Instructions */
+.instructions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background-color: #d1ecf1;
+  border-top: 1px solid #bee5eb;
+  color: #0c5460;
+}
+
+.instructions p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #6c757d;
+  background-color: #f8f9fa;
+}
+
+.empty-state h3 {
+  margin: 1rem 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Badge overrides */
+.match-table-container ::ng-deep .badge {
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .header-info {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  
+  .table-title {
+    justify-content: center;
+  }
+  
+  .round-status {
+    justify-content: center;
+  }
+  
+  .summary-stats {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-header {
+    padding: 1rem;
+  }
+  
+  .table-title {
+    font-size: 1.25rem;
+  }
+  
+  .summary-stats {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .progress-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .progress-text {
+    text-align: center;
+    min-width: auto;
+  }
+  
+  .next-round-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+  
+  .next-round-info {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .instructions {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .table-header {
+    padding: 0.75rem;
+  }
+  
+  .table-summary {
+    padding: 0.75rem;
+  }
+  
+  .next-round-section,
+  .instructions {
+    padding: 1rem;
+  }
+  
+  .empty-state {
+    padding: 3rem 1rem;
+  }
+  
+  /* Hide table on mobile, use card layout from match-row component */
+  .matches-table {
+    display: none;
+  }
+  
+  .matches-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+/* Animation for progress bar */
+.progress-fill {
+  animation: progressSlide 0.5s ease-out;
+}
+
+@keyframes progressSlide {
+  from {
+    width: 0;
+  }
+}
+
+/* Hover effects for interactive elements */
+.next-round-section:hover {
+  background: linear-gradient(135deg, #c3e6cb 0%, #b8dabc 100%);
+}
+
+.instructions:hover {
+  background-color: #bee5eb;
+}

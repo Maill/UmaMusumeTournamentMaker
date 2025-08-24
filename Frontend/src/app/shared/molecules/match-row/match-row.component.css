@@ -1,0 +1,119 @@
+/* Match Row Styling */
+.match-row {
+  transition: background-color 0.2s ease-in-out;
+}
+
+.match-row:hover {
+  background-color: #f8f9fa;
+}
+
+.match-row.completed {
+  background-color: #d4edda;
+}
+
+.match-row.completed:hover {
+  background-color: #c3e6cb;
+}
+
+.match-row.pending {
+  background-color: #fff3cd;
+}
+
+.match-row.pending:hover {
+  background-color: #ffeaa7;
+}
+
+/* Cell Content Styling */
+.match-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+/* Players List */
+.players-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.player-name {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.player-name.winner {
+  background-color: #d4edda;
+  color: #155724;
+  font-weight: 600;
+}
+
+.player-name.loser {
+  background-color: #f8d7da;
+  color: #721c24;
+  opacity: 0.8;
+}
+
+.vs-separator {
+  font-weight: 600;
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+/* Winner Display */
+.winner-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.winner-name {
+  font-weight: 600;
+  color: #28a745;
+}
+
+.no-winner {
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Completed Time */
+.completed-time {
+  font-size: 0.85rem;
+  color: #6c757d;
+  cursor: help;
+}
+
+/* Badge Overrides */
+.match-row ::ng-deep .badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  justify-content: center;
+  min-width: 90px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .players-list {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .vs-separator {
+    display: none;
+  }
+  
+  .winner-display {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}

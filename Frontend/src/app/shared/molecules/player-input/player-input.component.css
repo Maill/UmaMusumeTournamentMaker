@@ -1,0 +1,75 @@
+.player-input-wrapper {
+  width: 100%;
+}
+
+.input-group {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  width: 100%;
+}
+
+.input-group > app-input {
+  position: relative;
+  flex: 1 1 auto;
+  width: 1%;
+  min-width: 0;
+}
+
+.input-group-append {
+  margin-left: -1px;
+  display: flex;
+}
+
+.input-group-append app-button {
+  position: relative;
+  z-index: 2;
+}
+
+/* Ensure input and button heights match */
+.input-group app-input ::ng-deep .form-control {
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.input-group-append app-button ::ng-deep .btn {
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+  height: calc(1.5em + 0.75rem + 2px); /* Match input height */
+  display: flex;
+  align-items: center;
+}
+
+/* Focus states */
+.input-group app-input ::ng-deep .form-control:focus {
+  z-index: 3;
+}
+
+.input-group-append app-button ::ng-deep .btn:focus {
+  z-index: 3;
+}
+
+/* Responsive design */
+@media (max-width: 576px) {
+  .input-group {
+    flex-direction: column;
+  }
+  
+  .input-group > app-input {
+    margin-bottom: 0.5rem;
+  }
+  
+  .input-group app-input ::ng-deep .form-control {
+    border-radius: 0.25rem;
+  }
+  
+  .input-group-append {
+    margin-left: 0;
+  }
+  
+  .input-group-append app-button ::ng-deep .btn {
+    border-radius: 0.25rem;
+    width: 100%;
+  }
+}

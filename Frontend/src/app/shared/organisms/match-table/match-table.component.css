@@ -62,6 +62,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.9rem;
+  table-layout: fixed;
 }
 
 .matches-table th {
@@ -74,13 +75,26 @@
   white-space: nowrap;
 }
 
-/* Column widths */
-.match-col { width: 80px; }
-.players-col { min-width: 200px; }
-.status-col { width: 120px; }
-.winner-col { width: 150px; }
-.actions-col { width: 200px; }
-.completed-col { width: 120px; }
+/* Column widths - Distribute across full width */
+.match-col {
+  width: 12%;
+}
+.players-col {
+  width: 35%;
+}
+.status-col {
+  width: 15%;
+}
+.winner-col {
+  width: 20%;
+}
+.actions-col {
+  width: 18%;
+}
+.completed-col {
+  width: 0%;
+  display: none;
+}
 
 /* Table Summary */
 .table-summary {
@@ -216,15 +230,15 @@
     align-items: stretch;
     text-align: center;
   }
-  
+
   .table-title {
     justify-content: center;
   }
-  
+
   .round-status {
     justify-content: center;
   }
-  
+
   .summary-stats {
     gap: 1rem;
   }
@@ -234,38 +248,38 @@
   .table-header {
     padding: 1rem;
   }
-  
+
   .table-title {
     font-size: 1.25rem;
   }
-  
+
   .summary-stats {
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
   }
-  
+
   .progress-container {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .progress-text {
     text-align: center;
     min-width: auto;
   }
-  
+
   .next-round-section {
     flex-direction: column;
     text-align: center;
     gap: 1.5rem;
   }
-  
+
   .next-round-info {
     flex-direction: column;
     gap: 0.75rem;
   }
-  
+
   .instructions {
     flex-direction: column;
     text-align: center;
@@ -277,25 +291,25 @@
   .table-header {
     padding: 0.75rem;
   }
-  
+
   .table-summary {
     padding: 0.75rem;
   }
-  
+
   .next-round-section,
   .instructions {
     padding: 1rem;
   }
-  
+
   .empty-state {
     padding: 3rem 1rem;
   }
-  
+
   /* Hide table on mobile, use card layout from match-row component */
   .matches-table {
     display: none;
   }
-  
+
   .matches-table tbody {
     display: flex;
     flex-direction: column;

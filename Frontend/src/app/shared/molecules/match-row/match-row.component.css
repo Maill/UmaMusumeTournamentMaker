@@ -1,36 +1,50 @@
-/* Match Row Styling */
-.match-row {
+:host {
   transition: background-color 0.2s ease-in-out;
 }
 
-.match-row:hover {
+:host:hover {
   background-color: #f8f9fa;
 }
 
-.match-row.completed {
+:host(.completed) {
   background-color: #d4edda;
 }
 
-.match-row.completed:hover {
+:host(.completed):hover {
   background-color: #c3e6cb;
 }
 
-.match-row.pending {
+:host(.pending) {
   background-color: #fff3cd;
 }
 
-.match-row.pending:hover {
+:host(.pending):hover {
   background-color: #ffeaa7;
 }
 
-/* Cell Content Styling */
-.match-label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #495057;
+/* Cell styling */
+:host td {
+  padding: 0.75rem;
+  vertical-align: middle;
+  border-top: 1px solid #dee2e6;
 }
 
-/* Players List */
+.match-number {
+  font-weight: 600;
+  color: #495057;
+  text-align: center;
+  width: 80px;
+}
+
+.match-label {
+  font-size: 0.9rem;
+}
+
+/* Players column */
+.match-players {
+  min-width: 200px;
+}
+
 .players-list {
   display: flex;
   align-items: center;
@@ -66,7 +80,17 @@
   font-size: 0.85rem;
 }
 
-/* Winner Display */
+/* Status column */
+.match-status {
+  text-align: center;
+  width: 120px;
+}
+
+/* Winner column */
+.match-winner {
+  min-width: 150px;
+}
+
 .winner-display {
   display: flex;
   align-items: center;
@@ -83,15 +107,25 @@
   font-style: italic;
 }
 
-/* Completed Time */
+/* Actions column */
+.match-actions {
+  min-width: 200px;
+}
+
+/* Completed at column */
+.match-completed {
+  width: 120px;
+  text-align: center;
+}
+
 .completed-time {
   font-size: 0.85rem;
   color: #6c757d;
   cursor: help;
 }
 
-/* Badge Overrides */
-.match-row ::ng-deep .badge {
+/* Badge overrides */
+:host ::ng-deep .badge {
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -99,21 +133,81 @@
   min-width: 90px;
 }
 
-/* Responsive Design */
+/* Responsive design */
 @media (max-width: 768px) {
+  :host td {
+    padding: 0.5rem 0.25rem;
+    font-size: 0.9rem;
+  }
+
   .players-list {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.25rem;
   }
-  
+
   .vs-separator {
     display: none;
   }
-  
+
+  .match-actions {
+    min-width: 150px;
+  }
+
   .winner-display {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.25rem;
+  }
+}
+
+@media (max-width: 576px) {
+  :host {
+    display: block;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  :host td {
+    display: block;
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+    padding: 0.75rem;
+  }
+
+  :host td:last-child {
+    border-bottom: none;
+  }
+
+  :host td::before {
+    content: attr(data-label) ': ';
+    font-weight: 600;
+    display: inline-block;
+    width: 100px;
+  }
+
+  .match-number::before {
+    content: 'Match ';
+  }
+
+  .match-players::before {
+    content: 'Players ';
+  }
+
+  .match-status::before {
+    content: 'Status ';
+  }
+
+  .match-winner::before {
+    content: 'Winner ';
+  }
+
+  .match-actions::before {
+    content: 'Actions ';
+  }
+
+  .match-completed::before {
+    content: 'Completed ';
   }
 }

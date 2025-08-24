@@ -201,12 +201,12 @@
   .page-title {
     font-size: 2rem;
   }
-  
+
   .tournaments-grid {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1rem;
   }
-  
+
   .tournaments-stats {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }
@@ -220,39 +220,39 @@
     gap: 1.5rem;
     padding: 1.5rem 1rem;
   }
-  
+
   .header-actions {
     align-self: center;
   }
-  
+
   .page-content {
     padding: 1.5rem 1rem;
   }
-  
+
   .page-title {
     font-size: 1.75rem;
     justify-content: center;
   }
-  
+
   .page-subtitle {
     font-size: 1rem;
   }
-  
+
   .tournaments-filters {
     flex-direction: column;
     gap: 1rem;
     align-items: stretch;
     text-align: center;
   }
-  
+
   .tournaments-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .tournaments-stats {
     grid-template-columns: 1fr;
   }
-  
+
   .stat-card {
     justify-content: center;
     text-align: center;
@@ -263,36 +263,36 @@
   .header-content {
     padding: 1rem;
   }
-  
+
   .page-content {
     padding: 1rem;
   }
-  
+
   .page-title {
     font-size: 1.5rem;
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .tournaments-section {
     gap: 1.5rem;
   }
-  
+
   .stat-card {
     padding: 1rem;
     flex-direction: column;
     text-align: center;
     gap: 0.75rem;
   }
-  
+
   .empty-content h2 {
     font-size: 1.5rem;
   }
-  
+
   .empty-content p {
     font-size: 1rem;
   }
-  
+
   .empty-actions {
     flex-direction: column;
     align-items: center;
@@ -334,7 +334,7 @@
   .stat-card {
     border: 2px solid #000;
   }
-  
+
   .tournaments-filters {
     border: 2px solid #000;
   }
@@ -346,11 +346,11 @@
     position: static;
     box-shadow: none;
   }
-  
+
   .header-actions {
     display: none;
   }
-  
+
   .tournaments-grid {
     grid-template-columns: 1fr;
     gap: 1rem;

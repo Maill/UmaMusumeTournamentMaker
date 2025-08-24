@@ -1,10 +1,10 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { StandingsRowComponent } from '../../molecules/standings-row/standings-row.component';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { BaseBadgeComponent } from '../../atoms/badge/base-badge.component';
 import { BaseIconComponent, IconName } from '../../atoms/icon/base-icon.component';
 import { LoadingSpinnerComponent } from '../../atoms/spinner/loading-spinner.component';
 import { ErrorDisplayComponent } from '../../molecules/error-display/error-display.component';
-import { BaseBadgeComponent } from '../../atoms/badge/base-badge.component';
+import { StandingsRowComponent } from '../../molecules/standings-row/standings-row.component';
 import { Player } from '../../types/tournament.types';
 
 export interface StandingsTableData {
@@ -27,7 +27,7 @@ export type StandingsViewMode = 'current' | 'final' | 'live';
     BaseIconComponent,
     LoadingSpinnerComponent,
     ErrorDisplayComponent,
-    BaseBadgeComponent
+    BaseBadgeComponent,
   ],
   template: `
     <div class="standings-table-container">
@@ -39,16 +39,17 @@ export type StandingsViewMode = 'current' | 'final' | 'live';
               [name]="getTitleIcon()"
               size="md"
               [color]="getTitleColor()"
-              [ariaLabel]="getAriaLabel()">
+              [ariaLabel]="getAriaLabel()"
+            >
             </app-icon>
             {{ getTableTitle() }}
           </h3>
-          
+
           <div class="standings-meta">
             <app-badge [variant]="getStatusVariant()">
               {{ getStatusText() }}
             </app-badge>
-            
+
             <span class="player-count">
               {{ data.players.length }} {{ data.players.length === 1 ? 'Player' : 'Players' }}
             </span>
@@ -57,148 +58,131 @@ export type StandingsViewMode = 'current' | 'final' | 'live';
 
         <!-- Champion Banner (Tournament Complete) -->
         @if (data.tournamentComplete && data.winnerId && data.winnerName) {
-          <div class="champion-banner">
-            <div class="champion-content">
-              <app-icon
-                name="trophy"
-                size="lg"
-                color="warning"
-                ariaLabel="Tournament Champion">
-              </app-icon>
-              <div class="champion-text">
-                <h4>🏆 Tournament Champion</h4>
-                <p class="champion-name">{{ data.winnerName }}</p>
-                <p class="champion-subtitle">Congratulations to our tournament winner!</p>
-              </div>
+        <div class="champion-banner">
+          <div class="champion-content">
+            <app-icon name="trophy" size="lg" color="warning" ariaLabel="Tournament Champion">
+            </app-icon>
+            <div class="champion-text">
+              <h4>🏆 Tournament Champion</h4>
+              <p class="champion-name">{{ data.winnerName }}</p>
+              <p class="champion-subtitle">Congratulations to our tournament winner!</p>
             </div>
           </div>
+        </div>
         }
       </div>
 
       <!-- Error Display -->
       @if (data.error) {
-        <app-error-display
-          [message]="data.error"
-          type="error"
-          [dismissible]="true"
-          (dismissed)="onErrorDismiss()">
-        </app-error-display>
+      <app-error-display
+        [message]="data.error"
+        type="error"
+        [dismissible]="true"
+        (dismissed)="onErrorDismiss()"
+      >
+      </app-error-display>
       }
 
       <!-- Loading State -->
       @if (data.isLoading) {
-        <div class="loading-container">
-          <app-loading-spinner
-            size="lg"
-            variant="primary"
-            loadingText="Loading standings...">
-          </app-loading-spinner>
-        </div>
+      <div class="loading-container">
+        <app-loading-spinner size="lg" variant="primary" loadingText="Loading standings...">
+        </app-loading-spinner>
+      </div>
       } @else {
-        <!-- Standings Table -->
-        @if (data.players.length > 0) {
-          <div class="table-container">
-            <table class="standings-table">
-              <thead>
-                <tr>
-                  <th class="rank-col">Rank</th>
-                  <th class="player-col">Player</th>
-                  <th class="points-col">Points</th>
-                  <th class="wins-col">Wins</th>
-                  <th class="losses-col">Losses</th>
-                  <th class="winrate-col">Win Rate</th>
-                  @if (showGamesPlayed) {
-                    <th class="games-col">Games</th>
-                  }
-                </tr>
-              </thead>
-              <tbody>
-                @for (player of getPlayersWithRankings(); track player.id) {
-                  <app-standings-row
-                    [player]="player"
-                    [showGamesPlayed]="showGamesPlayed"
-                    [highlightTop3]="highlightTop3">
-                  </app-standings-row>
-                }
-              </tbody>
-            </table>
-          </div>
+      <!-- Standings Table -->
+      @if (data.players.length > 0) {
+      <div class="table-container">
+        <table class="standings-table">
+          <thead>
+            <tr>
+              <th class="rank-col">Rank</th>
+              <th class="player-col">Player</th>
+              <th class="points-col">Points</th>
+              <th class="wins-col">Wins</th>
+              <th class="losses-col">Losses</th>
+              <th class="winrate-col">Win Rate</th>
+              @if (showGamesPlayed) {
+              <th class="games-col">Games</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (player of getPlayersWithRankings(); track player.id) {
+            <tr app-standings-row
+              [player]="player"
+              [showGamesPlayed]="showGamesPlayed"
+              [highlightTop3]="highlightTop3"
+            >
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
-          <!-- Table Summary -->
-          <div class="table-summary">
-            <div class="summary-stats">
-              <div class="stat-group">
-                <div class="stat-item">
-                  <app-icon name="users" size="sm" color="primary"></app-icon>
-                  <span class="stat-label">Total Players:</span>
-                  <span class="stat-value">{{ data.players.length }}</span>
-                </div>
-                
-                <div class="stat-item">
-                  <app-icon name="target" size="sm" color="success"></app-icon>
-                  <span class="stat-label">Total Games:</span>
-                  <span class="stat-value">{{ getTotalGamesPlayed() }}</span>
-                </div>
-              </div>
+      <!-- Table Summary -->
+      <div class="table-summary">
+        <div class="summary-stats">
+          <div class="stat-group">
+            <div class="stat-item">
+              <app-icon name="users" size="sm" color="primary"></app-icon>
+              <span class="stat-label">Total Players:</span>
+              <span class="stat-value">{{ data.players.length }}</span>
+            </div>
 
-              <div class="stat-group">
-                <div class="stat-item">
-                  <app-icon name="star" size="sm" color="warning"></app-icon>
-                  <span class="stat-label">Highest Score:</span>
-                  <span class="stat-value">{{ getHighestPoints() }} pts</span>
-                </div>
-                
-                <div class="stat-item">
-                  <app-icon name="trending-up" size="sm" color="info"></app-icon>
-                  <span class="stat-label">Avg Win Rate:</span>
-                  <span class="stat-value">{{ getAverageWinRate() }}%</span>
-                </div>
-              </div>
+            <div class="stat-item">
+              <app-icon name="target" size="sm" color="success"></app-icon>
+              <span class="stat-label">Total Games:</span>
+              <span class="stat-value">{{ getTotalGamesPlayed() }}</span>
             </div>
           </div>
 
-          <!-- Top 3 Podium (Tournament Complete) -->
-          @if (data.tournamentComplete && showPodium && data.players.length >= 3) {
-            <div class="podium-section">
-              <h4 class="podium-title">🏆 Final Podium</h4>
-              <div class="podium">
-                @for (player of getTopThreePlayers(); track player.id; let i = $index) {
-                  <div class="podium-place" [class]="getPodiumClass(i)">
-                    <div class="podium-rank">
-                      <app-icon
-                        [name]="getPodiumIcon(i)"
-                        size="lg"
-                        [color]="getPodiumColor(i)">
-                      </app-icon>
-                    </div>
-                    <div class="podium-player">
-                      <span class="podium-name">{{ player.name }}</span>
-                      <span class="podium-points">{{ player.points }} pts</span>
-                      <span class="podium-record">{{ player.wins }}W - {{ player.losses }}L</span>
-                    </div>
-                  </div>
-                }
-              </div>
+          <div class="stat-group">
+            <div class="stat-item">
+              <app-icon name="star" size="sm" color="warning"></app-icon>
+              <span class="stat-label">Highest Score:</span>
+              <span class="stat-value">{{ getHighestPoints() }} pts</span>
             </div>
+
+            <div class="stat-item">
+              <app-icon name="trending-up" size="sm" color="info"></app-icon>
+              <span class="stat-label">Avg Win Rate:</span>
+              <span class="stat-value">{{ getAverageWinRate() }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top 3 Podium (Tournament Complete) -->
+      @if (data.tournamentComplete && showPodium && data.players.length >= 3) {
+      <div class="podium-section">
+        <h4 class="podium-title">🏆 Final Podium</h4>
+        <div class="podium">
+          @for (player of getTopThreePlayers(); track player.id; let i = $index) {
+          <div class="podium-place" [class]="getPodiumClass(i)">
+            <div class="podium-rank">
+              <app-icon [name]="getPodiumIcon(i)" size="lg" [color]="getPodiumColor(i)"> </app-icon>
+            </div>
+            <div class="podium-player">
+              <span class="podium-name">{{ player.name }}</span>
+              <span class="podium-points">{{ player.points }} pts</span>
+              <span class="podium-record">{{ player.wins }}W - {{ player.losses }}L</span>
+            </div>
+          </div>
           }
-
-        } @else {
-          <!-- Empty State -->
-          <div class="empty-state">
-            <app-icon
-              name="users"
-              size="xl"
-              color="secondary"
-              ariaLabel="No players">
-            </app-icon>
-            <h3>No Players</h3>
-            <p>{{ getEmptyStateMessage() }}</p>
-          </div>
-        }
-      }
+        </div>
+      </div>
+      } } @else {
+      <!-- Empty State -->
+      <div class="empty-state">
+        <app-icon name="users" size="xl" color="secondary" ariaLabel="No players"> </app-icon>
+        <h3>No Players</h3>
+        <p>{{ getEmptyStateMessage() }}</p>
+      </div>
+      } }
     </div>
   `,
-  styleUrl: './standings-table.component.css'
+  styleUrl: './standings-table.component.css',
 })
 export class StandingsTableComponent {
   @Input() data!: StandingsTableData;
@@ -216,7 +200,7 @@ export class StandingsTableComponent {
 
   getTableTitle(): string {
     if (this.title) return this.title;
-    
+
     switch (this.viewMode) {
       case 'final':
         return 'Final Standings';
@@ -251,7 +235,9 @@ export class StandingsTableComponent {
   }
 
   getAriaLabel(): string {
-    return this.data.tournamentComplete ? 'Final tournament standings' : 'Current tournament standings';
+    return this.data.tournamentComplete
+      ? 'Final tournament standings'
+      : 'Current tournament standings';
   }
 
   getPlayersWithRankings(): any[] {
@@ -267,7 +253,7 @@ export class StandingsTableComponent {
       rank: index + 1,
       isChampion: index === 0 && this.data.tournamentComplete,
       isRunnerUp: index === 1 && this.data.tournamentComplete,
-      isThirdPlace: index === 2 && this.data.tournamentComplete
+      isThirdPlace: index === 2 && this.data.tournamentComplete,
     }));
   }
 
@@ -280,7 +266,7 @@ export class StandingsTableComponent {
   }
 
   getHighestPoints(): number {
-    return this.data.players.length > 0 ? Math.max(...this.data.players.map(p => p.points)) : 0;
+    return this.data.players.length > 0 ? Math.max(...this.data.players.map((p) => p.points)) : 0;
   }
 
   getAverageWinRate(): number {
@@ -314,12 +300,12 @@ export class StandingsTableComponent {
   // Utility methods for external use
   getPlayerByRank(rank: number): Player | null {
     const rankedPlayers = this.getPlayersWithRankings();
-    return rankedPlayers.find(p => p.rank === rank) || null;
+    return rankedPlayers.find((p) => p.rank === rank) || null;
   }
 
   getPlayerRank(playerId: number): number {
     const rankedPlayers = this.getPlayersWithRankings();
-    const player = rankedPlayers.find(p => p.id === playerId);
+    const player = rankedPlayers.find((p) => p.id === playerId);
     return player?.rank || 0;
   }
 }

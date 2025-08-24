@@ -122,13 +122,27 @@
 }
 
 /* Column widths */
-.rank-col { width: 80px; }
-.player-col { min-width: 200px; }
-.points-col { width: 100px; }
-.wins-col { width: 80px; }
-.losses-col { width: 80px; }
-.winrate-col { width: 120px; }
-.games-col { width: 80px; }
+.rank-col {
+  width: 80px;
+}
+.player-col {
+  min-width: 160px;
+}
+.points-col {
+  width: 100px;
+}
+.wins-col {
+  width: 100px;
+}
+.losses-col {
+  width: 100px;
+}
+.winrate-col {
+  width: 120px;
+}
+.games-col {
+  width: 80px;
+}
 
 /* Table Summary */
 .table-summary {
@@ -279,21 +293,21 @@
     align-items: stretch;
     text-align: center;
   }
-  
+
   .table-title {
     justify-content: center;
   }
-  
+
   .standings-meta {
     justify-content: center;
   }
-  
+
   .champion-content {
     flex-direction: column;
     text-align: center;
     gap: 1rem;
   }
-  
+
   .summary-stats {
     grid-template-columns: 1fr;
   }
@@ -303,37 +317,37 @@
   .table-header {
     padding: 1rem;
   }
-  
+
   .table-title {
     font-size: 1.25rem;
   }
-  
+
   .champion-banner {
     padding: 1rem;
   }
-  
+
   .champion-text h4 {
     font-size: 1.1rem;
   }
-  
+
   .champion-name {
     font-size: 1.25rem;
   }
-  
+
   .podium {
     grid-template-columns: 1fr;
     gap: 0.75rem;
   }
-  
+
   .podium-place.first-place {
     transform: none;
     order: 1;
   }
-  
+
   .podium-place.second-place {
     order: 2;
   }
-  
+
   .podium-place.third-place {
     order: 3;
   }
@@ -343,35 +357,35 @@
   .table-header {
     padding: 0.75rem;
   }
-  
+
   .table-summary {
     padding: 1rem;
   }
-  
+
   .podium-section {
     padding: 1.5rem 1rem;
   }
-  
+
   .empty-state {
     padding: 3rem 1rem;
   }
-  
+
   .stat-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.25rem;
   }
-  
+
   .stat-value {
     margin-left: 0;
     font-size: 1.1rem;
   }
-  
+
   /* Hide table on mobile, use card layout from standings-row component */
   .standings-table {
     display: none;
   }
-  
+
   .standings-table tbody {
     display: flex;
     flex-direction: column;

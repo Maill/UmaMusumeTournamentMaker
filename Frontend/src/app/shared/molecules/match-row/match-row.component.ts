@@ -11,11 +11,15 @@ export interface MatchRowData extends Match {
 }
 
 @Component({
-  selector: 'app-match-row',
+  selector: 'tr[app-match-row]',
   standalone: true,
   imports: [CommonModule, BaseBadgeComponent, BaseIconComponent, WinnerSelectorComponent],
+  host: {
+    'class': 'match-row',
+    '[class.completed]': 'isCompleted()',
+    '[class.pending]': '!isCompleted()'
+  },
   template: `
-    <tr class="match-row" [class.completed]="isCompleted()" [class.pending]="!isCompleted()">
       <!-- Match Number -->
       <td class="match-number">
         <span class="match-label">#{{ match.matchNumber }}</span>
@@ -101,7 +105,6 @@ export interface MatchRowData extends Match {
           </span>
         </td>
       }
-    </tr>
   `,
   styleUrl: './match-row.component.css'
 })

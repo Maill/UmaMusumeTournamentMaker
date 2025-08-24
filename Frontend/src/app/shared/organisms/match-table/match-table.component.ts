@@ -109,12 +109,12 @@ export interface MatchTableState {
               </thead>
               <tbody>
                 @for (match of getMatchesWithNumbers(); track match.id) {
-                  <app-match-row
+                  <tr app-match-row
                     [match]="match"
                     [allowWinnerChange]="data.canManage"
                     [showCompletedAt]="showCompletedTime"
                     (winnerChanged)="onWinnerChange($event)">
-                  </app-match-row>
+                  </tr>
                 }
               </tbody>
             </table>

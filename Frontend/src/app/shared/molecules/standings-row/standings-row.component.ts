@@ -12,17 +12,17 @@ export interface StandingsRowData extends Player {
 }
 
 @Component({
-  selector: 'app-standings-row',
+  selector: 'tr[app-standings-row]',
   standalone: true,
   imports: [CommonModule, BaseBadgeComponent, BaseIconComponent],
+  host: {
+    'class': 'standings-row',
+    '[class.champion]': 'player.isChampion',
+    '[class.runner-up]': 'player.isRunnerUp',
+    '[class.third-place]': 'player.isThirdPlace',
+    '[class.highlight]': 'isHighlighted()'
+  },
   template: `
-    <tr 
-      class="standings-row" 
-      [class.champion]="player.isChampion"
-      [class.runner-up]="player.isRunnerUp" 
-      [class.third-place]="player.isThirdPlace"
-      [class.highlight]="isHighlighted()">
-      
       <!-- Rank -->
       <td class="rank-cell">
         <div class="rank-display">
@@ -114,7 +114,6 @@ export interface StandingsRowData extends Player {
           </div>
         </td>
       }
-    </tr>
   `,
   styleUrl: './standings-row.component.css'
 })

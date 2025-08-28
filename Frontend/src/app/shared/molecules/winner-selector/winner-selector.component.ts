@@ -1,8 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BaseSelectComponent, SelectOption } from '../../atoms/select/base-select.component';
 import { BaseIconComponent } from '../../atoms/icon/base-icon.component';
+import { BaseSelectComponent, SelectOption } from '../../atoms/select/base-select.component';
 import { MatchPlayer } from '../../types/tournament.types';
 
 export interface WinnerSelectorData {
@@ -22,42 +22,43 @@ export interface WinnerSelectorData {
       <div class="selector-container">
         <app-select
           [options]="playerOptions"
-          [placeholder]="placeholder"
           [disabled]="disabled"
           [error]="error"
           [label]="label"
-          (valueChange)="onWinnerChange($event)">
+          (valueChange)="onWinnerChange($event)"
+        >
         </app-select>
-        
+
         <div class="winner-indicator">
           @if (selectedWinnerId && !disabled) {
-            <app-icon
+          <!--<app-icon
               name="check"
               size="sm"
               color="success"
               [ariaLabel]="'Winner selected: ' + getSelectedPlayerName()">
             </app-icon>
-            <span class="winner-text">{{ getSelectedPlayerName() }}</span>
+          <span class="winner-text">{{ getSelectedPlayerName() }}</span>-->
           } @else if (selectedWinnerId && disabled) {
-            <app-icon
-              name="trophy"
-              size="sm"
-              color="warning"
-              [ariaLabel]="'Match winner: ' + getSelectedPlayerName()">
-            </app-icon>
-            <span class="winner-text winner-final">{{ getSelectedPlayerName() }}</span>
+          <app-icon
+            name="trophy"
+            size="sm"
+            color="warning"
+            [ariaLabel]="'Match winner: ' + getSelectedPlayerName()"
+          >
+          </app-icon>
+          <span class="winner-text winner-final">{{ getSelectedPlayerName() }}</span>
           }
         </div>
       </div>
-      
+
       @if (showHelp && !error) {
-        <div class="selector-help">
-          {{ helpText }}
-        </div>
+      <div class="selector-help">
+        {{ helpText }}
+      </div>
       }
     </div>
   `,
-  styleUrl: './winner-selector.component.css'
+  styleUrl: './winner-selector.component.css',
 })
 export class WinnerSelectorComponent {
   @Input() matchId: number = 0;
@@ -65,53 +66,58 @@ export class WinnerSelectorComponent {
   @Input() selectedWinnerId: number | null = null;
   @Input() disabled: boolean = false;
   @Input() error: string | null = null;
-  @Input() label: string = 'Select Winner';
+  //@Input() label: string = 'Select Winner';
+  @Input() label: string = ' ';
   @Input() placeholder: string = 'Choose match winner...';
   @Input() helpText: string = 'Select the player who won this match';
   @Input() showHelp: boolean = false;
 
-  @Output() winnerChanged = new EventEmitter<{ matchId: number; winnerId: number | null; playerName?: string }>();
+  @Output() winnerChanged = new EventEmitter<{
+    matchId: number;
+    winnerId: number | null;
+    playerName?: string;
+  }>();
 
   get playerOptions(): SelectOption<number>[] {
     const options: SelectOption<number>[] = [];
-    
-    // Add empty option for clearing selection
-    if (!this.disabled) {
+
+    // Add placeholder option when no winner is selected
+    if (!this.selectedWinnerId) {
       options.push({
-        value: 0, // Use 0 for null/empty since select needs a value
+        value: 0, // Use 0 for no selection
         label: this.placeholder,
-        disabled: false
+        disabled: false,
       });
     }
-    
+
     // Add player options
-    this.players.forEach(player => {
+    this.players.forEach((player) => {
       options.push({
         value: player.id,
         label: player.name,
-        disabled: false
+        disabled: false,
       });
     });
-    
+
     return options;
   }
 
   onWinnerChange(winnerId: number): void {
-    // Convert 0 back to null for empty selection
+    // Convert 0 back to null for placeholder selection
     const actualWinnerId = winnerId === 0 ? null : winnerId;
-    const selectedPlayer = this.players.find(p => p.id === actualWinnerId);
-    
-    this.selectedWinnerId = actualWinnerId;
+    const selectedPlayer = this.players.find((p) => p.id === actualWinnerId);
+
+    // Don't modify the input property - let parent handle the state
     this.winnerChanged.emit({
       matchId: this.matchId,
       winnerId: actualWinnerId,
-      playerName: selectedPlayer?.name
+      playerName: selectedPlayer?.name,
     });
   }
 
   getSelectedPlayerName(): string {
     if (!this.selectedWinnerId) return '';
-    const selectedPlayer = this.players.find(p => p.id === this.selectedWinnerId);
+    const selectedPlayer = this.players.find((p) => p.id === this.selectedWinnerId);
     return selectedPlayer?.name || '';
   }
 
@@ -125,7 +131,11 @@ export class WinnerSelectorComponent {
 
   clearSelection(): void {
     if (this.canChangeWinner()) {
-      this.onWinnerChange(0); // Use 0 to trigger null assignment
+      this.winnerChanged.emit({
+        matchId: this.matchId,
+        winnerId: null,
+        playerName: undefined,
+      });
     }
   }
 }

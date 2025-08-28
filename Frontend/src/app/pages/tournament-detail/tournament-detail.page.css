@@ -1,17 +1,20 @@
 .tournament-detail-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: #e9ecef;
 }
 
 /* Page Loading */
 .page-loading {
   position: fixed;
-  top: 0;
+  top: 60px;
   left: 0;
   right: 0;
   bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: rgba(255, 255, 255, 0.9);
-  z-index: 9999;
+  z-index: 100;
 }
 
 /* Page Error */
@@ -79,18 +82,6 @@
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-}
-
-.winner-badge {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-  border: 1px solid #ffc107;
-  border-radius: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-weight: 600;
-  color: #856404;
 }
 
 .header-actions {
@@ -179,26 +170,26 @@
   .tournament-sections {
     gap: 1.5rem;
   }
-  
+
   .tournament-body {
     padding: 1.5rem;
   }
-  
+
   .header-main {
     flex-direction: column;
     align-items: stretch;
     text-align: center;
     gap: 1.5rem;
   }
-  
+
   .tournament-name {
     font-size: 2rem;
   }
-  
+
   .tournament-meta {
     justify-content: center;
   }
-  
+
   .header-actions {
     align-self: center;
   }
@@ -209,34 +200,34 @@
   .header-main {
     padding: 1rem;
   }
-  
+
   .tournament-body {
     padding: 1rem;
   }
-  
+
   .tournament-name {
     font-size: 1.75rem;
     white-space: normal;
   }
-  
+
   .tournament-meta {
     flex-direction: column;
     align-items: center;
     gap: 0.75rem;
   }
-  
+
   .winner-badge {
     justify-content: center;
   }
-  
+
   .history-section {
     padding: 1.5rem;
   }
-  
+
   .rounds-history {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }
-  
+
   .error-actions {
     flex-direction: column;
     align-items: center;
@@ -248,29 +239,29 @@
   .header-main {
     padding: 0.75rem;
   }
-  
+
   .tournament-body {
     padding: 0.75rem;
   }
-  
+
   .tournament-name {
     font-size: 1.5rem;
   }
-  
+
   .history-title {
     font-size: 1.25rem;
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .history-section {
     padding: 1rem;
   }
-  
+
   .rounds-history {
     grid-template-columns: 1fr;
   }
-  
+
   .page-error {
     padding: 2rem 1rem;
   }
@@ -311,11 +302,11 @@
   .tournament-header {
     border-bottom: 2px solid #000;
   }
-  
+
   .tournament-section {
     border: 2px solid #000;
   }
-  
+
   .winner-badge {
     border: 2px solid #ffc107;
   }
@@ -327,15 +318,15 @@
     position: static;
     box-shadow: none;
   }
-  
+
   .header-actions {
     display: none;
   }
-  
+
   .tournament-sections {
     gap: 1rem;
   }
-  
+
   .tournament-section {
     box-shadow: none;
     border: 1px solid #000;

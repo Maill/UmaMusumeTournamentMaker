@@ -36,6 +36,7 @@ export interface Round {
   roundNumber: number;
   matches: Match[];
   isCompleted: boolean;
+  roundType: string;
 }
 
 export interface Tournament {

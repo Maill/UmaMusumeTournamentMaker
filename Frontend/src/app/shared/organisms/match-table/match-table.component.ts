@@ -1,12 +1,12 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatchRowComponent } from '../../molecules/match-row/match-row.component';
-import { BaseIconComponent } from '../../atoms/icon/base-icon.component';
-import { LoadingSpinnerComponent } from '../../atoms/spinner/loading-spinner.component';
-import { ErrorDisplayComponent } from '../../molecules/error-display/error-display.component';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { BaseBadgeComponent } from '../../atoms/badge/base-badge.component';
 import { BaseButtonComponent } from '../../atoms/button/base-button.component';
-import { Match, Round } from '../../types/tournament.types';
+import { BaseIconComponent, IconName } from '../../atoms/icon/base-icon.component';
+import { LoadingSpinnerComponent } from '../../atoms/spinner/loading-spinner.component';
+import { ErrorDisplayComponent } from '../../molecules/error-display/error-display.component';
+import { MatchRowComponent } from '../../molecules/match-row/match-row.component';
+import { Round } from '../../types/tournament.types';
 
 export interface MatchTableData {
   round: Round;
@@ -32,7 +32,7 @@ export interface MatchTableState {
     LoadingSpinnerComponent,
     ErrorDisplayComponent,
     BaseBadgeComponent,
-    BaseButtonComponent
+    BaseButtonComponent,
   ],
   template: `
     <div class="match-table-container">
@@ -40,28 +40,24 @@ export interface MatchTableState {
       <div class="table-header">
         <div class="header-info">
           <h3 class="table-title">
-            <app-icon
-              name="target"
-              size="md"
-              color="primary"
-              ariaLabel="Matches">
+            <app-icon [name]="getTitleIcon()" size="md" color="primary" ariaLabel="Matches">
             </app-icon>
-            Round {{ data.round.roundNumber }} Matches
+            {{ getTitleText() }}
           </h3>
-          
+
           <div class="round-status">
             @if (data.round.isCompleted) {
-              <app-badge variant="success">
-                <app-icon name="check" size="xs"></app-icon>
-                Round Complete
-              </app-badge>
+            <app-badge variant="success">
+              <app-icon name="check" size="xs"></app-icon>
+              Round Complete
+            </app-badge>
             } @else {
-              <app-badge variant="warning">
-                <app-icon name="clock" size="xs"></app-icon>
-                In Progress
-              </app-badge>
+            <app-badge variant="warning">
+              <app-icon name="clock" size="xs"></app-icon>
+              In Progress
+            </app-badge>
             }
-            
+
             <span class="match-count">
               {{ getCompletedMatchesCount() }} / {{ data.round.matches.length }} matches complete
             </span>
@@ -71,143 +67,120 @@ export interface MatchTableState {
 
       <!-- Error Display -->
       @if (data.error) {
-        <app-error-display
-          [message]="data.error"
-          type="error"
-          [dismissible]="true"
-          (dismissed)="onErrorDismiss()">
-        </app-error-display>
+      <app-error-display
+        [message]="data.error"
+        type="error"
+        [dismissible]="true"
+        (dismissed)="onErrorDismiss()"
+      >
+      </app-error-display>
       }
 
       <!-- Loading State -->
       @if (data.isLoading) {
-        <div class="loading-container">
-          <app-loading-spinner
-            size="lg"
-            variant="primary"
-            loadingText="Loading matches...">
-          </app-loading-spinner>
-        </div>
+      <div class="loading-container">
+        <app-loading-spinner size="lg" variant="primary" loadingText="Loading matches...">
+        </app-loading-spinner>
+      </div>
       } @else {
-        <!-- Matches Table -->
-        @if (data.round.matches.length > 0) {
-          <div class="table-container">
-            <table class="matches-table">
-              <thead>
-                <tr>
-                  <th class="match-col">Match</th>
-                  <th class="players-col">Players</th>
-                  <th class="status-col">Status</th>
-                  <th class="winner-col">Winner</th>
-                  @if (data.canManage) {
-                    <th class="actions-col">Actions</th>
-                  }
-                  @if (showCompletedTime) {
-                    <th class="completed-col">Completed</th>
-                  }
-                </tr>
-              </thead>
-              <tbody>
-                @for (match of getMatchesWithNumbers(); track match.id) {
-                  <tr app-match-row
-                    [match]="match"
-                    [allowWinnerChange]="data.canManage"
-                    [showCompletedAt]="showCompletedTime"
-                    (winnerChanged)="onWinnerChange($event)">
-                  </tr>
-                }
-              </tbody>
-            </table>
+      <!-- Matches Table -->
+      @if (data.round.matches.length > 0) {
+      <div class="table-container">
+        <table class="matches-table">
+          <thead>
+            <tr>
+              <th class="match-col">Match</th>
+              <th class="players-col">Players</th>
+              <th class="status-col">Status</th>
+              <th class="winner-col">Winner</th>
+              @if (data.canManage) {
+              <th class="actions-col">Actions</th>
+              } @if (showCompletedTime) {
+              <th class="completed-col">Completed</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (match of getMatchesWithNumbers(); track match.id) {
+            <tr
+              app-match-row
+              [match]="match"
+              [allowWinnerChange]="data.canManage"
+              [showCompletedAt]="showCompletedTime"
+              (winnerChanged)="onWinnerChange($event)"
+            ></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table Summary -->
+      <div class="table-summary">
+        <div class="summary-stats">
+          <div class="stat-item">
+            <app-icon name="check" size="sm" color="success"></app-icon>
+            <span>{{ getCompletedMatchesCount() }} Completed</span>
           </div>
 
-          <!-- Table Summary -->
-          <div class="table-summary">
-            <div class="summary-stats">
-              <div class="stat-item">
-                <app-icon name="check" size="sm" color="success"></app-icon>
-                <span>{{ getCompletedMatchesCount() }} Completed</span>
-              </div>
-              
-              <div class="stat-item">
-                <app-icon name="clock" size="sm" color="warning"></app-icon>
-                <span>{{ getPendingMatchesCount() }} Pending</span>
-              </div>
-            </div>
-
-            <!-- Progress Bar -->
-            <div class="progress-container">
-              <div class="progress-bar">
-                <div 
-                  class="progress-fill" 
-                  [style.width.%]="getProgressPercentage()">
-                </div>
-              </div>
-              <span class="progress-text">{{ getProgressPercentage() }}% Complete</span>
-            </div>
+          <div class="stat-item">
+            <app-icon name="clock" size="sm" color="warning"></app-icon>
+            <span>{{ getPendingMatchesCount() }} Pending</span>
           </div>
+        </div>
 
-          <!-- Next Round Action -->
-          @if (data.canManage && state.canStartNextRound) {
-            <div class="next-round-section">
-              <div class="next-round-info">
-                <app-icon
-                  name="chevron-right"
-                  size="md"
-                  color="primary">
-                </app-icon>
-                <div class="next-round-text">
-                  <h4>Round Complete!</h4>
-                  <p>All matches have been finished. Ready to proceed to the next round.</p>
-                </div>
-              </div>
-              
-              <app-button
-                variant="primary"
-                size="lg"
-                [loading]="state.isStartingNextRound"
-                loadingText="Starting Next Round..."
-                [disabled]="state.isStartingNextRound"
-                (clicked)="onStartNextRound()">
-                {{ state.nextRoundButtonText }}
-              </app-button>
-            </div>
-          }
-
-          <!-- Round Instructions -->
-          @if (!data.round.isCompleted && getPendingMatchesCount() > 0) {
-            <div class="instructions">
-              <app-icon
-                name="info"
-                size="sm"
-                color="info">
-              </app-icon>
-              <p>
-                @if (data.canManage) {
-                  Select winners for all matches to complete this round and proceed to the next.
-                } @else {
-                  Waiting for tournament organizer to set match winners.
-                }
-              </p>
-            </div>
-          }
-
-        } @else {
-          <!-- Empty State -->
-          <div class="empty-state">
-            <app-icon
-              name="target"
-              size="xl"
-              color="secondary"
-              ariaLabel="No matches">
-            </app-icon>
-            <h3>No Matches</h3>
-            <p>This round has no matches scheduled.</p>
+        <!-- Progress Bar -->
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="getProgressPercentage()"></div>
           </div>
-        }
+          <span class="progress-text">{{ getProgressPercentage() }}% Complete</span>
+        </div>
+      </div>
+
+      <!-- Next Round Action -->
+      @if (data.canManage && state.canStartNextRound) {
+      <div class="next-round-section">
+        <div class="next-round-info">
+          <app-icon [name]="getNextRoundIcon()" size="md" color="primary"> </app-icon>
+          <div class="next-round-text">
+            <h4>{{ getNextRoundTitle() }}</h4>
+            <p>{{ getNextRoundText() }}</p>
+          </div>
+        </div>
+
+        <app-button
+          variant="primary"
+          size="lg"
+          [loading]="state.isStartingNextRound"
+          loadingText="Loading..."
+          [disabled]="state.isStartingNextRound"
+          (clicked)="onStartNextRound()"
+        >
+          {{ state.nextRoundButtonText }}
+        </app-button>
+      </div>
       }
+
+      <!-- Round Instructions -->
+      @if (!data.round.isCompleted && getPendingMatchesCount() > 0) {
+      <div class="instructions">
+        <app-icon name="info" size="sm" color="info"> </app-icon>
+        <p>
+          @if (data.canManage) { Select winners for all matches to complete this round and proceed
+          to the next. } @else { Waiting for tournament organizer to set match winners. }
+        </p>
+      </div>
+      } } @else {
+      <!-- Empty State -->
+      <div class="empty-state">
+        <app-icon name="target" size="xl" color="secondary" ariaLabel="No matches"> </app-icon>
+        <h3>No Matches</h3>
+        <p>This round has no matches scheduled.</p>
+      </div>
+      } }
     </div>
   `,
-  styleUrl: './match-table.component.css'
+  styleUrl: './match-table.component.css',
 })
 export class MatchTableComponent {
   @Input() data!: MatchTableData;
@@ -215,11 +188,15 @@ export class MatchTableComponent {
     updatingMatchId: null,
     canStartNextRound: false,
     isStartingNextRound: false,
-    nextRoundButtonText: 'Start Next Round'
+    nextRoundButtonText: 'Start Next Round',
   };
   @Input() showCompletedTime: boolean = false;
 
-  @Output() winnerChanged = new EventEmitter<{ matchId: number; winnerId: number | null; playerName?: string }>();
+  @Output() winnerChanged = new EventEmitter<{
+    matchId: number;
+    winnerId: number | null;
+    playerName?: string;
+  }>();
   @Output() nextRoundStarted = new EventEmitter<void>();
   @Output() errorDismissed = new EventEmitter<void>();
 
@@ -239,22 +216,22 @@ export class MatchTableComponent {
     return this.data.round.matches.map((match, index) => ({
       ...match,
       matchNumber: index + 1,
-      canManage: this.data.canManage
+      canManage: this.data.canManage,
     }));
   }
 
   getCompletedMatchesCount(): number {
-    return this.data.round.matches.filter(match => match.winnerId).length;
+    return this.data.round.matches.filter((match) => match.winnerId).length;
   }
 
   getPendingMatchesCount(): number {
-    return this.data.round.matches.filter(match => !match.winnerId).length;
+    return this.data.round.matches.filter((match) => !match.winnerId).length;
   }
 
   getProgressPercentage(): number {
     const total = this.data.round.matches.length;
     if (total === 0) return 100;
-    
+
     const completed = this.getCompletedMatchesCount();
     return Math.round((completed / total) * 100);
   }
@@ -273,5 +250,41 @@ export class MatchTableComponent {
     const pending = total - completed;
 
     return { completed, pending, total };
+  }
+
+  getNextRoundText(): string {
+    return this.isRoundFinal()
+      ? 'Crown you tournament winner!'
+      : 'All matches have been completed. Ready to proceed to the next round.';
+  }
+
+  getNextRoundTitle(): string {
+    return this.isRoundFinal() ? 'Finale complete!' : 'Round Complete!';
+  }
+
+  getNextRoundIcon(): IconName {
+    return this.isRoundFinal() ? 'confetti' : 'chevron-right';
+  }
+
+  getTitleIcon(): IconName {
+    return this.isRoundFinal() ? 'trophy' : 'target';
+  }
+
+  getTitleText(): string {
+    const baseText: string = `Round ${this.data.round.roundNumber} matches`;
+
+    if (this.isRoundFinal()) {
+      return 'Final Round';
+    }
+
+    if (this.data.round.roundType == 'Tiebreaker') {
+      return `Tiebreaker - ${baseText}`;
+    }
+
+    return baseText;
+  }
+
+  isRoundFinal(): boolean {
+    return this.data.round.roundType == 'Final';
   }
 }

@@ -1,25 +1,43 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil, finalize, switchMap } from 'rxjs';
+import { finalize, Subject, switchMap, takeUntil } from 'rxjs';
 
 // Import organisms
-import { PlayerManagementComponent, PlayerManagementState } from '../../shared/organisms/player-management/player-management.component';
-import { MatchTableComponent, MatchTableData, MatchTableState } from '../../shared/organisms/match-table/match-table.component';
-import { StandingsTableComponent, StandingsTableData } from '../../shared/organisms/standings-table/standings-table.component';
+import {
+  MatchTableComponent,
+  MatchTableData,
+  MatchTableState,
+} from '../../shared/organisms/match-table/match-table.component';
+import {
+  PlayerManagementComponent,
+  PlayerManagementState,
+} from '../../shared/organisms/player-management/player-management.component';
+import {
+  StandingsTableComponent,
+  StandingsTableData,
+} from '../../shared/organisms/standings-table/standings-table.component';
 
 // Import molecules and atoms
-import { ErrorDisplayComponent } from '../../shared/molecules/error-display/error-display.component';
-import { LoadingSpinnerComponent } from '../../shared/atoms/spinner/loading-spinner.component';
+import { BaseBadgeComponent } from '../../shared/atoms/badge/base-badge.component';
 import { BaseButtonComponent } from '../../shared/atoms/button/base-button.component';
 import { BaseIconComponent } from '../../shared/atoms/icon/base-icon.component';
-import { BaseBadgeComponent } from '../../shared/atoms/badge/base-badge.component';
+import { LoadingSpinnerComponent } from '../../shared/atoms/spinner/loading-spinner.component';
+import { ErrorDisplayComponent } from '../../shared/molecules/error-display/error-display.component';
 
 // Import types and services
-import { Tournament, TournamentStatus, TournamentType, Round } from '../../shared/types/tournament.types';
+import {
+  PasswordModalComponent,
+  PasswordModalData,
+} from '../../shared/molecules/password-modal/password-modal.component';
 import { TournamentService } from '../../shared/services/tournament.service';
 import { WebSocketService, WebSocketUpdate } from '../../shared/services/websocket.service';
-import { PasswordModalComponent, PasswordModalData } from '../../shared/molecules/password-modal/password-modal.component';
+import {
+  Round,
+  Tournament,
+  TournamentStatus,
+  TournamentType,
+} from '../../shared/types/tournament.types';
 
 interface TournamentDetailState {
   tournament: Tournament | null;
@@ -43,205 +61,194 @@ interface TournamentDetailState {
     BaseButtonComponent,
     BaseIconComponent,
     BaseBadgeComponent,
-    PasswordModalComponent
+    PasswordModalComponent,
   ],
   template: `
     <div class="tournament-detail-page">
       <!-- Loading State -->
       @if (state.isLoading && !state.tournament) {
-        <div class="page-loading">
-          <app-loading-spinner
-            size="lg"
-            variant="primary"
-            loadingText="Loading tournament..."
-            [overlay]="true">
-          </app-loading-spinner>
-        </div>
+      <div class="page-loading">
+        <app-loading-spinner
+          size="lg"
+          variant="primary"
+          loadingText="Loading tournament..."
+          [overlay]="true"
+        >
+        </app-loading-spinner>
+      </div>
       }
 
       <!-- Error State -->
       @if (state.error && !state.tournament) {
-        <div class="page-error">
-          <app-error-display
-            [message]="state.error"
-            type="error"
-            [retryable]="true"
-            retryText="Reload Tournament"
-            title="Failed to Load Tournament"
-            (retryClicked)="loadTournament()"
-            (dismissed)="clearError()">
-          </app-error-display>
-          
-          <div class="error-actions">
-            <app-button
-              variant="outline-secondary"
-              (clicked)="goBack()">
-              <app-icon name="arrow-left" size="sm"></app-icon>
-              Back to Tournaments
-            </app-button>
-          </div>
+      <div class="page-error">
+        <app-error-display
+          [message]="state.error"
+          type="error"
+          [retryable]="true"
+          retryText="Reload Tournament"
+          title="Failed to Load Tournament"
+          (retryClicked)="loadTournament()"
+          (dismissed)="clearError()"
+        >
+        </app-error-display>
+
+        <div class="error-actions">
+          <app-button variant="outline-secondary" (clicked)="goBack()">
+            <app-icon name="arrow-left" size="sm"></app-icon>
+            Back to Tournaments
+          </app-button>
         </div>
+      </div>
       }
 
       <!-- Tournament Content -->
       @if (state.tournament) {
-        <div class="tournament-content">
-          <!-- Tournament Header -->
-          <div class="tournament-header">
-            <div class="header-navigation">
-              <app-button
-                variant="outline-secondary"
-                size="sm"
-                (clicked)="goBack()">
-                <app-icon name="arrow-left" size="xs"></app-icon>
-                Back to Tournaments
-              </app-button>
+      <div class="tournament-content">
+        <!-- Tournament Header -->
+        <div class="tournament-header">
+          <div class="header-navigation">
+            <app-button variant="outline-secondary" size="sm" (clicked)="goBack()">
+              <app-icon name="arrow-left" size="xs"></app-icon>
+              Back to Tournaments
+            </app-button>
+          </div>
+
+          <div class="header-main">
+            <div class="tournament-info">
+              <h1 class="tournament-name">{{ state.tournament.name }}</h1>
+
+              <div class="tournament-meta">
+                <app-badge [variant]="getTypeVariant()">
+                  {{ getTournamentTypeName() }}
+                </app-badge>
+
+                <app-badge [variant]="getStatusVariant()">
+                  {{ getStatusText() }}
+                </app-badge>
+              </div>
             </div>
 
-            <div class="header-main">
-              <div class="tournament-info">
-                <h1 class="tournament-name">{{ state.tournament.name }}</h1>
-                
-                <div class="tournament-meta">
-                  <app-badge [variant]="getTypeVariant()">
-                    {{ getTournamentTypeName() }}
-                  </app-badge>
-                  
-                  <app-badge [variant]="getStatusVariant()">
-                    {{ getStatusText() }}
-                  </app-badge>
-                  
-                  @if (state.tournament.status === TournamentStatus.Completed && state.tournament.winnerId) {
-                    <div class="winner-badge">
-                      <app-icon name="trophy" size="sm" color="warning"></app-icon>
-                      <span>Champion: {{ getWinnerName() }}</span>
+            <div class="header-actions">
+              @if (!state.managementMode) {
+              <app-button variant="primary" (clicked)="enterManagementMode()">
+                <app-icon name="cog" size="sm"></app-icon>
+                Enter Management
+              </app-button>
+              } @else {
+              <app-button variant="outline-secondary" (clicked)="exitManagementMode()">
+                <app-icon name="eye" size="sm"></app-icon>
+                Exit Management
+              </app-button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Tournament States -->
+        <div class="tournament-body">
+          <!-- Created State: Player Management -->
+          @if (state.tournament.status === TournamentStatus.Created) {
+          <div class="tournament-section">
+            <app-player-management
+              [players]="state.tournament.players"
+              [state]="getPlayerManagementState()"
+              [minPlayersRequired]="3"
+              [allowPlayerRemoval]="true"
+              (playerAdded)="onPlayerAdd($event)"
+              (playerRemoved)="onPlayerRemove($event)"
+              (tournamentStarted)="onTournamentStart()"
+              (errorDismissed)="clearError()"
+            >
+            </app-player-management>
+          </div>
+          }
+
+          <!-- In Progress State: Matches and Standings -->
+          @if (state.tournament.status === TournamentStatus.InProgress) {
+          <div class="tournament-sections">
+            <!-- Current Round Matches -->
+            @if (getCurrentRound()) {
+            <div class="tournament-section">
+              <app-match-table
+                [data]="getMatchTableData()"
+                [state]="getMatchTableState()"
+                (winnerChanged)="onWinnerChange($event)"
+                (nextRoundStarted)="onNextRoundStart()"
+                (errorDismissed)="clearError()"
+              >
+              </app-match-table>
+            </div>
+            }
+
+            <!-- Current Standings -->
+            <div class="tournament-section">
+              <app-standings-table
+                [data]="getStandingsData()"
+                [viewMode]="'current'"
+                [showGamesPlayed]="false"
+                [highlightTop3]="true"
+                [showPodium]="false"
+                (errorDismissed)="clearError()"
+              >
+              </app-standings-table>
+            </div>
+          </div>
+          }
+
+          <!-- Completed State: Final Results -->
+          @if (state.tournament.status === TournamentStatus.Completed) {
+          <div class="tournament-sections">
+            <!-- Final Standings with Podium -->
+            <div class="tournament-section">
+              <app-standings-table
+                [data]="getStandingsData()"
+                [viewMode]="'final'"
+                [showGamesPlayed]="true"
+                [highlightTop3]="true"
+                [showPodium]="true"
+                title="Tournament Results"
+                (errorDismissed)="clearError()"
+              >
+              </app-standings-table>
+            </div>
+
+            <!-- Tournament History -->
+            <div class="tournament-section">
+              <div class="history-section">
+                <h3 class="history-title">
+                  <app-icon name="clock" size="md" color="secondary"></app-icon>
+                  Tournament History
+                </h3>
+
+                <div class="rounds-history">
+                  @for (round of state.tournament.rounds; track round.id) {
+                  <div class="round-summary">
+                    <h4>Round {{ round.roundNumber }}</h4>
+                    <div class="round-info">
+                      <span>{{ round.matches.length }} matches</span>
+                      <span>{{ getCompletedMatchesInRound(round) }} completed</span>
                     </div>
+                  </div>
                   }
                 </div>
               </div>
-
-              <div class="header-actions">
-                @if (!state.managementMode) {
-                  <app-button
-                    variant="primary"
-                    (clicked)="enterManagementMode()">
-                    <app-icon name="cog" size="sm"></app-icon>
-                    Enter Management
-                  </app-button>
-                } @else {
-                  <app-button
-                    variant="outline-secondary"
-                    (clicked)="exitManagementMode()">
-                    <app-icon name="eye" size="sm"></app-icon>
-                    Exit Management
-                  </app-button>
-                }
-              </div>
             </div>
           </div>
-
-          <!-- Tournament States -->
-          <div class="tournament-body">
-            
-            <!-- Created State: Player Management -->
-            @if (state.tournament.status === TournamentStatus.Created) {
-              <div class="tournament-section">
-                <app-player-management
-                  [players]="state.tournament.players"
-                  [state]="getPlayerManagementState()"
-                  [minPlayersRequired]="3"
-                  [allowPlayerRemoval]="true"
-                  (playerAdded)="onPlayerAdd($event)"
-                  (playerRemoved)="onPlayerRemove($event)"
-                  (tournamentStarted)="onTournamentStart()"
-                  (errorDismissed)="clearError()">
-                </app-player-management>
-              </div>
-            }
-
-            <!-- In Progress State: Matches and Standings -->
-            @if (state.tournament.status === TournamentStatus.InProgress) {
-              <div class="tournament-sections">
-                
-                <!-- Current Round Matches -->
-                @if (getCurrentRound()) {
-                  <div class="tournament-section">
-                    <app-match-table
-                      [data]="getMatchTableData()"
-                      [state]="getMatchTableState()"
-                      (winnerChanged)="onWinnerChange($event)"
-                      (nextRoundStarted)="onNextRoundStart()"
-                      (errorDismissed)="clearError()">
-                    </app-match-table>
-                  </div>
-                }
-
-                <!-- Current Standings -->
-                <div class="tournament-section">
-                  <app-standings-table
-                    [data]="getStandingsData()"
-                    [viewMode]="'current'"
-                    [showGamesPlayed]="false"
-                    [highlightTop3]="true"
-                    [showPodium]="false"
-                    (errorDismissed)="clearError()">
-                  </app-standings-table>
-                </div>
-              </div>
-            }
-
-            <!-- Completed State: Final Results -->
-            @if (state.tournament.status === TournamentStatus.Completed) {
-              <div class="tournament-sections">
-                <!-- Final Standings with Podium -->
-                <div class="tournament-section">
-                  <app-standings-table
-                    [data]="getStandingsData()"
-                    [viewMode]="'final'"
-                    [showGamesPlayed]="true"
-                    [highlightTop3]="true"
-                    [showPodium]="true"
-                    title="Final Tournament Results"
-                    (errorDismissed)="clearError()">
-                  </app-standings-table>
-                </div>
-
-                <!-- Tournament History -->
-                <div class="tournament-section">
-                  <div class="history-section">
-                    <h3 class="history-title">
-                      <app-icon name="clock" size="md" color="secondary"></app-icon>
-                      Tournament History
-                    </h3>
-                    
-                    <div class="rounds-history">
-                      @for (round of state.tournament.rounds; track round.id) {
-                        <div class="round-summary">
-                          <h4>Round {{ round.roundNumber }}</h4>
-                          <div class="round-info">
-                            <span>{{ round.matches.length }} matches</span>
-                            <span>{{ getCompletedMatchesInRound(round) }} completed</span>
-                          </div>
-                        </div>
-                      }
-                    </div>
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
+          }
         </div>
+      </div>
       }
 
       <!-- Password Modal -->
       <app-password-modal
         [data]="state.passwordModal"
         (passwordSubmitted)="onPasswordSubmitted($event)"
-        (cancelled)="onPasswordCancelled()">
+        (cancelled)="onPasswordCancelled()"
+      >
       </app-password-modal>
     </div>
   `,
-  styleUrl: './tournament-detail.page.css'
+  styleUrl: './tournament-detail.page.css',
 })
 export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -258,8 +265,8 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       title: 'Enter Management Mode',
       message: 'Enter the tournament password to manage this tournament.',
       isLoading: false,
-      error: null
-    }
+      error: null,
+    },
   };
 
   // Expose enums for template
@@ -276,7 +283,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.route.params
       .pipe(
-        switchMap(params => {
+        switchMap((params) => {
           this.tournamentId = +params['id'];
           this.loadTournament();
           return this.webSocketService.updates$;
@@ -290,13 +297,13 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       });
 
     // Join tournament WebSocket group
-    this.webSocketService.joinTournament(this.tournamentId).catch(error => {
+    this.webSocketService.joinTournament(this.tournamentId).catch((error) => {
       console.warn('Failed to join WebSocket group:', error);
     });
   }
 
   ngOnDestroy(): void {
-    this.webSocketService.leaveTournament().catch(error => {
+    this.webSocketService.leaveTournament().catch((error) => {
       console.warn('Failed to leave WebSocket group:', error);
     });
     this.destroy$.next();
@@ -307,9 +314,10 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
     this.state.isLoading = true;
     this.state.error = null;
 
-    this.tournamentService.getTournament(this.tournamentId)
+    this.tournamentService
+      .getTournament(this.tournamentId)
       .pipe(
-        finalize(() => this.state.isLoading = false),
+        finalize(() => (this.state.isLoading = false)),
         takeUntil(this.destroy$)
       )
       .subscribe({
@@ -323,7 +331,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
         error: (error: any) => {
           console.error('Failed to load tournament:', error);
           this.state.error = error.message || 'Failed to load tournament. Please try again.';
-        }
+        },
       });
   }
 
@@ -342,7 +350,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       this.state.passwordModal = {
         ...this.state.passwordModal,
         isVisible: true,
-        error: null
+        error: null,
       };
     }
   }
@@ -355,7 +363,8 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
     this.state.passwordModal.isLoading = true;
     this.state.passwordModal.error = null;
 
-    this.tournamentService.validatePassword(this.tournamentId, password)
+    this.tournamentService
+      .validatePassword(this.tournamentId, password)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -374,7 +383,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
           this.state.passwordModal.isLoading = false;
           this.state.passwordModal.error = 'Failed to validate password. Please try again.';
           console.error('Password validation failed:', error);
-        }
+        },
       });
   }
 
@@ -389,23 +398,24 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
 
     this.state.isUpdating = true;
     const request = {
-      name: playerName
+      name: playerName,
     };
 
-    this.tournamentService.addPlayer(this.tournamentId, request)
+    this.tournamentService
+      .addPlayer(this.tournamentId, request)
       .pipe(
-        finalize(() => this.state.isUpdating = false),
+        finalize(() => (this.state.isUpdating = false)),
         takeUntil(this.destroy$)
       )
       .subscribe({
-        next: (response: {message: string}) => {
+        next: (response: { message: string }) => {
           console.log('Player added successfully:', response.message);
           // Tournament data will be updated via WebSocket
         },
         error: (error: any) => {
           console.error('Failed to add player:', error);
           this.state.error = error.message || 'Failed to add player. Please try again.';
-        }
+        },
       });
   }
 
@@ -415,23 +425,24 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
     this.state.isUpdating = true;
     const request = {
       tournamentId: this.tournamentId,
-      playerId: event.playerId
+      playerId: event.playerId,
     };
 
-    this.tournamentService.removePlayer(request)
+    this.tournamentService
+      .removePlayer(request)
       .pipe(
-        finalize(() => this.state.isUpdating = false),
+        finalize(() => (this.state.isUpdating = false)),
         takeUntil(this.destroy$)
       )
       .subscribe({
-        next: (response: {message: string}) => {
+        next: (response: { message: string }) => {
           console.log('Player removed successfully:', response.message);
           // Tournament data will be updated via WebSocket
         },
         error: (error: any) => {
           console.error('Failed to remove player:', error);
           this.state.error = error.message || 'Failed to remove player. Please try again.';
-        }
+        },
       });
   }
 
@@ -440,20 +451,26 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
 
     this.state.isUpdating = true;
     const password = this.tournamentService.getPassword(this.tournamentId);
-    console.log('Starting tournament:', this.tournamentId, 'with password:', password ? 'PROVIDED' : 'NOT PROVIDED');
-    
+    console.log(
+      'Starting tournament:',
+      this.tournamentId,
+      'with password:',
+      password ? 'PROVIDED' : 'NOT PROVIDED'
+    );
+
     const request = {
       tournamentId: this.tournamentId,
-      password: password
+      password: password,
     };
 
-    this.tournamentService.startTournament(request)
+    this.tournamentService
+      .startTournament(request)
       .pipe(
-        finalize(() => this.state.isUpdating = false),
+        finalize(() => (this.state.isUpdating = false)),
         takeUntil(this.destroy$)
       )
       .subscribe({
-        next: (response: {message: string}) => {
+        next: (response: { message: string }) => {
           console.log('Tournament started successfully:', response.message);
           // Tournament data will be updated via WebSocket
         },
@@ -461,7 +478,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
           console.error('Failed to start tournament:', error);
           console.error('Request was:', request);
           this.state.error = error.message || 'Failed to start tournament. Please try again.';
-        }
+        },
       });
   }
 
@@ -469,51 +486,71 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   onWinnerChange(event: { matchId: number; winnerId: number | null; playerName?: string }): void {
     if (!this.state.tournament) return;
 
-    this.state.isUpdating = true;
     const request = {
       tournamentId: this.tournamentId,
       matchId: event.matchId,
-      winnerId: event.winnerId || 0
+      winnerId: event.winnerId || 0,
     };
 
-    this.tournamentService.setMatchWinner(request)
-      .pipe(
-        finalize(() => this.state.isUpdating = false),
-        takeUntil(this.destroy$)
-      )
+    this.tournamentService
+      .setMatchWinner(request)
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (tournament: Tournament) => {
-          this.state.tournament = tournament;
+        next: (response: { message: string }) => {
+          console.log('Winner selection broadcasted:', response.message);
+          // Tournament data will be updated via WebSocket
         },
         error: (error: any) => {
           console.error('Failed to set match winner:', error);
           this.state.error = error.message || 'Failed to set match winner. Please try again.';
-        }
+        },
       });
   }
 
   onNextRoundStart(): void {
     if (!this.state.tournament) return;
 
+    // Collect all match results with winners from current round
+    const currentRound = this.getCurrentRound();
+    if (!currentRound) {
+      this.state.error = 'No current round found';
+      return;
+    }
+
+    const matchResults = currentRound.matches
+      .filter((match) => match.winnerId) // Only matches with winners
+      .map((match) => ({
+        matchId: match.id,
+        winnerId: match.winnerId!,
+      }));
+
+    // Ensure all matches have winners before proceeding
+    if (matchResults.length !== currentRound.matches.length) {
+      this.state.error = 'All matches must have winners before starting the next round';
+      return;
+    }
+
     this.state.isUpdating = true;
     const request = {
       tournamentId: this.tournamentId,
-      matchResults: [] // Empty for now, service can handle this
+      matchResults: matchResults,
     };
 
-    this.tournamentService.startNextRound(request)
+    this.tournamentService
+      .startNextRound(request)
       .pipe(
-        finalize(() => this.state.isUpdating = false),
+        finalize(() => (this.state.isUpdating = false)),
         takeUntil(this.destroy$)
       )
       .subscribe({
-        next: (tournament: Tournament) => {
-          this.state.tournament = tournament;
+        next: (response: { message: string }) => {
+          console.log('Next round started:', response.message);
+          // Tournament data will be updated via WebSocket
         },
         error: (error: any) => {
           console.error('Failed to start next round:', error);
           this.state.error = error.message || 'Failed to start next round. Please try again.';
-        }
+        },
       });
   }
 
@@ -530,10 +567,37 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       case 'NewRound':
       case 'TournamentUpdated':
       case 'MatchUpdated':
-      case 'WinnerSelected':
-        // Reload tournament data on any update
+        // Reload tournament data for these updates
         this.loadTournament();
         break;
+      case 'WinnerSelected':
+        // Handle winner selection locally without DB reload
+        this.handleWinnerSelection(update.data);
+        break;
+    }
+  }
+
+  private handleWinnerSelection(data: any): void {
+    if (!this.state.tournament || !data.matchId || !data.winnerId) return;
+
+    // Find and update the match in the current tournament state
+    const currentRound = this.getCurrentRound();
+    if (currentRound) {
+      const match = currentRound.matches.find((m) => m.id === data.matchId);
+      if (match) {
+        // Find the winner player
+        const winner = match.players.find((p) => p.id === data.winnerId);
+        if (winner) {
+          // Update the match with the selected winner
+          match.winnerId = data.winnerId;
+          match.winner = winner;
+
+          // Force change detection by creating a new tournament object
+          this.state.tournament = { ...this.state.tournament };
+
+          console.log(`Winner selected for match ${data.matchId}:`, winner.name);
+        }
+      }
     }
   }
 
@@ -545,7 +609,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       isStartingTournament: this.state.isUpdating,
       canManage: this.state.managementMode,
       error: this.state.error,
-      addPlayerError: null
+      addPlayerError: null,
     };
   }
 
@@ -555,7 +619,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       round: currentRound!,
       canManage: this.state.managementMode,
       isLoading: this.state.isUpdating,
-      error: this.state.error
+      error: this.state.error,
     };
   }
 
@@ -564,7 +628,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       updatingMatchId: this.state.isUpdating ? -1 : null,
       canStartNextRound: this.canStartNextRound(),
       isStartingNextRound: this.state.isUpdating,
-      nextRoundButtonText: this.getNextRoundButtonText()
+      nextRoundButtonText: this.getNextRoundButtonText(),
     };
   }
 
@@ -575,25 +639,29 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       error: this.state.error,
       tournamentComplete: this.state.tournament?.status === TournamentStatus.Completed,
       winnerId: this.state.tournament?.winnerId,
-      winnerName: this.getWinnerName()
+      winnerName: this.getWinnerName(),
+      totalGames:
+        this.state.tournament?.rounds.reduce((sum, obj) => sum + obj.matches.length, 0) ?? 0,
     };
   }
 
   // Helper methods
   getCurrentRound(): Round | null {
     if (!this.state.tournament?.rounds) return null;
-    return this.state.tournament.rounds.find(r => !r.isCompleted) || null;
+    return this.state.tournament.rounds.find((r) => !r.isCompleted) || null;
   }
 
   canStartNextRound(): boolean {
     const currentRound = this.getCurrentRound();
     if (!currentRound) return false;
-    
-    return currentRound.matches.every(match => match.winnerId) && this.state.managementMode;
+
+    return currentRound.matches.every((match) => match.winnerId) && this.state.managementMode;
   }
 
   getNextRoundButtonText(): string {
-    return this.isLastRound() ? 'Complete Tournament' : 'Start Next Round';
+    return this.getCurrentRound()?.roundType == 'Final'
+      ? 'Complete Tournament'
+      : 'Start Next Round';
   }
 
   isLastRound(): boolean {
@@ -602,7 +670,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   }
 
   getCompletedMatchesInRound(round: Round): number {
-    return round.matches.filter(match => match.winnerId).length;
+    return round.matches.filter((match) => match.winnerId).length;
   }
 
   getTournamentTypeName(): string {
@@ -631,7 +699,9 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
 
   getWinnerName(): string {
     if (!this.state.tournament?.winnerId) return '';
-    const winner = this.state.tournament.players.find(p => p.id === this.state.tournament?.winnerId);
+    const winner = this.state.tournament.players.find(
+      (p) => p.id === this.state.tournament?.winnerId
+    );
     return winner?.name || '';
   }
 

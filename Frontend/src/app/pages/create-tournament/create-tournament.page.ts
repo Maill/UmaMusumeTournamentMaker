@@ -50,9 +50,7 @@ interface CreateTournamentPageState {
 
             <div class="header-text">
               <h1 class="page-title">Create New Tournament</h1>
-              <p class="page-description">
-                Set up a new tournament with custom settings and invite players to compete.
-              </p>
+              <p class="page-description">Set up a new tournament and invite players to compete.</p>
             </div>
           </div>
         </div>
@@ -96,9 +94,11 @@ interface CreateTournamentPageState {
                     multiple rounds.
                   </p>
                   <ul>
-                    <li>Players are paired based on current standings</li>
+                    <li>
+                      Players plays everyone and are paired based on current standings if possible
+                    </li>
                     <li>Everyone plays the same number of rounds</li>
-                    <li>Continues until a clear winner emerges</li>
+                    <li>Continues until a clear winner emerges via tiebreaker rounds</li>
                     <li>Great for skill-based tournaments</li>
                   </ul>
                 </div>
@@ -107,7 +107,7 @@ interface CreateTournamentPageState {
               <div class="help-card">
                 <div class="help-card-header">
                   <app-icon name="star" size="lg" color="info"></app-icon>
-                  <h3>Champions Meeting</h3>
+                  <h3>Champions Meeting (W.I.P)</h3>
                 </div>
                 <div class="help-card-content">
                   <p>
@@ -151,13 +151,13 @@ interface CreateTournamentPageState {
                 </div>
               </div>
 
-              <div class="tip-item">
+              <!-- <div class="tip-item"> TODO : Redo text
                 <app-icon name="check" size="sm" color="success"></app-icon>
                 <div class="tip-text">
                   <strong>Plan ahead:</strong> Consider how many rounds you want and the time needed
                   for each match.
                 </div>
-              </div>
+              </div> -->
 
               <div class="tip-item">
                 <app-icon name="check" size="sm" color="success"></app-icon>
@@ -198,9 +198,7 @@ export class CreateTournamentPageComponent implements OnDestroy {
       next: (tournament) => {
         this.state.isCreating = false;
         // Navigate to the newly created tournament
-        this.router.navigate(['/tournaments', tournament.id], {
-          queryParams: { created: 'true' },
-        });
+        this.router.navigate(['/tournaments', tournament.id]);
       },
       error: (error) => {
         console.error('Failed to create tournament:', error);

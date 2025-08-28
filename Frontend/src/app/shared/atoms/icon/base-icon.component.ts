@@ -1,24 +1,26 @@
-import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, Input } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
-export type IconName = 
-  | 'trophy' 
-  | 'close' 
-  | 'edit' 
-  | 'delete' 
-  | 'add' 
-  | 'check' 
-  | 'warning' 
-  | 'info' 
-  | 'refresh' 
-  | 'eye' 
-  | 'eye-slash' 
-  | 'chevron-down' 
+export type IconName =
+  | 'trophy'
+  | 'close'
+  | 'edit'
+  | 'delete'
+  | 'add'
+  | 'check'
+  | 'warning'
+  | 'info'
+  | 'refresh'
+  | 'eye'
+  | 'eye-slash'
+  | 'chevron-down'
   | 'chevron-up'
   | 'chevron-right'
   | 'star'
-  | 'medal'
+  | 'medal-first'
+  | 'medal-second'
+  | 'medal-thrid'
   | 'users'
   | 'target'
   | 'calendar'
@@ -27,7 +29,9 @@ export type IconName =
   | 'trending-up'
   | 'arrow-left'
   | 'lightbulb'
-  | 'cog';
+  | 'cog'
+  | 'confetti'
+  | 'podium';
 
 export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
 
@@ -36,13 +40,10 @@ export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <span 
-      [class]="getIconClasses()" 
-      [attr.aria-label]="ariaLabel"
-      [innerHTML]="getIconSvg()">
+    <span [class]="getIconClasses()" [attr.aria-label]="ariaLabel" [innerHTML]="getIconSvg()">
     </span>
   `,
-  styleUrl: './base-icon.component.css'
+  styleUrl: './base-icon.component.css',
 })
 export class BaseIconComponent {
   @Input() name: IconName = 'info';
@@ -68,7 +69,9 @@ export class BaseIconComponent {
     'chevron-up': `⬆️`,
     'chevron-right': `➡️`,
     star: `⭐`,
-    medal: `🥇`,
+    'medal-first': `🥇`,
+    'medal-second': `🥈`,
+    'medal-thrid': `🥉`,
     users: `👥`,
     target: `🎯`,
     calendar: `📅`,
@@ -77,7 +80,9 @@ export class BaseIconComponent {
     'trending-up': `📈`,
     'arrow-left': `⬅️`,
     lightbulb: `💡`,
-    cog: `⚙️`
+    cog: `⚙️`,
+    confetti: `🎉`,
+    podium: `🏅`,
   };
 
   getIconSvg(): SafeHtml {
@@ -87,7 +92,7 @@ export class BaseIconComponent {
 
   getIconClasses(): string {
     const classes = ['icon', `icon-${this.size}`];
-    
+
     if (this.color) {
       classes.push(`icon-${this.color}`);
     }

@@ -1,5 +1,5 @@
-import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, Input } from '@angular/core';
 import { LoadingSize } from '../../types/ui.types';
 
 @Component({
@@ -7,11 +7,15 @@ import { LoadingSize } from '../../types/ui.types';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div [class]="getSpinnerClasses()" role="status" [attr.aria-label]="ariaLabel">
+    <!--<span [class]="getSpinnerClasses()" role="status" [attr.aria-label]="ariaLabel">
       <span class="visually-hidden">{{ loadingText }}</span>
+    </span>-->
+    <div style="text-align: center;">
+      <div [class]="getSpinnerClasses()" role="status" [attr.aria-label]="ariaLabel"></div>
+      <div class="visually-hidden">{{ loadingText }}</div>
     </div>
   `,
-  styleUrl: './loading-spinner.component.css'
+  styleUrl: './loading-spinner.component.css',
 })
 export class LoadingSpinnerComponent {
   @Input() size: LoadingSize = 'md';
@@ -22,7 +26,7 @@ export class LoadingSpinnerComponent {
 
   getSpinnerClasses(): string {
     const classes = ['spinner', `spinner-${this.size}`, `spinner-${this.variant}`];
-    
+
     if (this.overlay) {
       classes.push('spinner-overlay');
     }

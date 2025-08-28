@@ -1,11 +1,11 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { BaseButtonComponent } from '../../atoms/button/base-button.component';
 import { BaseInputComponent } from '../../atoms/input/base-input.component';
 import { BaseSelectComponent, SelectOption } from '../../atoms/select/base-select.component';
-import { BaseButtonComponent } from '../../atoms/button/base-button.component';
 import { ErrorDisplayComponent } from '../../molecules/error-display/error-display.component';
-import { TournamentType, CreateTournamentRequest } from '../../types/tournament.types';
+import { CreateTournamentRequest, TournamentType } from '../../types/tournament.types';
 
 export interface TournamentFormData {
   name: string;
@@ -23,29 +23,30 @@ export interface TournamentFormState {
   selector: 'app-tournament-form',
   standalone: true,
   imports: [
-    CommonModule, 
+    CommonModule,
     ReactiveFormsModule,
-    BaseInputComponent, 
-    BaseSelectComponent, 
+    BaseInputComponent,
+    BaseSelectComponent,
     BaseButtonComponent,
-    ErrorDisplayComponent
+    ErrorDisplayComponent,
   ],
   template: `
     <div class="tournament-form-container">
       <div class="form-header">
         <h1 class="form-title">{{ title }}</h1>
         @if (subtitle) {
-          <p class="form-subtitle">{{ subtitle }}</p>
+        <p class="form-subtitle">{{ subtitle }}</p>
         }
       </div>
 
       @if (state.error) {
-        <app-error-display
-          [message]="state.error"
-          type="error"
-          [dismissible]="true"
-          (dismissed)="clearError()">
-        </app-error-display>
+      <app-error-display
+        [message]="state.error"
+        type="error"
+        [dismissible]="true"
+        (dismissed)="clearError()"
+      >
+      </app-error-display>
       }
 
       <form [formGroup]="tournamentForm" (ngSubmit)="onSubmit()" class="tournament-form">
@@ -58,7 +59,8 @@ export interface TournamentFormState {
           [disabled]="state.isLoading"
           formControlName="name"
           [error]="getFieldError('name')"
-          helpText="Choose a descriptive name for your tournament">
+          helpText="Choose a descriptive name for your tournament"
+        >
         </app-input>
 
         <!-- Tournament Type -->
@@ -69,7 +71,8 @@ export interface TournamentFormState {
           [disabled]="state.isLoading"
           formControlName="type"
           [error]="getFieldError('type')"
-          placeholder="Select tournament type">
+          placeholder="Select tournament type"
+        >
         </app-select>
 
         <!-- Tournament Type Description -->
@@ -88,7 +91,8 @@ export interface TournamentFormState {
           [disabled]="state.isLoading"
           formControlName="password"
           [error]="getFieldError('password')"
-          helpText="Set a password to restrict tournament management access">
+          helpText="Set a password to restrict tournament management access"
+        >
         </app-input>
 
         <!-- Form Actions -->
@@ -99,25 +103,27 @@ export interface TournamentFormState {
             [disabled]="!tournamentForm.valid || state.isLoading"
             [loading]="state.isLoading"
             [loadingText]="submitLoadingText"
-            [fullWidth]="true">
+            [fullWidth]="true"
+          >
             {{ submitText }}
           </app-button>
-          
+
           @if (showCancel) {
-            <app-button
-              type="button"
-              variant="secondary"
-              [disabled]="state.isLoading"
-              [fullWidth]="true"
-              (clicked)="onCancel()">
-              {{ cancelText }}
-            </app-button>
+          <app-button
+            type="button"
+            variant="secondary"
+            [disabled]="state.isLoading"
+            [fullWidth]="true"
+            (clicked)="onCancel()"
+          >
+            {{ cancelText }}
+          </app-button>
           }
         </div>
       </form>
     </div>
   `,
-  styleUrl: './tournament-form.component.css'
+  styleUrl: './tournament-form.component.css',
 })
 export class TournamentFormComponent implements OnInit {
   @Input() title: string = 'Create New Tournament';
@@ -130,7 +136,7 @@ export class TournamentFormComponent implements OnInit {
   @Input() state: TournamentFormState = {
     isLoading: false,
     error: null,
-    showPassword: true
+    showPassword: true,
   };
 
   @Output() formSubmitted = new EventEmitter<CreateTournamentRequest>();
@@ -139,27 +145,29 @@ export class TournamentFormComponent implements OnInit {
   @Output() errorDismissed = new EventEmitter<void>();
 
   tournamentForm!: FormGroup;
-  
+
   tournamentTypeOptions: SelectOption<TournamentType>[] = [
     {
       value: TournamentType.Swiss,
-      label: 'Swiss Tournament'
+      label: 'Swiss Tournament',
     },
     {
       value: TournamentType.ChampionsMeeting,
-      label: 'Champions Meeting Tournament'
-    }
+      label: 'Champions Meeting Tournament (W.I.P)',
+    },
   ];
 
   private typeDescriptions: Record<TournamentType, { name: string; description: string }> = {
     [TournamentType.Swiss]: {
       name: 'Swiss Tournament',
-      description: 'Players are paired each round based on their current standings. Continues until a clear winner emerges or maximum rounds are reached.'
+      description:
+        'Players are paired each round based on their current standings. Continues until a clear winner emerges or maximum rounds are reached.',
     },
     [TournamentType.ChampionsMeeting]: {
-      name: 'Champions Meeting Tournament', 
-      description: 'Multi-round tournament with group divisions based on performance. Top performers advance to final groups.'
-    }
+      name: 'Champions Meeting Tournament (W.I.P)',
+      description:
+        'Multi-round tournament with group divisions based on performance. Top performers advance to final groups. (This tournament type is still VERY early work and is very likely to not work at all)',
+    },
   };
 
   constructor(private fb: FormBuilder) {}
@@ -176,23 +184,15 @@ export class TournamentFormComponent implements OnInit {
           Validators.required,
           Validators.minLength(3),
           Validators.maxLength(100),
-          Validators.pattern(/^[a-zA-Z0-9\s\-_]+$/)
-        ]
+          Validators.pattern(/^[a-zA-Z0-9\s\-_]+$/),
+        ],
       ],
-      type: [
-        this.initialData?.type ?? TournamentType.Swiss,
-        [Validators.required]
-      ],
-      password: [
-        this.initialData?.password || '',
-        [
-          Validators.maxLength(50)
-        ]
-      ]
+      type: [this.initialData?.type ?? TournamentType.Swiss, [Validators.required]],
+      password: [this.initialData?.password || '', [Validators.maxLength(50)]],
     });
 
     // Subscribe to form changes
-    this.tournamentForm.valueChanges.subscribe(value => {
+    this.tournamentForm.valueChanges.subscribe((value) => {
       this.formChanged.emit(value);
     });
   }
@@ -203,9 +203,9 @@ export class TournamentFormComponent implements OnInit {
       const request: CreateTournamentRequest = {
         name: formData.name.trim(),
         type: formData.type,
-        password: formData.password?.trim() || undefined
+        password: formData.password?.trim() || undefined,
       };
-      
+
       this.formSubmitted.emit(request);
     }
   }
@@ -220,16 +220,23 @@ export class TournamentFormComponent implements OnInit {
 
   getFieldError(fieldName: string): string | null {
     const field = this.tournamentForm.get(fieldName);
-    
+
     if (field?.invalid && (field.dirty || field.touched)) {
       const errors = field.errors;
-      
+
       if (errors?.['required']) return `${this.getFieldLabel(fieldName)} is required`;
-      if (errors?.['minlength']) return `${this.getFieldLabel(fieldName)} must be at least ${errors['minlength'].requiredLength} characters`;
-      if (errors?.['maxlength']) return `${this.getFieldLabel(fieldName)} must be no more than ${errors['maxlength'].requiredLength} characters`;
-      if (errors?.['pattern']) return `${this.getFieldLabel(fieldName)} contains invalid characters`;
+      if (errors?.['minlength'])
+        return `${this.getFieldLabel(fieldName)} must be at least ${
+          errors['minlength'].requiredLength
+        } characters`;
+      if (errors?.['maxlength'])
+        return `${this.getFieldLabel(fieldName)} must be no more than ${
+          errors['maxlength'].requiredLength
+        } characters`;
+      if (errors?.['pattern'])
+        return `${this.getFieldLabel(fieldName)} contains invalid characters`;
     }
-    
+
     return null;
   }
 
@@ -237,7 +244,7 @@ export class TournamentFormComponent implements OnInit {
     const labels: Record<string, string> = {
       name: 'Tournament name',
       type: 'Tournament type',
-      password: 'Password'
+      password: 'Password',
     };
     return labels[fieldName] || fieldName;
   }

@@ -1,8 +1,16 @@
-import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BaseInputComponent } from '../../atoms/input/base-input.component';
 import { BaseButtonComponent } from '../../atoms/button/base-button.component';
+import { BaseInputComponent } from '../../atoms/input/base-input.component';
 
 export interface PlayerInputData {
   name: string;
@@ -27,28 +35,31 @@ export interface PlayerInputData {
           [error]="error"
           [required]="required"
           (enterPressed)="onAddPlayer()"
-          (valueChange)="onNameChange($event)">
+          (valueChange)="onNameChange($event)"
+        >
         </app-input>
-        
+
         <div class="input-group-append">
           <app-button
             variant="primary"
             [disabled]="disabled || isLoading || !canAddPlayer()"
             [loading]="isLoading"
             [loadingText]="loadingText"
-            (clicked)="onAddPlayer()">
+            (clicked)="onAddPlayer()"
+          >
             {{ buttonText }}
           </app-button>
         </div>
       </div>
     </div>
   `,
-  styleUrl: './player-input.component.css'
+  styleUrl: './player-input.component.css',
 })
 export class PlayerInputComponent implements AfterViewInit {
-  @ViewChild('playerNameInput', { read: ElementRef }) playerNameInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('playerNameInput', { read: ElementRef })
+  playerNameInput!: ElementRef<HTMLInputElement>;
 
-  @Input() label: string = 'Add Player';
+  @Input() label: string = '';
   @Input() placeholder: string = 'Enter player name';
   @Input() buttonText: string = 'Add Player';
   @Input() loadingText: string = 'Adding...';
@@ -76,7 +87,7 @@ export class PlayerInputComponent implements AfterViewInit {
     if (this.canAddPlayer()) {
       const trimmedName = this.playerName.trim();
       this.playerAdded.emit(trimmedName);
-      
+
       if (this.clearOnAdd) {
         this.playerName = '';
         this.focusInput();
@@ -91,10 +102,12 @@ export class PlayerInputComponent implements AfterViewInit {
 
   canAddPlayer(): boolean {
     const trimmedName = this.playerName.trim();
-    return trimmedName.length >= this.minLength && 
-           trimmedName.length <= this.maxLength &&
-           !this.disabled && 
-           !this.isLoading;
+    return (
+      trimmedName.length >= this.minLength &&
+      trimmedName.length <= this.maxLength &&
+      !this.disabled &&
+      !this.isLoading
+    );
   }
 
   focusInput(): void {

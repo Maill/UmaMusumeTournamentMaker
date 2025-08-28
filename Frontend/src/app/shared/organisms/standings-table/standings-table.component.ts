@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { BaseBadgeComponent } from '../../atoms/badge/base-badge.component';
 import { BaseIconComponent, IconName } from '../../atoms/icon/base-icon.component';
 import { LoadingSpinnerComponent } from '../../atoms/spinner/loading-spinner.component';
 import { ErrorDisplayComponent } from '../../molecules/error-display/error-display.component';
@@ -14,6 +13,7 @@ export interface StandingsTableData {
   tournamentComplete: boolean;
   winnerId?: number;
   winnerName?: string;
+  totalGames: number;
 }
 
 export type StandingsViewMode = 'current' | 'final' | 'live';
@@ -27,7 +27,6 @@ export type StandingsViewMode = 'current' | 'final' | 'live';
     BaseIconComponent,
     LoadingSpinnerComponent,
     ErrorDisplayComponent,
-    BaseBadgeComponent,
   ],
   template: `
     <div class="standings-table-container">
@@ -44,26 +43,19 @@ export type StandingsViewMode = 'current' | 'final' | 'live';
             </app-icon>
             {{ getTableTitle() }}
           </h3>
-
-          <div class="standings-meta">
-            <app-badge [variant]="getStatusVariant()">
-              {{ getStatusText() }}
-            </app-badge>
-
-            <span class="player-count">
-              {{ data.players.length }} {{ data.players.length === 1 ? 'Player' : 'Players' }}
-            </span>
-          </div>
         </div>
 
         <!-- Champion Banner (Tournament Complete) -->
         @if (data.tournamentComplete && data.winnerId && data.winnerName) {
         <div class="champion-banner">
           <div class="champion-content">
-            <app-icon name="trophy" size="lg" color="warning" ariaLabel="Tournament Champion">
-            </app-icon>
             <div class="champion-text">
-              <h4>🏆 Tournament Champion</h4>
+              <div>
+                <app-icon name="trophy" size="xl" color="warning" ariaLabel="Tournament Champion" />
+                <h2>Tournament Champion</h2>
+                <app-icon name="trophy" size="xl" color="warning" ariaLabel="Tournament Champion" />
+              </div>
+
               <p class="champion-name">{{ data.winnerName }}</p>
               <p class="champion-subtitle">Congratulations to our tournament winner!</p>
             </div>
@@ -109,12 +101,12 @@ export type StandingsViewMode = 'current' | 'final' | 'live';
           </thead>
           <tbody>
             @for (player of getPlayersWithRankings(); track player.id) {
-            <tr app-standings-row
+            <tr
+              app-standings-row
               [player]="player"
               [showGamesPlayed]="showGamesPlayed"
               [highlightTop3]="highlightTop3"
-            >
-            </tr>
+            ></tr>
             }
           </tbody>
         </table>
@@ -133,17 +125,11 @@ export type StandingsViewMode = 'current' | 'final' | 'live';
             <div class="stat-item">
               <app-icon name="target" size="sm" color="success"></app-icon>
               <span class="stat-label">Total Games:</span>
-              <span class="stat-value">{{ getTotalGamesPlayed() }}</span>
+              <span class="stat-value">{{ this.data.totalGames }}</span>
             </div>
           </div>
 
           <div class="stat-group">
-            <div class="stat-item">
-              <app-icon name="star" size="sm" color="warning"></app-icon>
-              <span class="stat-label">Highest Score:</span>
-              <span class="stat-value">{{ getHighestPoints() }} pts</span>
-            </div>
-
             <div class="stat-item">
               <app-icon name="trending-up" size="sm" color="info"></app-icon>
               <span class="stat-label">Avg Win Rate:</span>
@@ -213,25 +199,13 @@ export class StandingsTableComponent {
   }
 
   getTitleIcon(): IconName {
-    if (this.data.tournamentComplete) return 'trophy';
+    if (this.data.tournamentComplete) return 'podium';
     return 'trending-up';
   }
 
   getTitleColor(): string {
     if (this.data.tournamentComplete) return 'warning';
     return 'primary';
-  }
-
-  getStatusVariant(): 'success' | 'primary' | 'info' {
-    if (this.data.tournamentComplete) return 'success';
-    if (this.viewMode === 'live') return 'info';
-    return 'primary';
-  }
-
-  getStatusText(): string {
-    if (this.data.tournamentComplete) return 'Tournament Complete';
-    if (this.viewMode === 'live') return 'Live Updates';
-    return 'In Progress';
   }
 
   getAriaLabel(): string {
@@ -261,10 +235,6 @@ export class StandingsTableComponent {
     return this.getPlayersWithRankings().slice(0, 3);
   }
 
-  getTotalGamesPlayed(): number {
-    return this.data.players.reduce((total, player) => total + player.wins + player.losses, 0) / 2;
-  }
-
   getHighestPoints(): number {
     return this.data.players.length > 0 ? Math.max(...this.data.players.map((p) => p.points)) : 0;
   }
@@ -281,8 +251,8 @@ export class StandingsTableComponent {
   }
 
   getPodiumIcon(index: number): IconName {
-    const icons: IconName[] = ['trophy', 'medal', 'medal'];
-    return icons[index] || 'medal';
+    const icons: IconName[] = ['medal-first', 'medal-second', 'medal-thrid'];
+    return icons[index] || 'medal-first';
   }
 
   getPodiumColor(index: number): string {

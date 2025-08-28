@@ -201,19 +201,20 @@ export class TournamentService {
   }
 
   // Match Management
-  setMatchWinner(request: SetWinnerRequest): Observable<Tournament> {
+  setMatchWinner(request: SetWinnerRequest): Observable<{message: string}> {
     this.loadingSubject.next(true);
     this.errorSubject.next(null);
     
-    const storedPassword = this.getPassword(request.tournamentId);
     const winnerData = {
-      winnerId: request.winnerId,
-      password: request.password || storedPassword
+      tournamentId: request.tournamentId,
+      matchId: request.matchId,
+      winnerId: request.winnerId
     };
 
-    return this.http.patch<Tournament>(`${this.apiUrl}/matches/${request.matchId}/winner`, winnerData).pipe(
-      tap(tournament => {
-        this.currentTournamentSubject.next(tournament);
+    return this.http.post<{message: string}>(`${environment.apiUrl}/matches/broadcast-winner`, winnerData).pipe(
+      tap(response => {
+        console.log('Broadcast winner success:', response.message);
+        // Tournament data will come via WebSocket
       }),
       catchError(this.handleError),
       tap(() => this.loadingSubject.next(false))
@@ -239,20 +240,20 @@ export class TournamentService {
     );
   }
 
-  startNextRound(request: StartNextRoundRequest): Observable<Tournament> {
+  startNextRound(request: StartNextRoundRequest): Observable<{message: string}> {
     this.loadingSubject.next(true);
     this.errorSubject.next(null);
     
     const storedPassword = this.getPassword(request.tournamentId);
     const roundData = {
-      matchResults: request.matchResults,
-      password: request.password || storedPassword
+      password: request.password || storedPassword,
+      matchResults: request.matchResults
     };
 
-    return this.http.post<Tournament>(`${this.apiUrl}/${request.tournamentId}/next-round`, roundData).pipe(
-      tap(tournament => {
-        this.currentTournamentSubject.next(tournament);
-        this.updateTournamentInList(request.tournamentId, { status: tournament.status });
+    return this.http.post<{message: string}>(`${this.apiUrl}/${request.tournamentId}/next-round`, roundData).pipe(
+      tap(response => {
+        console.log('Start next round success:', response.message);
+        // Tournament data will come via WebSocket
       }),
       catchError(this.handleError),
       tap(() => this.loadingSubject.next(false))

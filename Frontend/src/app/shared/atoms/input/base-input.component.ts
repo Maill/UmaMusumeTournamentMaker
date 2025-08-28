@@ -1,5 +1,5 @@
-import { Component, Input, Output, EventEmitter, forwardRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { InputType } from '../../types/ui.types';
 
@@ -11,50 +11,47 @@ import { InputType } from '../../types/ui.types';
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => BaseInputComponent),
-      multi: true
-    }
+      multi: true,
+    },
   ],
   template: `
-    <div class="input-wrapper">
-      @if (label) {
-        <label [for]="inputId" class="input-label">
-          {{ label }}
-          @if (required) {
-            <span class="required-asterisk">*</span>
-          }
-        </label>
+    @if (label) {
+    <label [for]="inputId" class="input-label">
+      {{ label }}
+      @if (required) {
+      <span class="required-asterisk">*</span>
       }
-      
-      <input 
-        [id]="inputId"
-        [type]="type"
-        [class]="getInputClasses()"
-        [placeholder]="placeholder"
-        [disabled]="disabled"
-        [readonly]="readonly"
-        [required]="required"
-        [value]="value"
-        (input)="onInput($event)"
-        (blur)="onBlur($event)"
-        (focus)="onFocus($event)"
-        (keyup.enter)="onEnterPress($event)"
-        (keyup.escape)="onEscapePress($event)"
-        #inputElement>
-      
-      @if (error) {
-        <div class="input-error">
-          {{ error }}
-        </div>
-      }
-      
-      @if (helpText && !error) {
-        <div class="input-help">
-          {{ helpText }}
-        </div>
-      }
+    </label>
+    }
+
+    <input
+      [id]="inputId"
+      [type]="type"
+      [class]="getInputClasses()"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      [readonly]="readonly"
+      [required]="required"
+      [value]="value"
+      (input)="onInput($event)"
+      (blur)="onBlur($event)"
+      (focus)="onFocus($event)"
+      (keyup.enter)="onEnterPress($event)"
+      (keyup.escape)="onEscapePress($event)"
+      #inputElement
+    />
+
+    @if (error) {
+    <div class="input-error">
+      {{ error }}
     </div>
+    } @if (helpText && !error) {
+    <div class="input-help">
+      {{ helpText }}
+    </div>
+    }
   `,
-  styleUrl: './base-input.component.css'
+  styleUrl: './base-input.component.css',
 })
 export class BaseInputComponent implements ControlValueAccessor {
   @Input() type: InputType = 'text';
@@ -121,15 +118,15 @@ export class BaseInputComponent implements ControlValueAccessor {
 
   getInputClasses(): string {
     const classes = ['form-control'];
-    
+
     if (this.error) {
       classes.push('is-invalid');
     }
-    
+
     if (this.disabled) {
       classes.push('disabled');
     }
-    
+
     if (this.readonly) {
       classes.push('readonly');
     }

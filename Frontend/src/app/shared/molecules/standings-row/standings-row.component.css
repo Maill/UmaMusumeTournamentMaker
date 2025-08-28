@@ -10,7 +10,7 @@
 /* Ranking highlights */
 :host(.champion) {
   background-color: #fff8e1;
-  border-left-color: #ffc107;
+  border-left-color: #ffdb0e;
 }
 
 :host(.champion):hover {
@@ -18,8 +18,8 @@
 }
 
 :host(.runner-up) {
-  background-color: #f8f9fa;
-  border-left-color: #6c757d;
+  background-color: #f0f0f0;
+  border-left-color: #9ca7b1;
 }
 
 :host(.runner-up):hover {
@@ -27,12 +27,12 @@
 }
 
 :host(.third-place) {
-  background-color: #e8f5e8;
-  border-left-color: #28a745;
+  background-color: #ebe0cd;
+  border-left-color: #ac986e;
 }
 
 :host(.third-place):hover {
-  background-color: #d4edda;
+  background-color: #ebdbc2;
 }
 
 /* Cell styling */
@@ -146,24 +146,8 @@
   gap: 0.375rem;
 }
 
-.winrate-bar {
-  width: 80px;
-  height: 6px;
-  background-color: #e9ecef;
-  border-radius: 3px;
-  overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.winrate-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%);
-  border-radius: 3px;
-  transition: width 0.3s ease-in-out;
-}
-
 .winrate-text {
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #495057;
 }

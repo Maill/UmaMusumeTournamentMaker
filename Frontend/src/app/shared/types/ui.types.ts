@@ -1,4 +1,11 @@
-export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'outline-primary' | 'outline-secondary' | 'outline-danger';
+export type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'danger'
+  | 'success'
+  | 'outline-primary'
+  | 'outline-secondary'
+  | 'outline-danger';
 
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
@@ -6,7 +13,17 @@ export type ButtonType = 'button' | 'submit' | 'reset';
 
 export type InputType = 'text' | 'password' | 'email' | 'number';
 
-export type BadgeVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
+export type BadgeVariant =
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'danger'
+  | 'warning'
+  | 'info'
+  | 'light'
+  | 'dark'
+  | 'bronze'
+  | 'silver';
 
 export type LoadingSize = 'sm' | 'md' | 'lg';
 

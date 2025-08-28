@@ -65,7 +65,6 @@ export interface PlayerAction {
       @if (state.canManage) {
       <div class="add-player-section">
         <app-player-input
-          label="Add New Player"
           placeholder="Enter player name"
           buttonText="Add Player"
           [isLoading]="state.isAddingPlayer"

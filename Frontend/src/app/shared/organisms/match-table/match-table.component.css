@@ -7,7 +7,7 @@
 
 /* Table Header */
 .table-header {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: #fff;
   border-bottom: 1px solid #dee2e6;
   padding: 1.5rem;
 }

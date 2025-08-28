@@ -62,7 +62,7 @@
   }
 
   .input-group app-input ::ng-deep .form-control {
-    border-radius: 0.25rem;
+    border-radius: var(--radius-sm);
   }
 
   .input-group-append {
@@ -70,7 +70,7 @@
   }
 
   .input-group-append app-button ::ng-deep .btn {
-    border-radius: 0.25rem;
+    border-radius: var(--radius-sm);
     width: 100%;
   }
 }

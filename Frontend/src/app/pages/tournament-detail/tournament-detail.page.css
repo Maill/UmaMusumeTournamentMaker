@@ -1,6 +1,6 @@
 .tournament-detail-page {
   min-height: 100vh;
-  background: #e9ecef;
+  background: var(--bg-neutral);
 }
 
 /* Page Loading */
@@ -13,7 +13,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--overlay-light);
   z-index: 100;
 }
 
@@ -21,15 +21,15 @@
 .page-error {
   max-width: 800px;
   margin: 0 auto;
-  padding: 4rem 2rem;
+  padding: var(--space-3xl) var(--space-xl);
   text-align: center;
 }
 
 .error-actions {
-  margin-top: 2rem;
+  margin-top: var(--space-xl);
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
 /* Tournament Content */
@@ -41,16 +41,16 @@
 
 /* Tournament Header */
 .tournament-header {
-  background: #fff;
-  border-bottom: 1px solid #e9ecef;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
 .header-navigation {
-  border-bottom: 1px solid #f8f9fa;
+  border-bottom: 1px solid var(--bg-light);
   padding: 1rem 2rem;
 }
 
@@ -71,7 +71,7 @@
   margin: 0 0 1rem 0;
   font-size: 2.5rem;
   font-weight: 700;
-  color: #212529;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -100,18 +100,18 @@
 }
 
 .tournament-section {
-  background: #fff;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
 }
 
 /* History Section */
 .history-section {
   padding: 2rem;
-  background: #fff;
-  border-radius: 0.5rem;
-  border: 1px solid #e9ecef;
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
 }
 
 .history-title {
@@ -121,7 +121,7 @@
   margin: 0 0 1.5rem 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #495057;
+  color: var(--text-secondary);
 }
 
 .rounds-history {
@@ -131,9 +131,9 @@
 }
 
 .round-summary {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 0.375rem;
+  background: var(--bg-light);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
   padding: 1rem;
   text-align: center;
   transition: transform 0.2s ease-in-out;
@@ -141,14 +141,14 @@
 
 .round-summary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .round-summary h4 {
   margin: 0 0 0.5rem 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #495057;
+  color: var(--text-secondary);
 }
 
 .round-info {
@@ -156,7 +156,7 @@
   flex-direction: column;
   gap: 0.25rem;
   font-size: 0.9rem;
-  color: #6c757d;
+  color: var(--text-muted);
 }
 
 /* Responsive Design */
@@ -293,22 +293,22 @@
 
 /* Focus states for accessibility */
 .tournament-detail-page :focus-visible {
-  outline: 2px solid #007bff;
+  outline: 2px solid var(--brand-primary);
   outline-offset: 2px;
 }
 
 /* High contrast support */
 @media (prefers-contrast: high) {
   .tournament-header {
-    border-bottom: 2px solid #000;
+    border-bottom: 2px solid var(--text-primary);
   }
 
   .tournament-section {
-    border: 2px solid #000;
+    border: 2px solid var(--text-primary);
   }
 
   .winner-badge {
-    border: 2px solid #ffc107;
+    border: 2px solid var(--warning-primary);
   }
 }
 
@@ -329,6 +329,6 @@
 
   .tournament-section {
     box-shadow: none;
-    border: 1px solid #000;
+    border: 1px solid var(--text-primary);
   }
 }

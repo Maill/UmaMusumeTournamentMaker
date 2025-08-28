@@ -10,13 +10,13 @@
 
 /* Page Header */
 .page-header {
-  background: #fff;
-  border-bottom: 1px solid #e9ecef;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .header-navigation {
-  border-bottom: 1px solid #f8f9fa;
+  border-bottom: 1px solid var(--bg-light);
   padding: 1rem 2rem;
 }
 
@@ -37,14 +37,14 @@
   margin: 0 0 1rem 0;
   font-size: 3rem;
   font-weight: 700;
-  color: #212529;
+  color: var(--text-primary);
   line-height: 1.2;
 }
 
 .page-description {
   margin: 0;
   font-size: 1.2rem;
-  color: #6c757d;
+  color: var(--text-muted);
   line-height: 1.6;
 }
 
@@ -55,9 +55,9 @@
 
 /* Help Section */
 .help-section {
-  background: #fff;
-  border-top: 1px solid #e9ecef;
-  border-bottom: 1px solid #e9ecef;
+  background: var(--bg-white);
+  border-top: 1px solid var(--border-primary);
+  border-bottom: 1px solid var(--border-primary);
   padding: 3rem 2rem;
 }
 
@@ -74,7 +74,7 @@
   margin: 0 0 2rem 0;
   font-size: 2rem;
   font-weight: 600;
-  color: #495057;
+  color: var(--text-secondary);
   text-align: center;
 }
 
@@ -85,9 +85,9 @@
 }
 
 .help-card {
-  background: #fff;
-  border: 2px solid #e9ecef;
-  border-radius: 0.75rem;
+  background: var(--bg-white);
+  border: 2px solid var(--border-primary);
+  border-radius: var(--radius-lg);
   padding: 2rem;
   transition: all 0.3s ease-in-out;
   position: relative;
@@ -101,13 +101,13 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #007bff 0%, #17a2b8 100%);
+  background: linear-gradient(90deg, var(--brand-primary) 0%, var(--info-primary) 100%);
 }
 
 .help-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  border-color: #007bff;
+  box-shadow: var(--shadow-lg);
+  border-color: var(--brand-primary);
 }
 
 .help-card-header {
@@ -121,13 +121,13 @@
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #212529;
+  color: var(--text-primary);
 }
 
 .help-card-content p {
   margin: 0 0 1rem 0;
   font-size: 1rem;
-  color: #495057;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
@@ -140,13 +140,13 @@
 .help-card-content li {
   position: relative;
   margin-bottom: 0.5rem;
-  color: #6c757d;
+  color: var(--text-muted);
   line-height: 1.4;
 }
 
 .help-card-content li::before {
   content: '•';
-  color: #007bff;
+  color: var(--brand-primary);
   font-weight: 600;
   position: absolute;
   left: -1rem;
@@ -171,7 +171,7 @@
   margin: 0 0 2rem 0;
   font-size: 1.75rem;
   font-weight: 600;
-  color: #495057;
+  color: var(--text-secondary);
 }
 
 .tips-list {
@@ -185,28 +185,28 @@
   display: flex;
   align-items: flex-start;
   gap: 1rem;
-  background: #fff;
-  border: 1px solid #e9ecef;
-  border-radius: 0.5rem;
+  background: var(--bg-white);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
   padding: 1.5rem;
   transition: all 0.2s ease-in-out;
 }
 
 .tip-item:hover {
   transform: translateX(4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: #28a745;
+  box-shadow: var(--shadow-md);
+  border-color: var(--success-primary);
 }
 
 .tip-text {
   flex: 1;
   font-size: 1rem;
   line-height: 1.5;
-  color: #495057;
+  color: var(--text-secondary);
 }
 
 .tip-text strong {
-  color: #212529;
+  color: var(--text-primary);
 }
 
 /* Responsive Design */
@@ -368,7 +368,7 @@
 
 /* Focus states for accessibility */
 .create-tournament-page :focus-visible {
-  outline: 2px solid #007bff;
+  outline: 2px solid var(--brand-primary);
   outline-offset: 2px;
 }
 
@@ -376,7 +376,7 @@
 @media (prefers-contrast: high) {
   .help-card,
   .tip-item {
-    border: 2px solid #000;
+    border: 2px solid var(--text-primary);
   }
 
   .header-icon {
@@ -396,12 +396,12 @@
 
   .help-section,
   .tips-section {
-    background: #fff;
+    background: var(--bg-white);
   }
 
   .help-card,
   .tip-item {
     box-shadow: none;
-    border: 1px solid #000;
+    border: 1px solid var(--text-primary);
   }
 }

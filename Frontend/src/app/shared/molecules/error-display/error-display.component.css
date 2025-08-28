@@ -1,6 +1,6 @@
 .error-display {
   border: 1px solid;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   padding: 1rem;
   margin: 1rem 0;
 }
@@ -12,21 +12,21 @@
 
 /* Error types */
 .error-error {
-  background-color: #f8d7da;
-  border-color: #f5c6cb;
-  color: #721c24;
+  background-color: var(--danger-bg);
+  border-color: var(--danger-bg-hover);
+  color: var(--text-error);
 }
 
 .error-warning {
-  background-color: #fff3cd;
-  border-color: #ffeaa7;
-  color: #856404;
+  background-color: var(--warning-bg);
+  border-color: var(--warning-bg-hover);
+  color: var(--text-warning);
 }
 
 .error-info {
-  background-color: #d1ecf1;
-  border-color: #bee5eb;
-  color: #0c5460;
+  background-color: var(--info-bg);
+  border-color: var(--info-bg-hover);
+  color: var(--text-info);
 }
 
 /* Content layout */
@@ -136,7 +136,7 @@
 
 /* Focus states for accessibility */
 .error-display:focus-within {
-  outline: 2px solid rgba(13, 110, 253, 0.25);
+  outline: 2px solid var(--focus-shadow-primary);
   outline-offset: 2px;
 }
 
@@ -144,19 +144,19 @@
 @media (prefers-contrast: high) {
   .error-error {
     border-width: 2px;
-    background-color: #fff;
-    border-color: #dc3545;
+    background-color: var(--bg-white);
+    border-color: var(--danger-primary);
   }
   
   .error-warning {
     border-width: 2px;
-    background-color: #fff;
-    border-color: #ffc107;
+    background-color: var(--bg-white);
+    border-color: var(--warning-primary);
   }
   
   .error-info {
     border-width: 2px;
-    background-color: #fff;
-    border-color: #17a2b8;
+    background-color: var(--bg-white);
+    border-color: var(--info-primary);
   }
 }

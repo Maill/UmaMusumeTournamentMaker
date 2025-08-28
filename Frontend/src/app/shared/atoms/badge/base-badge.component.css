@@ -7,7 +7,7 @@
   text-align: center;
   white-space: nowrap;
   vertical-align: baseline;
-  border-radius: 0.25rem;
+  border-radius: var(--radius-sm);
 }
 
 .badge-pill {
@@ -18,53 +18,53 @@
 
 /* Badge variants */
 .badge-primary {
-  color: #fff;
-  background-color: #007bff;
+  color: var(--bg-white);
+  background-color: var(--brand-primary);
 }
 
 .badge-secondary {
-  color: #fff;
-  background-color: #6c757d;
+  color: var(--bg-white);
+  background-color: var(--secondary-primary);
 }
 
 .badge-success {
-  color: #fff;
-  background-color: #28a745;
+  color: var(--bg-white);
+  background-color: var(--success-primary);
 }
 
 .badge-danger {
-  color: #fff;
-  background-color: #dc3545;
+  color: var(--bg-white);
+  background-color: var(--danger-primary);
 }
 
 .badge-warning {
-  color: #212529;
-  background-color: #ffc107;
+  color: var(--text-primary);
+  background-color: var(--warning-primary);
 }
 
 .badge-info {
-  color: #fff;
-  background-color: #17a2b8;
+  color: var(--bg-white);
+  background-color: var(--info-primary);
 }
 
 .badge-light {
-  color: #212529;
-  background-color: #f8f9fa;
+  color: var(--text-primary);
+  background-color: var(--bg-light);
 }
 
 .badge-dark {
-  color: #fff;
-  background-color: #343a40;
+  color: var(--bg-white);
+  background-color: var(--text-primary);
 }
 
 .badge-bronze {
-  color: #fff;
-  background-color: #ac986e;
+  color: var(--bg-white);
+  background-color: var(--rank-bronze);
 }
 
 .badge-silver {
-  color: #fff;
-  background-color: #9ca7b1;
+  color: var(--bg-white);
+  background-color: var(--rank-silver);
 }
 
 /* Dismissible badges */

@@ -2,9 +2,9 @@
   max-width: 600px;
   margin: 0 auto;
   padding: 2rem;
-  background: #fff;
-  border-radius: 0.5rem;
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Form Header */
@@ -16,13 +16,13 @@
 .form-title {
   font-size: 2rem;
   font-weight: 600;
-  color: #212529;
+  color: var(--text-primary);
   margin: 0 0 0.5rem 0;
 }
 
 .form-subtitle {
   font-size: 1rem;
-  color: #6c757d;
+  color: var(--text-muted);
   margin: 0;
   line-height: 1.5;
 }
@@ -40,9 +40,9 @@
 }
 
 .description-card {
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 0.375rem;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
   padding: 1rem;
   transition: all 0.2s ease-in-out;
 }
@@ -57,7 +57,7 @@
 .description-card p {
   margin: 0;
   font-size: 0.9rem;
-  color: #6c757d;
+  color: var(--text-muted);
   line-height: 1.4;
 }
 
@@ -105,7 +105,7 @@
   .tournament-form-container {
     padding: 1.5rem;
     margin: 1rem;
-    border-radius: 0.375rem;
+    border-radius: var(--radius-sm);
   }
   
   .form-title {

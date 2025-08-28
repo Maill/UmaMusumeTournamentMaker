@@ -1,51 +1,51 @@
 .input-label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-sm);
   font-weight: 500;
-  color: #212529;
+  color: var(--text-primary);
 }
 
 .required-asterisk {
-  color: #dc3545;
+  color: var(--danger-primary);
   margin-left: 2px;
 }
 
 .form-control {
   display: block;
   width: 100%;
-  padding: 0.375rem 0.75rem;
+  padding: var(--space-xs) var(--space-sm);
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
-  color: #212529;
-  background-color: #fff;
+  color: var(--text-primary);
+  background-color: var(--bg-white);
   background-clip: padding-box;
-  border: 1px solid #ced4da;
-  border-radius: 0.25rem;
+  border: 1px solid var(--border-form);
+  border-radius: var(--radius-sm);
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .form-control:focus {
-  color: #212529;
-  background-color: #fff;
-  border-color: #86b7fe;
+  color: var(--text-primary);
+  background-color: var(--bg-white);
+  border-color: var(--focus-border);
   outline: 0;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  box-shadow: 0 0 0 0.25rem var(--focus-shadow-primary);
 }
 
 .form-control:disabled {
-  background-color: #e9ecef;
+  background-color: var(--bg-neutral);
   opacity: 1;
   cursor: not-allowed;
 }
 
 .form-control.readonly {
-  background-color: #e9ecef;
+  background-color: var(--bg-neutral);
   opacity: 1;
 }
 
 .form-control.is-invalid {
-  border-color: #dc3545;
+  border-color: var(--danger-primary);
   padding-right: calc(1.5em + 0.75rem);
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
@@ -54,24 +54,24 @@
 }
 
 .form-control.is-invalid:focus {
-  border-color: #dc3545;
-  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+  border-color: var(--danger-primary);
+  box-shadow: 0 0 0 0.25rem var(--focus-shadow-danger);
 }
 
 .input-error {
   width: 100%;
-  margin-top: 0.25rem;
+  margin-top: var(--space-xs);
   font-size: 0.875em;
-  color: #dc3545;
+  color: var(--danger-primary);
 }
 
 .input-help {
-  margin-top: 0.25rem;
+  margin-top: var(--space-xs);
   font-size: 0.875em;
-  color: #6c757d;
+  color: var(--text-muted);
 }
 
 .form-control::placeholder {
-  color: #6c757d;
+  color: var(--text-muted);
   opacity: 1;
 }

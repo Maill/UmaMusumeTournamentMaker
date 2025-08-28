@@ -1,6 +1,6 @@
 .player-management-container {
-  background: #fff;
-  border-radius: 0.5rem;
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
   padding: 1.5rem;
   border: 1px solid #e9ecef;
 }
@@ -22,12 +22,12 @@
   margin: 0 0 0.5rem 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #212529;
+  color: var(--text-primary);
 }
 
 .section-subtitle {
   margin: 0;
-  color: #6c757d;
+  color: var(--text-muted);
   font-size: 1rem;
   line-height: 1.4;
 }
@@ -63,7 +63,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  background: #fff;
+  background: var(--bg-white);
   border: 1px solid #e9ecef;
   border-radius: 0.375rem;
   transition: all 0.2s ease-in-out;
@@ -90,14 +90,14 @@
 
 .player-number {
   font-weight: 600;
-  color: #6c757d;
+  color: var(--text-muted);
   min-width: 30px;
   text-align: right;
 }
 
 .player-name {
   font-weight: 500;
-  color: #212529;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -128,7 +128,7 @@
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
-  color: #6c757d;
+  color: var(--text-muted);
 }
 
 .empty-state h3 {
@@ -147,7 +147,7 @@
 .start-tournament-section {
   background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
   border: 1px solid #c3e6cb;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   padding: 1.5rem;
   text-align: center;
   margin-bottom: 1rem;

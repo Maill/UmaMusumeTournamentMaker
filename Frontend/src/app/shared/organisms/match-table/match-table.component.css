@@ -1,15 +1,15 @@
 .match-table-container {
-  background: #fff;
-  border-radius: 0.5rem;
-  border: 1px solid #e9ecef;
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
   overflow: hidden;
 }
 
 /* Table Header */
 .table-header {
-  background: #fff;
-  border-bottom: 1px solid #dee2e6;
-  padding: 1.5rem;
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border-default);
+  padding: var(--space-lg);
 }
 
 .header-info {
@@ -17,17 +17,17 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
 .table-title {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-sm);
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #212529;
+  color: var(--text-primary);
 }
 
 .round-status {
@@ -39,7 +39,7 @@
 
 .match-count {
   font-size: 0.9rem;
-  color: #6c757d;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
@@ -49,13 +49,13 @@
   justify-content: center;
   align-items: center;
   padding: 4rem 2rem;
-  background-color: #f8f9fa;
+  background-color: var(--bg-light);
 }
 
 /* Table Container */
 .table-container {
   overflow-x: auto;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--border-primary);
 }
 
 .matches-table {
@@ -66,12 +66,12 @@
 }
 
 .matches-table th {
-  background-color: #f8f9fa;
-  color: #495057;
+  background-color: var(--bg-light);
+  color: var(--text-secondary);
   font-weight: 600;
   text-align: left;
   padding: 1rem 0.75rem;
-  border-bottom: 2px solid #dee2e6;
+  border-bottom: 2px solid var(--border-default);
   white-space: nowrap;
 }
 
@@ -98,8 +98,8 @@
 
 /* Table Summary */
 .table-summary {
-  background-color: #f8f9fa;
-  border-top: 1px solid #e9ecef;
+  background-color: var(--bg-light);
+  border-top: 1px solid var(--border-primary);
   padding: 1rem 1.5rem;
 }
 
@@ -116,7 +116,7 @@
   gap: 0.5rem;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #495057;
+  color: var(--text-secondary);
 }
 
 /* Progress Bar */
@@ -129,14 +129,14 @@
 .progress-bar {
   flex: 1;
   height: 8px;
-  background-color: #e9ecef;
+  background-color: var(--bg-neutral);
   border-radius: 4px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #ffc107 0%, #28a745 100%);
+  background: linear-gradient(90deg, var(--warning-primary) 0%, var(--success-primary) 100%);
   border-radius: 4px;
   transition: width 0.3s ease-in-out;
 }
@@ -144,15 +144,15 @@
 .progress-text {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #495057;
+  color: var(--text-secondary);
   min-width: 80px;
   text-align: right;
 }
 
 /* Next Round Section */
 .next-round-section {
-  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-  border-top: 1px solid #c3e6cb;
+  background: linear-gradient(135deg, var(--success-bg) 0%, var(--success-bg-hover) 100%);
+  border-top: 1px solid var(--success-bg-hover);
   padding: 1.5rem;
   display: flex;
   justify-content: space-between;
@@ -168,13 +168,13 @@
 
 .next-round-text h4 {
   margin: 0 0 0.25rem 0;
-  color: #155724;
+  color: var(--text-success);
   font-size: 1.1rem;
 }
 
 .next-round-text p {
   margin: 0;
-  color: #155724;
+  color: var(--text-success);
   opacity: 0.8;
   font-size: 0.9rem;
 }
@@ -185,9 +185,9 @@
   align-items: center;
   gap: 0.75rem;
   padding: 1rem 1.5rem;
-  background-color: #d1ecf1;
-  border-top: 1px solid #bee5eb;
-  color: #0c5460;
+  background-color: var(--info-bg);
+  border-top: 1px solid var(--info-bg-hover);
+  color: var(--text-info);
 }
 
 .instructions p {
@@ -200,8 +200,8 @@
 .empty-state {
   text-align: center;
   padding: 4rem 2rem;
-  color: #6c757d;
-  background-color: #f8f9fa;
+  color: var(--text-muted);
+  background-color: var(--bg-light);
 }
 
 .empty-state h3 {
@@ -330,9 +330,9 @@
 
 /* Hover effects for interactive elements */
 .next-round-section:hover {
-  background: linear-gradient(135deg, #c3e6cb 0%, #b8dabc 100%);
+  background: linear-gradient(135deg, var(--success-bg-hover) 0%, #b8dabc 100%);
 }
 
 .instructions:hover {
-  background-color: #bee5eb;
+  background-color: var(--info-bg-hover);
 }

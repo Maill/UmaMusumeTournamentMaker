@@ -1,34 +1,34 @@
 /* Sizes */
 .spinner-sm {
-  padding: 1rem;
+  padding: var(--space-md);
   border-width: 0.125em;
 }
 
 .spinner-md {
-  padding: 2rem;
+  padding: var(--space-xl);
   border-width: 0.25em;
 }
 
 .spinner-lg {
-  padding: 3rem;
+  padding: var(--space-2xl);
   border-width: 0.375em;
 }
 
 /* Variants */
 .spinner-primary {
-  border-color: #007bff;
+  border-color: var(--brand-primary);
 }
 
 .spinner-secondary {
-  border-color: #6c757d;
+  border-color: var(--secondary-primary);
 }
 
 .spinner-light {
-  border-color: #f8f9fa;
+  border-color: var(--bg-light);
 }
 
 .spinner-dark {
-  border-color: #343a40;
+  border-color: var(--text-primary);
 }
 
 /* Overlay spinner */
@@ -38,7 +38,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 9999;*/
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--overlay-light);
 }
 
 .spinner-overlay::before {

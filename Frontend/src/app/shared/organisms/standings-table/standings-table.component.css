@@ -41,7 +41,6 @@
 }
 
 .champion-content {
-  /*display: flex;*/
   align-items: center;
   gap: 1rem;
   text-align: center;
@@ -50,7 +49,6 @@
 .champion-text h2 {
   margin: 0 0 0.5rem 0.5rem;
   color: var(--text-warning);
-  /*font-size: 1.3rem;*/
   font-weight: 700;
 }
 
@@ -156,7 +154,6 @@
 
 .stat-item {
   display: flex;
-  /* align-items: center; */
   gap: 0.5rem;
   font-size: 0.9rem;
 }

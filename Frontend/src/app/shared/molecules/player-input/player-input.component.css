@@ -6,7 +6,6 @@
   position: relative;
   display: flex;
   flex-wrap: wrap;
-  /*align-items: stretch;*/
   width: 100%;
 }
 
@@ -27,10 +26,6 @@
   position: relative;
   z-index: 2;
 }
-
-/*app-button button {
-  height: auto;
-}*/
 
 app-input ::ng-deep .form-control {
   padding: 6.25px var(--space-md);

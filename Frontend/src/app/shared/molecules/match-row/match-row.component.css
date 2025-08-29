@@ -43,10 +43,6 @@
   width: 80px;
 }
 
-.match-label {
-  /* font-size: 0.9rem; */
-}
-
 /* Players column */
 .match-players {
   min-width: 200px;
@@ -84,7 +80,6 @@
 .vs-separator {
   font-weight: 600;
   color: var(--text-muted);
-  /* font-size: 0.85rem; */
 }
 
 /* Status column */
@@ -133,9 +128,6 @@
 
 /* Badge overrides */
 :host ::ng-deep .badge {
-  /* display: flex; */
-  /* align-items: center; */
-  /* gap: var(--space-xs); */
   justify-content: center;
   min-width: 90px;
 }

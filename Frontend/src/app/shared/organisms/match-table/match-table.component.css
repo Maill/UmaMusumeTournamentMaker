@@ -59,10 +59,8 @@
 }
 
 .matches-table {
-  /* width: 100%; */
   border-collapse: collapse;
   font-size: 0.9rem;
-  /* table-layout: fixed; */
 }
 
 .matches-table th {
@@ -113,7 +111,6 @@
 
 .stat-item {
   display: flex;
-  /* align-items: center; */
   gap: 0.5rem;
   font-size: 0.9rem;
   font-weight: 500;

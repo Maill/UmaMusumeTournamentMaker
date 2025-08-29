@@ -1,0 +1,144 @@
+<div class="create-tournament-page">
+  <div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-navigation">
+        <app-button variant="outline-secondary" size="sm" (clicked)="goBack()">
+          <app-icon name="arrow-left" size="xs"></app-icon>
+          Back to Tournaments
+        </app-button>
+      </div>
+
+      <div class="header-content">
+        <!--<div class="header-icon">
+          <app-icon
+            name="add"
+            size="xl"
+            color="primary"
+            ariaLabel="Create tournament">
+          </app-icon>
+        </div>-->
+
+        <div class="header-text">
+          <h1 class="page-title">Create New Tournament</h1>
+          <p class="page-description">Set up a new tournament and invite players to compete.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tournament Form -->
+    <div class="form-section">
+      <app-tournament-form
+        [title]="'Tournament Details'"
+        [subtitle]="'Configure your tournament settings and rules'"
+        [submitText]="'Create Tournament'"
+        [submitLoadingText]="'Creating Tournament...'"
+        [cancelText]="'Cancel'"
+        [showCancel]="true"
+        [initialData]="state.formData || undefined"
+        [state]="getFormState()"
+        (formSubmitted)="onCreateTournament($event)"
+        (formCancelled)="onCancel()"
+        (formChanged)="onFormChange($event)"
+        (errorDismissed)="clearError()"
+      >
+      </app-tournament-form>
+    </div>
+
+    <!-- Help Section -->
+    <div class="help-section">
+      <div class="help-content">
+        <h2 class="help-title">
+          <app-icon name="info" size="md" color="info"></app-icon>
+          Tournament Types
+        </h2>
+
+        <div class="help-cards">
+          <div class="help-card">
+            <div class="help-card-header">
+              <app-icon name="target" size="lg" color="primary"></app-icon>
+              <h3>Swiss Tournament</h3>
+            </div>
+            <div class="help-card-content">
+              <p>
+                <strong>Best for:</strong> Balanced competition where all players get to play
+                multiple rounds.
+              </p>
+              <ul>
+                <li>
+                  Players plays everyone and are paired based on current standings if possible
+                </li>
+                <li>Everyone plays the same number of rounds</li>
+                <li>Continues until a clear winner emerges via tiebreaker rounds</li>
+                <li>Great for skill-based tournaments</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="help-card">
+            <div class="help-card-header">
+              <app-icon name="star" size="lg" color="info"></app-icon>
+              <h3>Champions Meeting (W.I.P)</h3>
+            </div>
+            <div class="help-card-content">
+              <p>
+                <strong>Best for:</strong> Elite competitions with group divisions and
+                advancement.
+              </p>
+              <ul>
+                <li>Multi-stage tournament structure</li>
+                <li>Group divisions based on performance</li>
+                <li>Top performers advance to final groups</li>
+                <li>Perfect for championship events</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tips Section -->
+    <div class="tips-section">
+      <div class="tips-content">
+        <h2 class="tips-title">
+          <app-icon name="lightbulb" size="md" color="warning"></app-icon>
+          Pro Tips
+        </h2>
+
+        <div class="tips-list">
+          <div class="tip-item">
+            <app-icon name="check" size="sm" color="success"></app-icon>
+            <div class="tip-text">
+              <strong>Name wisely:</strong> Choose a descriptive name that players will
+              recognize and remember.
+            </div>
+          </div>
+
+          <div class="tip-item">
+            <app-icon name="check" size="sm" color="success"></app-icon>
+            <div class="tip-text">
+              <strong>Set a password:</strong> Use a password to control who can manage the
+              tournament and set match results.
+            </div>
+          </div>
+
+          <!-- <div class="tip-item"> TODO : Redo text
+            <app-icon name="check" size="sm" color="success"></app-icon>
+            <div class="tip-text">
+              <strong>Plan ahead:</strong> Consider how many rounds you want and the time needed
+              for each match.
+            </div>
+          </div> -->
+
+          <div class="tip-item">
+            <app-icon name="check" size="sm" color="success"></app-icon>
+            <div class="tip-text">
+              <strong>Minimum players:</strong> You'll need at least 3 players to start any
+              tournament.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

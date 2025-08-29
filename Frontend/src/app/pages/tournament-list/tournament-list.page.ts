@@ -6,8 +6,8 @@ import { Subject, takeUntil } from 'rxjs';
 // Import organisms and molecules
 import { BaseButtonComponent } from '../../shared/atoms/button/base-button.component';
 import { BaseIconComponent } from '../../shared/atoms/icon/base-icon.component';
-import { LoadingSpinnerComponent } from '../../shared/atoms/spinner/loading-spinner.component';
 import { ErrorDisplayComponent } from '../../shared/molecules/error-display/error-display.component';
+import { TournamentCardSkeletonComponent } from '../../shared/molecules/tournament-card-skeleton/tournament-card-skeleton.component';
 import { TournamentCardComponent } from '../../shared/molecules/tournament-card/tournament-card.component';
 
 // Import types and services
@@ -32,156 +32,12 @@ interface TournamentListState {
   imports: [
     CommonModule,
     TournamentCardComponent,
+    TournamentCardSkeletonComponent,
     ErrorDisplayComponent,
-    LoadingSpinnerComponent,
     BaseButtonComponent,
     BaseIconComponent,
   ],
-  template: `
-    <div class="tournament-list-page">
-      <!-- Page Header -->
-      <div class="page-header">
-        <div class="header-content">
-          <div class="header-info">
-            <h1 class="page-title">
-              <app-icon name="trophy" size="xl" color="primary" ariaLabel="Tournaments"> </app-icon>
-              Tournaments
-            </h1>
-            <p class="page-subtitle">Manage and participate in competitive tournaments</p>
-          </div>
-
-          <div class="header-actions">
-            <app-button variant="primary" size="lg" (clicked)="onCreateTournament()">
-              <!--<app-icon name="add" size="sm"> </app-icon>-->
-              Create Tournament
-            </app-button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Main Content -->
-      <div class="page-content">
-        <!-- Loading State -->
-        @if (state.isLoading && !state.hasLoaded) {
-        <div class="loading-section">
-          <app-loading-spinner
-            size="lg"
-            variant="primary"
-            loadingText="Loading tournaments..."
-            [overlay]="false"
-          >
-          </app-loading-spinner>
-          <p class="loading-text">Fetching your tournaments...</p>
-        </div>
-        }
-
-        <!-- Error State -->
-        @if (state.error && !state.isLoading) {
-        <div class="error-section">
-          <app-error-display
-            [message]="state.error"
-            type="error"
-            [retryable]="true"
-            retryText="Retry Loading"
-            title="Failed to Load Tournaments"
-            (retryClicked)="loadTournaments()"
-            (dismissed)="clearError()"
-          >
-          </app-error-display>
-        </div>
-        }
-
-        <!-- Tournaments Grid -->
-        @if (!state.isLoading && !state.error && state.tournaments.length > 0) {
-        <div class="tournaments-section">
-          <!-- Tournament Stats -->
-          <div class="tournaments-stats">
-            <div class="stat-card">
-              <app-icon name="trophy" size="lg" color="primary"></app-icon>
-              <div class="stat-content">
-                <span class="stat-value">{{ state.tournaments.length }}</span>
-                <span class="stat-label">Total Tournaments</span>
-              </div>
-            </div>
-
-            <div class="stat-card">
-              <app-icon name="play" size="md" color="success"></app-icon>
-              <div class="stat-content">
-                <span class="stat-value">{{ getActiveTournamentsCount() }}</span>
-                <span class="stat-label">Active</span>
-              </div>
-            </div>
-
-            <div class="stat-card">
-              <app-icon name="check" size="md" color="warning"></app-icon>
-              <div class="stat-content">
-                <span class="stat-value">{{ getCompletedTournamentsCount() }}</span>
-                <span class="stat-label">Completed</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Filter/Sort Options -->
-          <div class="tournaments-filters">
-            <div class="filter-info">
-              <span class="results-count">
-                Showing {{ getFilteredTournaments().length }} tournaments
-              </span>
-            </div>
-
-            <div class="filter-actions">
-              <app-button
-                variant="outline-secondary"
-                size="sm"
-                [loading]="state.isLoading"
-                (clicked)="refreshTournaments()"
-              >
-                <app-icon name="refresh" size="xs"></app-icon>
-                Refresh
-              </app-button>
-            </div>
-          </div>
-
-          <!-- Tournaments Grid -->
-          <div class="tournaments-grid">
-            @for (tournament of getFilteredTournaments(); track tournament.id) {
-            <app-tournament-card
-              [tournament]="mapToCardData(tournament)"
-              [clickable]="true"
-              [showActions]="true"
-              (cardClicked)="onTournamentClick($event)"
-            >
-            </app-tournament-card>
-            }
-          </div>
-        </div>
-        }
-
-        <!-- Empty State -->
-        @if (!state.isLoading && !state.error && state.tournaments.length === 0 && state.hasLoaded)
-        {
-        <div class="empty-state">
-          <div class="empty-content">
-            <app-icon name="trophy" size="xxl" color="secondary" ariaLabel="No tournaments">
-            </app-icon>
-            <h2>No Tournaments Found</h2>
-            <p>
-              You haven't created any tournaments yet. Get started by creating your first
-              tournament!
-            </p>
-
-            <div class="empty-actions">
-              <app-button variant="primary" size="lg" (clicked)="onCreateTournament()">
-                <!--<app-icon name="add" size="sm"> </app-icon>-->
-                Create Your First Tournament
-              </app-button>
-            </div>
-          </div>
-        </div>
-        }
-      </div>
-    </div>
-  `,
+  templateUrl: './tournament-list.page.html',
   styleUrl: './tournament-list.page.css',
 })
 export class TournamentListPageComponent implements OnInit, OnDestroy {

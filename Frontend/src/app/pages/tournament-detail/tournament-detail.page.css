@@ -79,9 +79,13 @@
 
 .tournament-meta {
   display: flex;
-  align-items: center;
+  /* align-items: center; */
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+:host .tournament-meta ::ng-deep .badge {
+  font-size: 0.85rem;
 }
 
 .header-actions {

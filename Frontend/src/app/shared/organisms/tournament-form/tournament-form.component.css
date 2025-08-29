@@ -70,27 +70,27 @@
 }
 
 /* Input group styling */
-.tournament-form ::ng-deep .input-wrapper {
+:host ::ng-deep .input-wrapper {
   margin-bottom: 0;
 }
 
-.tournament-form ::ng-deep .select-wrapper {
+:host ::ng-deep .select-wrapper {
   margin-bottom: 0;
 }
 
 /* Focus states */
-.tournament-form ::ng-deep .form-control:focus {
+:host ::ng-deep .form-control:focus {
   border-color: #007bff;
   box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 
-.tournament-form ::ng-deep .form-select:focus {
+:host ::ng-deep .form-select:focus {
   border-color: #007bff;
   box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 
 /* Error display adjustments */
-.tournament-form-container ::ng-deep .error-display {
+:host ::ng-deep .error-display {
   margin: 0 0 1.5rem 0;
 }
 

@@ -140,12 +140,12 @@
 }
 
 /* Badge styling overrides */
-.tournament-card ::ng-deep .type-badge .badge {
+:host ::ng-deep .type-badge .badge {
   font-size: 0.625rem;
   padding: 0.2em 0.4em;
 }
 
-.tournament-card ::ng-deep .status-badge .badge {
+:host ::ng-deep .status-badge .badge {
   font-size: 0.625rem;
   padding: 0.2em 0.4em;
 }

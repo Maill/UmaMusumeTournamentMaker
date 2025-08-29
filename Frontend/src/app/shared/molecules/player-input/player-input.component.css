@@ -27,17 +27,17 @@
   z-index: 2;
 }
 
-app-input ::ng-deep .form-control {
-  padding: 6.25px var(--space-md);
+:host app-input ::ng-deep .form-control {
+  padding: 5px var(--space-md) 6.25px var(--space-md);
 }
 
 /* Ensure input and button heights match */
-.input-group app-input ::ng-deep .form-control {
+:host .input-group app-input ::ng-deep .form-control {
   border-bottom-right-radius: 0;
   border-top-right-radius: 0;
 }
 
-.input-group-append app-button ::ng-deep .btn {
+:host .input-group-append app-button ::ng-deep .btn {
   border-bottom-left-radius: 0;
   border-top-left-radius: 0;
   height: calc(1.5em + 0.75rem + 2px); /* Match input height */
@@ -46,11 +46,11 @@ app-input ::ng-deep .form-control {
 }
 
 /* Focus states */
-.input-group app-input ::ng-deep .form-control:focus {
+:host .input-group app-input ::ng-deep .form-control:focus {
   z-index: 3;
 }
 
-.input-group-append app-button ::ng-deep .btn:focus {
+:host .input-group-append app-button ::ng-deep .btn:focus {
   z-index: 3;
 }
 
@@ -64,7 +64,7 @@ app-input ::ng-deep .form-control {
     margin-bottom: 0.5rem;
   }
 
-  .input-group app-input ::ng-deep .form-control {
+  :host .input-group app-input ::ng-deep .form-control {
     border-radius: var(--radius-sm);
   }
 
@@ -72,7 +72,7 @@ app-input ::ng-deep .form-control {
     margin-left: 0;
   }
 
-  .input-group-append app-button ::ng-deep .btn {
+  :host .input-group-append app-button ::ng-deep .btn {
     border-radius: var(--radius-sm);
     width: 100%;
   }

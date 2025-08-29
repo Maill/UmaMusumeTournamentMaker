@@ -214,7 +214,7 @@
 }
 
 /* Badge overrides */
-.match-table-container ::ng-deep .badge {
+:host ::ng-deep .badge {
   font-size: 0.75rem;
   display: flex;
   align-items: center;

@@ -97,7 +97,7 @@
 }
 
 /* Button overrides for error display */
-.error-display ::ng-deep .btn-sm {
+:host ::ng-deep .btn-sm {
   padding: 0.25rem 0.5rem;
   font-size: 0.8rem;
 }

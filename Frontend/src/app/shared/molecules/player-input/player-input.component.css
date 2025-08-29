@@ -6,7 +6,7 @@
   position: relative;
   display: flex;
   flex-wrap: wrap;
-  align-items: stretch;
+  /*align-items: stretch;*/
   width: 100%;
 }
 
@@ -18,14 +18,22 @@
 }
 
 .input-group-append {
-  margin-left: -1px;
+  margin-left: 4px;
   display: flex;
-  align-items: end;
+  align-items: center;
 }
 
 .input-group-append app-button {
   position: relative;
   z-index: 2;
+}
+
+/*app-button button {
+  height: auto;
+}*/
+
+app-input ::ng-deep .form-control {
+  padding: 6.25px var(--space-md);
 }
 
 /* Ensure input and button heights match */

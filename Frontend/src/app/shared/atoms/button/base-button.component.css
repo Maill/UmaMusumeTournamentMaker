@@ -1,17 +1,18 @@
 .btn {
-  display: inline-block;
-  padding: var(--space-xs) var(--space-sm);
-  margin-bottom: 0;
-  font-size: 1rem;
+  /* display: inline-block; */
+  /*padding: var(--space-sm) var(--space-lg);*/
+  /*margin-bottom: 0;*/
+  /*font-size: 1rem;*/
   font-weight: 400;
-  line-height: 1.5;
+  /*line-height: 1.5;*/
   text-align: center;
   text-decoration: none;
   vertical-align: middle;
   cursor: pointer;
   border: 1px solid var(--border-none);
   border-radius: var(--radius-sm);
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out;
   user-select: none;
 }
 
@@ -103,20 +104,21 @@
   padding: var(--space-xs) var(--space-sm);
   font-size: 0.875rem;
   line-height: 1.5;
-  border-radius: var(--radius-sm);
+  /* border-radius: var(--radius-sm); */
 }
 
 .btn-md {
   padding: var(--space-xs) var(--space-sm);
   font-size: 1rem;
   line-height: 1.5;
+  /* border-radius: var(--radius-sm); */
 }
 
 .btn-lg {
   padding: var(--space-sm) var(--space-md);
   font-size: 1.25rem;
   line-height: 1.5;
-  border-radius: var(--radius-sm);
+  /*border-radius: var(--radius-sm);*/
 }
 
 /* Full width */

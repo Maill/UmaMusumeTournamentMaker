@@ -85,6 +85,7 @@
 /* Player cell */
 .player-cell {
   min-width: 200px;
+  padding-left: 13px !important;
 }
 
 .player-info {

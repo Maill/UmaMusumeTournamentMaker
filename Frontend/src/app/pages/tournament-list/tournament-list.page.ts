@@ -97,7 +97,7 @@ interface TournamentListState {
           <!-- Tournament Stats -->
           <div class="tournaments-stats">
             <div class="stat-card">
-              <app-icon name="trophy" size="md" color="primary"></app-icon>
+              <app-icon name="trophy" size="lg" color="primary"></app-icon>
               <div class="stat-content">
                 <span class="stat-value">{{ state.tournaments.length }}</span>
                 <span class="stat-label">Total Tournaments</span>

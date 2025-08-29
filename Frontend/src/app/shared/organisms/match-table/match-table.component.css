@@ -59,10 +59,10 @@
 }
 
 .matches-table {
-  width: 100%;
+  /* width: 100%; */
   border-collapse: collapse;
   font-size: 0.9rem;
-  table-layout: fixed;
+  /* table-layout: fixed; */
 }
 
 .matches-table th {
@@ -78,6 +78,7 @@
 /* Column widths - Distribute across full width */
 .match-col {
   width: 12%;
+  text-align: center !important;
 }
 .players-col {
   width: 35%;
@@ -112,7 +113,7 @@
 
 .stat-item {
   display: flex;
-  align-items: center;
+  /* align-items: center; */
   gap: 0.5rem;
   font-size: 0.9rem;
   font-weight: 500;
@@ -130,14 +131,14 @@
   flex: 1;
   height: 8px;
   background-color: var(--bg-neutral);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--warning-primary) 0%, var(--success-primary) 100%);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   transition: width 0.3s ease-in-out;
 }
 

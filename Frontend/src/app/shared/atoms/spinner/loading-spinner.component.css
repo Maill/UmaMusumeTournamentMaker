@@ -63,7 +63,7 @@
 
 .spinner {
   border-bottom-color: transparent;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   display: inline-block;
   box-sizing: border-box;
   animation: rotation 1s linear infinite;

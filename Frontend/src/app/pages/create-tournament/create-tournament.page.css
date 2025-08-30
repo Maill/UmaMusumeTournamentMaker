@@ -1,0 +1,402 @@
+.create-tournament-page {
+  min-height: 100vh;
+}
+
+.page-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* Page Header */
+.page-header {
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.header-navigation {
+  border-bottom: 1px solid var(--bg-light);
+  padding: 1rem 2rem;
+}
+
+.header-content {
+  padding: 3rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.header-text {
+  max-width: 600px;
+}
+
+.page-title {
+  margin: 0 0 1rem 0;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.page-description {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* Form Section */
+.form-section {
+  padding: 2rem;
+}
+
+/* Help Section */
+.help-section {
+  background: var(--bg-white);
+  border-top: 1px solid var(--border-primary);
+  border-bottom: 1px solid var(--border-primary);
+  padding: 3rem 2rem;
+}
+
+.help-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.help-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0 0 2rem 0;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.help-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.help-card {
+  background: var(--bg-white);
+  border: 2px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  transition: all 0.3s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.help-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--brand-primary) 0%, var(--info-primary) 100%);
+}
+
+.help-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--brand-primary);
+}
+
+.help-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.help-card-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.help-card-content p {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.help-card-content ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style: none;
+}
+
+.help-card-content li {
+  position: relative;
+  margin-bottom: 0.5rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.help-card-content li::before {
+  content: '•';
+  color: var(--brand-primary);
+  font-weight: 600;
+  position: absolute;
+  left: -1rem;
+}
+
+/* Tips Section */
+.tips-section {
+  padding: 3rem 2rem;
+}
+
+.tips-content {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.tips-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: left;
+}
+
+.tip-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: var(--bg-white);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.tip-item:hover {
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--success-primary);
+}
+
+.tip-text {
+  flex: 1;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.tip-text strong {
+  color: var(--text-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .help-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-navigation,
+  .header-content,
+  .form-section,
+  .help-section,
+  .tips-section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .header-content {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
+  .header-icon {
+    width: 100px;
+    height: 100px;
+  }
+
+  .page-title {
+    font-size: 2rem;
+  }
+
+  .page-description {
+    font-size: 1.1rem;
+  }
+
+  .help-title,
+  .tips-title {
+    font-size: 1.5rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .help-section,
+  .tips-section {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .page-container {
+    margin: 0;
+  }
+
+  .header-navigation,
+  .header-content,
+  .form-section,
+  .help-section,
+  .tips-section {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .header-content {
+    gap: 1rem;
+  }
+
+  .header-icon {
+    width: 80px;
+    height: 80px;
+  }
+
+  .page-title {
+    font-size: 1.75rem;
+  }
+
+  .help-card,
+  .tip-item {
+    padding: 1rem;
+  }
+
+  .help-card-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .tip-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+  }
+}
+
+/* Animation for sections */
+.form-section,
+.help-section,
+.tips-section {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.help-section {
+  animation-delay: 0.2s;
+}
+
+.tips-section {
+  animation-delay: 0.4s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation for help cards */
+.help-card:nth-child(1) {
+  animation: slideInLeft 0.6s ease-out 0.6s both;
+}
+
+.help-card:nth-child(2) {
+  animation: slideInRight 0.6s ease-out 0.8s both;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Focus states for accessibility */
+.create-tournament-page :focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+/* High contrast support */
+@media (prefers-contrast: high) {
+  .help-card,
+  .tip-item {
+    border: 2px solid var(--text-primary);
+  }
+
+  .header-icon {
+    border: 3px solid #000;
+  }
+}
+
+/* Print styles */
+@media print {
+  .page-header {
+    box-shadow: none;
+  }
+
+  .header-navigation {
+    display: none;
+  }
+
+  .help-section,
+  .tips-section {
+    background: var(--bg-white);
+  }
+
+  .help-card,
+  .tip-item {
+    box-shadow: none;
+    border: 1px solid var(--text-primary);
+  }
+}

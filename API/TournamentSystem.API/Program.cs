@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using UmaMusumeTournamentMaker.API.Middleware;
 using UmaMusumeTournamentMaker.API.Application.Interfaces;
 using UmaMusumeTournamentMaker.API.Application.Interfaces.Repositories;
 using UmaMusumeTournamentMaker.API.Application.Services;
@@ -12,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Configure database based on environment
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") ?? builder.Configuration.GetConnectionString("DefaultConnection");
 #if DEBUG
 var provider = builder.Configuration.GetValue("Provider", "SQLite");
 #else
@@ -64,15 +67,40 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        if (builder.Environment.IsDevelopment())
+        {
+            policy.WithOrigins("http://localhost:4200")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials(); // Required for SignalR
+        }
+        else
+        {
+            policy.WithOrigins("https://umamusumetournamentmaker-599360421785.europe-west1.run.app")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // Required for SignalR
+        }
     });
+});
+
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<GzipCompressionProvider>();
+    options.Providers.Add<BrotliCompressionProvider>();
 });
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services
+    .AddHealthChecks()
+    .AddDbContextCheck<TournamentDbContext>(
+        failureStatus: HealthStatus.Unhealthy,
+        customTestQuery: (ctx, ct) => {
+            return Task.FromResult(ctx.Database.GetAppliedMigrations().Any());
+        });
 
 var app = builder.Build();
 
@@ -90,6 +118,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseDefaultFiles();
+
+// Use custom middleware for pre-compressed static files
+app.UseMiddleware<PrecompressedStaticFileMiddleware>();
+
 app.UseStaticFiles();
 
 app.MapFallbackToFile("index.html");
@@ -97,6 +129,10 @@ app.MapFallbackToFile("index.html");
 app.UseCors();
 app.UseHttpsRedirection();
 app.MapControllers();
+
+app.UseResponseCompression();
+
+app.MapHealthChecks("api/health");
 
 // Map SignalR hub
 app.MapHub<TournamentHub>("/tournamentHub");

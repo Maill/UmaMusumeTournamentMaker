@@ -1,0 +1,251 @@
+:host {
+  transition: all 0.2s ease-in-out;
+  border-left: 4px solid transparent;
+}
+
+:host:hover {
+  background-color: var(--bg-light);
+}
+
+/* Ranking highlights */
+:host(.champion) {
+  background-color: var(--warning-bg-light);
+  border-left-color: var(--warning-bright);
+}
+
+:host(.champion):hover {
+  background-color: var(--warning-bg);
+}
+
+:host(.runner-up) {
+  background-color: var(--bg-light);
+  border-left-color: var(--rank-silver);
+}
+
+:host(.runner-up):hover {
+  background-color: var(--bg-neutral);
+}
+
+:host(.third-place) {
+  background-color: #ebe0cd;
+  border-left-color: var(--rank-bronze);
+}
+
+:host(.third-place):hover {
+  background-color: #ebdbc2;
+}
+
+/* Cell styling */
+:host td {
+  padding: var(--space-sm);
+  vertical-align: middle;
+  border-top: 1px solid var(--border-default);
+}
+
+/* Rank cell */
+.rank-cell {
+  width: 80px;
+  text-align: center;
+}
+
+.rank-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.rank-number {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 30px;
+}
+
+.rank-text {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.rank-text.gold {
+  color: var(--warning-primary);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.rank-text.silver {
+  color: var(--text-muted);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.rank-text.bronze {
+  color: var(--text-bronze);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Player cell */
+.player-cell {
+  min-width: 200px;
+  padding-left: 13px !important;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.player-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+/* Stat cells */
+.stat-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Specific stat styling */
+.points-cell {
+  width: 80px;
+  background-color: rgba(13, 110, 253, 0.05);
+}
+
+.wins-cell .stat-display.wins .stat-value {
+  color: var(--success-primary);
+}
+
+.losses-cell .stat-display.losses .stat-value {
+  color: var(--danger-primary);
+}
+
+/* Win rate cell */
+.winrate-cell {
+  width: 120px;
+}
+
+.winrate-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.winrate-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Games played cell */
+.games-cell {
+  width: 80px;
+}
+
+/* Badge overrides */
+:host ::ng-deep .badge {
+  font-size: 0.7rem;
+  padding: 0.2em 0.5em;
+}
+
+/* Responsive design */
+@media (max-width: 992px) {
+  .rank-display {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .rank-text {
+    font-size: 0.8rem;
+  }
+
+  .stat-value {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .standings-row td {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .player-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+
+  .winrate-bar {
+    width: 60px;
+    height: 4px;
+  }
+
+  .stat-value {
+    font-size: 0.95rem;
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 576px) {
+  :host {
+    display: block;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-md);
+    padding: var(--space-md);
+  }
+
+  :host td {
+    display: block;
+    border: none;
+    padding: var(--space-xs) 0;
+  }
+
+  .rank-cell,
+  .player-cell {
+    margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-primary);
+  }
+
+  .rank-display {
+    justify-content: flex-start;
+  }
+
+  .player-info {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .stat-display {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .winrate-display {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}

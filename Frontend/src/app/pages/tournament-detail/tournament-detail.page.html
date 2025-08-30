@@ -1,0 +1,183 @@
+<div class="tournament-detail-page">
+  <!-- Loading State -->
+  @if (state.isLoading && !state.tournament) {
+  <div class="page-loading">
+    <app-loading-spinner
+      size="lg"
+      variant="primary"
+      loadingText="Loading tournament..."
+      [overlay]="true"
+    >
+    </app-loading-spinner>
+  </div>
+  }
+
+  <!-- Error State -->
+  @if (state.error && !state.tournament) {
+  <div class="page-error">
+    <app-error-display
+      [message]="state.error"
+      type="error"
+      [retryable]="true"
+      retryText="Reload Tournament"
+      title="Failed to Load Tournament"
+      (retryClicked)="loadTournament()"
+      (dismissed)="clearError()"
+    >
+    </app-error-display>
+
+    <div class="error-actions">
+      <app-button variant="outline-secondary" (clicked)="goBack()">
+        <app-icon name="arrow-left" size="sm"></app-icon>
+        Back to Tournaments
+      </app-button>
+    </div>
+  </div>
+  }
+
+  <!-- Tournament Content -->
+  @if (state.tournament) {
+  <div class="tournament-content">
+    <!-- Tournament Header -->
+    <div class="tournament-header">
+      <div class="header-navigation">
+        <app-button variant="outline-secondary" size="sm" (clicked)="goBack()">
+          <app-icon name="arrow-left" size="xs"></app-icon>
+          Back to Tournaments
+        </app-button>
+      </div>
+
+      <div class="header-main">
+        <div class="tournament-info">
+          <h1 class="tournament-name">{{ state.tournament.name }}</h1>
+
+          <div class="tournament-meta">
+            <app-badge [variant]="getTypeVariant()">
+              {{ getTournamentTypeName() }}
+            </app-badge>
+
+            <app-badge [variant]="getStatusVariant()">
+              {{ getStatusText() }}
+            </app-badge>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          @if (!state.managementMode) {
+          <app-button variant="primary" (clicked)="enterManagementMode()">
+            <app-icon name="cog" size="sm"></app-icon>
+            Enter Management
+          </app-button>
+          } @else {
+          <app-button variant="outline-secondary" (clicked)="exitManagementMode()">
+            <app-icon name="eye" size="sm"></app-icon>
+            Exit Management
+          </app-button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Tournament States -->
+    <div class="tournament-body">
+      <!-- Created State: Player Management -->
+      @if (state.tournament.status === TournamentStatus.Created) {
+      <div class="tournament-section">
+        <app-player-management
+          [players]="state.tournament.players"
+          [state]="getPlayerManagementState()"
+          [minPlayersRequired]="3"
+          [allowPlayerRemoval]="true"
+          (playerAdded)="onPlayerAdd($event)"
+          (playerRemoved)="onPlayerRemove($event)"
+          (tournamentStarted)="onTournamentStart()"
+          (errorDismissed)="clearError()"
+        >
+        </app-player-management>
+      </div>
+      }
+
+      <!-- In Progress State: Matches and Standings -->
+      @if (state.tournament.status === TournamentStatus.InProgress) {
+      <div class="tournament-sections">
+        <!-- Current Round Matches -->
+        @if (getCurrentRound()) {
+        <div class="tournament-section">
+          <app-match-table
+            [data]="getMatchTableData()"
+            [state]="getMatchTableState()"
+            (winnerChanged)="onWinnerChange($event)"
+            (nextRoundStarted)="onNextRoundStart()"
+            (errorDismissed)="clearError()"
+          >
+          </app-match-table>
+        </div>
+        }
+
+        <!-- Current Standings -->
+        <div class="tournament-section">
+          <app-standings-table
+            [data]="getStandingsData()"
+            [viewMode]="'current'"
+            [showGamesPlayed]="false"
+            [highlightTop3]="true"
+            [showPodium]="false"
+            (errorDismissed)="clearError()"
+          >
+          </app-standings-table>
+        </div>
+      </div>
+      }
+
+      <!-- Completed State: Final Results -->
+      @if (state.tournament.status === TournamentStatus.Completed) {
+      <div class="tournament-sections">
+        <!-- Final Standings with Podium -->
+        <div class="tournament-section">
+          <app-standings-table
+            [data]="getStandingsData()"
+            [viewMode]="'final'"
+            [showGamesPlayed]="true"
+            [highlightTop3]="true"
+            [showPodium]="true"
+            title="Tournament Results"
+            (errorDismissed)="clearError()"
+          >
+          </app-standings-table>
+        </div>
+
+        <!-- Tournament History -->
+        <div class="tournament-section">
+          <div class="history-section">
+            <h3 class="history-title">
+              <app-icon name="clock" size="md" color="secondary"></app-icon>
+              Tournament History
+            </h3>
+
+            <div class="rounds-history">
+              @for (round of state.tournament.rounds; track round.id) {
+              <div class="round-summary">
+                <h4>Round {{ round.roundNumber }}</h4>
+                <div class="round-info">
+                  <span>{{ round.matches.length }} matches</span>
+                  <span>{{ getCompletedMatchesInRound(round) }} completed</span>
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- Password Modal -->
+  <app-password-modal
+    [data]="state.passwordModal"
+    (passwordSubmitted)="onPasswordSubmitted($event)"
+    (cancelled)="onPasswordCancelled()"
+  >
+  </app-password-modal>
+</div>

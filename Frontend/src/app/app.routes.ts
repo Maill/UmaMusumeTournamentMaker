@@ -1,11 +1,17 @@
 import { Routes } from '@angular/router';
-import { TournamentListComponent } from './components/tournament-list/tournament-list';
-import { CreateTournamentComponent } from './components/create-tournament/create-tournament';
-import { TournamentDetailComponent } from './components/tournament-detail/tournament-detail';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/tournaments', pathMatch: 'full' },
-  { path: 'tournaments', component: TournamentListComponent },
-  { path: 'create-tournament', component: CreateTournamentComponent },
-  { path: 'tournament/:id', component: TournamentDetailComponent }
+  { 
+    path: 'tournaments', 
+    loadComponent: () => import('./pages/tournament-list/tournament-list.page').then(m => m.TournamentListPageComponent)
+  },
+  { 
+    path: 'tournaments/create', 
+    loadComponent: () => import('./pages/create-tournament/create-tournament.page').then(m => m.CreateTournamentPageComponent)
+  },
+  { 
+    path: 'tournaments/:id', 
+    loadComponent: () => import('./pages/tournament-detail/tournament-detail.page').then(m => m.TournamentDetailPageComponent)
+  },
 ];

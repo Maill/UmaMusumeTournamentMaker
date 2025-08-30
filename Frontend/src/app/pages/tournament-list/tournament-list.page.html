@@ -5,9 +5,13 @@
       <div class="header-info">
         <h1 class="page-title">
           <app-icon name="trophy" size="xl" color="primary" ariaLabel="Tournaments"> </app-icon>
-          Tournaments
+          Manage and participate in competitive tournaments
         </h1>
-        <p class="page-subtitle">Manage and participate in competitive tournaments</p>
+        <p class="page-subtitle">Matches format are 1v1v1, like Champions Meeting.</p>
+        <p class="page-subtitle">
+          Decide which track competition will occurs with which conditions and play!
+        </p>
+        <p class="page-subtitle">May the best trainer win!</p>
       </div>
 
       <div class="header-actions">
@@ -51,7 +55,8 @@
     <!-- Tournaments Grid -->
     @if (!state.isLoading && !state.error && state.tournaments.length > 0) {
     <div class="tournaments-section">
-      <!-- Tournament Stats -->
+      <!-- Tournament Stats - Deferred for better LCP -->
+      @defer (on viewport) {
       <div class="tournaments-stats">
         <div class="stat-card">
           <app-icon name="trophy" size="lg" color="primary"></app-icon>
@@ -77,6 +82,12 @@
           </div>
         </div>
       </div>
+      } @placeholder {
+      <div
+        class="tournaments-stats-placeholder"
+        style="height: 120px; background: #f8f9fa; border-radius: 8px; margin-bottom: 2rem"
+      ></div>
+      }
 
       <!-- Filter/Sort Options -->
       <div class="tournaments-filters">
@@ -115,16 +126,13 @@
     }
 
     <!-- Empty State -->
-    @if (!state.isLoading && !state.error && state.tournaments.length === 0 && state.hasLoaded)
-    {
+    @if (!state.isLoading && !state.error && state.tournaments.length === 0 && state.hasLoaded) {
     <div class="empty-state">
       <div class="empty-content">
-        <app-icon name="trophy" size="xxl" color="secondary" ariaLabel="No tournaments">
-        </app-icon>
+        <app-icon name="trophy" size="xxl" color="secondary" ariaLabel="No tournaments"> </app-icon>
         <h2>No Tournaments Found</h2>
         <p>
-          You haven't created any tournaments yet. Get started by creating your first
-          tournament!
+          You haven't created any tournaments yet. Get started by creating your first tournament!
         </p>
 
         <div class="empty-actions">

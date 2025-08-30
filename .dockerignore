@@ -1,0 +1,34 @@
+# .dockerignore for Tournament System
+
+# Frontend
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.angular/
+Frontend/*.log
+
+# API
+API/**/bin/
+API/**/obj/
+API/**/*.user
+API/**/*.log
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Runtime
+*.cache

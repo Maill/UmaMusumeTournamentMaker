@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://your-production-api-url.com/api',
-  hubUrl: 'https://your-production-api-url.com'
+  apiUrl: 'https://umamusumetournamentmaker-599360421785.europe-west1.run.app/api',
+  hubUrl: 'https://umamusumetournamentmaker-599360421785.europe-west1.run.app',
 };

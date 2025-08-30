@@ -1,0 +1,64 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{D82C56D6-B2CD-F611-9E31-04638F7EC30E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UmaMusumeTournamentMaker.API", "API\TournamentSystem.API\UmaMusumeTournamentMaker.API.csproj", "{FEF667F3-7DCC-D152-0B68-0DB2E12EAAFE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UmaMusumeTournamentMaker.API.PostgreSQLMigrations", "API\TournamentSystem.API.PostgreSQLMigrations\UmaMusumeTournamentMaker.API.PostgreSQLMigrations.csproj", "{8C5AFC8D-D97B-4144-B62A-F152D9C52D7C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UmaMusumeTournamentMaker.API.SQLiteMigrations", "API\TournamentSystem.API.SQLiteMigrations\UmaMusumeTournamentMaker.API.SQLiteMigrations.csproj", "{600D8B02-42F1-43BF-911A-A752ADF98FD5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UmaMusumeTournamentMaker.API.Infrastructure", "API\TournamentSystem.API.Infrastructure\UmaMusumeTournamentMaker.API.Infrastructure.csproj", "{C3639269-237E-44FC-BEC2-0E042F26D5EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UmaMusumeTournamentMaker.API.Domain", "API\TournamentSystem.API.Domain\UmaMusumeTournamentMaker.API.Domain.csproj", "{EFCF3609-F84B-459A-A335-A281AF1B900E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UmaMusumeTournamentMaker.API.Application", "API\TournamentSystem.API.Application\UmaMusumeTournamentMaker.API.Application.csproj", "{1B9831A3-5995-4CFA-A8B7-ED365C18A085}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FEF667F3-7DCC-D152-0B68-0DB2E12EAAFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEF667F3-7DCC-D152-0B68-0DB2E12EAAFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEF667F3-7DCC-D152-0B68-0DB2E12EAAFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEF667F3-7DCC-D152-0B68-0DB2E12EAAFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C5AFC8D-D97B-4144-B62A-F152D9C52D7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C5AFC8D-D97B-4144-B62A-F152D9C52D7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C5AFC8D-D97B-4144-B62A-F152D9C52D7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C5AFC8D-D97B-4144-B62A-F152D9C52D7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{600D8B02-42F1-43BF-911A-A752ADF98FD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{600D8B02-42F1-43BF-911A-A752ADF98FD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{600D8B02-42F1-43BF-911A-A752ADF98FD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{600D8B02-42F1-43BF-911A-A752ADF98FD5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3639269-237E-44FC-BEC2-0E042F26D5EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3639269-237E-44FC-BEC2-0E042F26D5EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3639269-237E-44FC-BEC2-0E042F26D5EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3639269-237E-44FC-BEC2-0E042F26D5EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFCF3609-F84B-459A-A335-A281AF1B900E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFCF3609-F84B-459A-A335-A281AF1B900E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFCF3609-F84B-459A-A335-A281AF1B900E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFCF3609-F84B-459A-A335-A281AF1B900E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B9831A3-5995-4CFA-A8B7-ED365C18A085}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B9831A3-5995-4CFA-A8B7-ED365C18A085}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B9831A3-5995-4CFA-A8B7-ED365C18A085}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B9831A3-5995-4CFA-A8B7-ED365C18A085}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FEF667F3-7DCC-D152-0B68-0DB2E12EAAFE} = {D82C56D6-B2CD-F611-9E31-04638F7EC30E}
+		{8C5AFC8D-D97B-4144-B62A-F152D9C52D7C} = {D82C56D6-B2CD-F611-9E31-04638F7EC30E}
+		{600D8B02-42F1-43BF-911A-A752ADF98FD5} = {D82C56D6-B2CD-F611-9E31-04638F7EC30E}
+		{C3639269-237E-44FC-BEC2-0E042F26D5EC} = {D82C56D6-B2CD-F611-9E31-04638F7EC30E}
+		{EFCF3609-F84B-459A-A335-A281AF1B900E} = {D82C56D6-B2CD-F611-9E31-04638F7EC30E}
+		{1B9831A3-5995-4CFA-A8B7-ED365C18A085} = {D82C56D6-B2CD-F611-9E31-04638F7EC30E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {57A2AD85-C8B1-4D28-BD26-9A3201D0ED24}
+	EndGlobalSection
+EndGlobal

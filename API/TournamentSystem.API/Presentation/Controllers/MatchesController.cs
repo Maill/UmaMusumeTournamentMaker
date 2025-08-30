@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using TournamentSystem.API.Application.DTOs;
-using TournamentSystem.API.Application.Interfaces;
+using UmaMusumeTournamentMaker.API.Application.DTOs;
+using UmaMusumeTournamentMaker.API.Application.Interfaces;
 
-namespace TournamentSystem.API.Presentation.Controllers
+namespace UmaMusumeTournamentMaker.API.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -26,7 +26,7 @@ namespace TournamentSystem.API.Presentation.Controllers
                 await _broadcastService.BroadcastWinnerSelection(broadcastWinnerDto.TournamentId, broadcastWinnerDto.MatchId, broadcastWinnerDto.WinnerId);
                 return Ok(new { message = "Winner selection broadcasted successfully" });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(500, new { message = "Failed to broadcast winner selection" });
             }

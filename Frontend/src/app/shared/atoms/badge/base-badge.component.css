@@ -1,0 +1,100 @@
+.badge {
+  padding: 0.25em 0.4em;
+  font-weight: 700;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: var(--radius-sm);
+}
+
+.badge-pill {
+  padding-right: 0.6em;
+  padding-left: 0.6em;
+  border-radius: var(--radius-pill);
+}
+
+/* Badge variants */
+.badge-primary {
+  color: var(--bg-white);
+  background-color: var(--brand-primary);
+}
+
+.badge-secondary {
+  color: var(--bg-white);
+  background-color: var(--secondary-primary);
+}
+
+.badge-success {
+  color: var(--bg-white);
+  background-color: var(--success-primary);
+}
+
+.badge-danger {
+  color: var(--bg-white);
+  background-color: var(--danger-primary);
+}
+
+.badge-warning {
+  color: var(--text-primary);
+  background-color: var(--warning-primary);
+}
+
+.badge-info {
+  color: var(--bg-white);
+  background-color: var(--info-primary);
+}
+
+.badge-light {
+  color: var(--text-primary);
+  background-color: var(--bg-light);
+}
+
+.badge-dark {
+  color: var(--bg-white);
+  background-color: var(--text-primary);
+}
+
+.badge-bronze {
+  color: var(--bg-white);
+  background-color: var(--rank-bronze);
+}
+
+.badge-silver {
+  color: var(--bg-white);
+  background-color: var(--rank-silver);
+}
+
+/* Dismissible badges */
+.badge-dismissible {
+  padding-right: 1.25em;
+  position: relative;
+}
+
+.badge-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.25em 0.4em;
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  font-weight: 700;
+  line-height: 1;
+  color: inherit;
+  opacity: 0.5;
+  cursor: pointer;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.badge-close:hover {
+  opacity: 0.75;
+}
+
+.badge-close:focus {
+  outline: 0;
+  opacity: 1;
+}
+
+/* Empty badge handling */
+.badge:empty {
+  display: none;
+}

@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using TournamentSystem.API.Application.DTOs;
-using TournamentSystem.API.Application.Interfaces;
+using UmaMusumeTournamentMaker.API.Application.DTOs;
+using UmaMusumeTournamentMaker.API.Application.Interfaces;
 
-namespace TournamentSystem.API.Presentation.Controllers
+namespace UmaMusumeTournamentMaker.API.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -40,20 +40,6 @@ namespace TournamentSystem.API.Presentation.Controllers
                 if (tournament == null)
                     return NotFound(new { message = "Tournament not found" });
 
-                return Ok(tournament);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        [HttpGet("{id}/current-round")]
-        public async Task<ActionResult<TournamentDto>> GetTournamentWithCurrentRound(int id)
-        {
-            try
-            {
-                var tournament = await _tournamentService.GetTournamentWithCurrentRoundAsync(id);
                 return Ok(tournament);
             }
             catch (ArgumentException ex)
@@ -233,7 +219,7 @@ namespace TournamentSystem.API.Presentation.Controllers
             try
             {
                 var isValid = await _tournamentService.ValidatePasswordAsync(id, validatePasswordDto.Password);
-                
+
                 if (isValid)
                 {
                     return Ok(new { message = "Password is valid", isValid = true });

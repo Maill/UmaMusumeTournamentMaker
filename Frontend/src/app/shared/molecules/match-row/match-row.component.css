@@ -1,0 +1,212 @@
+:host {
+  transition: background-color 0.2s ease-in-out;
+}
+
+:host:hover {
+  background-color: var(--bg-light);
+}
+
+:host(.completed) {
+  background-color: var(--success-bg);
+}
+
+:host(.completed):hover {
+  background-color: var(--success-bg-hover);
+}
+
+:host(.pending) {
+  background-color: var(--warning-bg);
+}
+
+:host(.pending):hover {
+  background-color: var(--warning-bg-hover);
+}
+
+/* Cell styling */
+:host td {
+  padding: var(--space-sm);
+  vertical-align: middle;
+  border-top: 1px solid var(--border-default);
+}
+
+.match-players,
+.match-status,
+.match-winner,
+.match-actions {
+  padding-left: 12.5px !important;
+}
+
+.match-number {
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+  width: 80px;
+}
+
+/* Players column */
+.match-players {
+  min-width: 200px;
+}
+
+.players-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.player-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-weight: 500;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease-in-out;
+}
+
+.player-name.winner {
+  background-color: var(--success-bg);
+  color: var(--text-success);
+  font-weight: 600;
+}
+
+.player-name.loser {
+  background-color: var(--danger-bg);
+  color: var(--text-error);
+  opacity: 0.8;
+}
+
+.vs-separator {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Status column */
+.match-status {
+  text-align: center;
+  width: 120px;
+}
+
+/* Winner column */
+.match-winner {
+  min-width: 150px;
+}
+
+.winner-display {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.winner-name {
+  font-weight: 600;
+  color: var(--success-primary);
+}
+
+.no-winner {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Actions column */
+.match-actions {
+  min-width: 200px;
+}
+
+/* Completed at column */
+.match-completed {
+  width: 120px;
+  text-align: center;
+}
+
+.completed-time {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: help;
+}
+
+/* Badge overrides */
+:host ::ng-deep .badge {
+  justify-content: center;
+  min-width: 90px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  :host td {
+    padding: 0.5rem 0.25rem;
+    font-size: 0.9rem;
+  }
+
+  .players-list {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+
+  .vs-separator {
+    display: none;
+  }
+
+  .match-actions {
+    min-width: 150px;
+  }
+
+  .winner-display {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+}
+
+@media (max-width: 576px) {
+  :host {
+    display: block;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-md);
+  }
+
+  :host td {
+    display: block;
+    border: none;
+    border-bottom: 1px solid var(--border-primary);
+    padding: var(--space-sm);
+  }
+
+  :host td:last-child {
+    border-bottom: none;
+  }
+
+  :host td::before {
+    content: attr(data-label) ': ';
+    font-weight: 600;
+    display: inline-block;
+    width: 100px;
+  }
+
+  .match-number::before {
+    content: 'Match ';
+  }
+
+  .match-players::before {
+    content: 'Players ';
+  }
+
+  .match-status::before {
+    content: 'Status ';
+  }
+
+  .match-winner::before {
+    content: 'Winner ';
+  }
+
+  .match-actions::before {
+    content: 'Actions ';
+  }
+
+  .match-completed::before {
+    content: 'Completed ';
+  }
+}

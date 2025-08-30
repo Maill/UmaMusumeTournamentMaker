@@ -62,7 +62,7 @@
       "label": "start-frontend",
       "type": "npm",
       "script": "start",
-      "path": "Frontend/tournament-frontend/",
+      "path": "Frontend/",
       "isBackground": true,
       "group": {
         "kind": "build",
@@ -76,10 +76,7 @@
         "owner": "typescript",
         "source": "ts",
         "applyTo": "closedDocuments",
-        "fileLocation": [
-          "relative",
-          "${workspaceFolder}/Frontend/tournament-frontend"
-        ],
+        "fileLocation": ["relative", "${workspaceFolder}/Frontend/"],
         "pattern": "$tsc",
         "background": {
           "activeOnStart": true,
@@ -96,7 +93,7 @@
       "label": "build-frontend",
       "type": "npm",
       "script": "build",
-      "path": "Frontend/tournament-frontend/",
+      "path": "Frontend/",
       "group": "build",
       "presentation": {
         "reveal": "always"
@@ -105,10 +102,7 @@
         "owner": "typescript",
         "source": "ts",
         "applyTo": "closedDocuments",
-        "fileLocation": [
-          "relative",
-          "${workspaceFolder}/Frontend/tournament-frontend"
-        ],
+        "fileLocation": ["relative", "${workspaceFolder}/Frontend"],
         "pattern": "$tsc"
       }
     },
@@ -116,7 +110,7 @@
       "label": "test-frontend",
       "type": "npm",
       "script": "test",
-      "path": "Frontend/tournament-frontend/",
+      "path": "Frontend/",
       "isBackground": true,
       "group": "test",
       "presentation": {
@@ -127,10 +121,7 @@
         "owner": "typescript",
         "source": "ts",
         "applyTo": "closedDocuments",
-        "fileLocation": [
-          "relative",
-          "${workspaceFolder}/Frontend/tournament-frontend"
-        ],
+        "fileLocation": ["relative", "${workspaceFolder}/Frontend"],
         "pattern": "$tsc",
         "background": {
           "activeOnStart": true,
@@ -146,10 +137,7 @@
     {
       "label": "start-full-stack",
       "dependsOrder": "parallel",
-      "dependsOn": [
-        "watch-api",
-        "start-frontend"
-      ],
+      "dependsOn": ["watch-api", "start-frontend"],
       "group": {
         "kind": "build",
         "isDefault": true
@@ -162,7 +150,7 @@
       "label": "install-frontend-deps",
       "type": "npm",
       "script": "install",
-      "path": "Frontend/tournament-frontend/",
+      "path": "Frontend/",
       "group": "build",
       "presentation": {
         "reveal": "always"
@@ -186,7 +174,7 @@
       "label": "build-frontend-prod",
       "type": "npm",
       "script": "build",
-      "path": "Frontend/tournament-frontend/",
+      "path": "Frontend/",
       "group": "build",
       "presentation": {
         "reveal": "always"
@@ -195,10 +183,7 @@
         "owner": "typescript",
         "source": "ts",
         "applyTo": "closedDocuments",
-        "fileLocation": [
-          "relative",
-          "${workspaceFolder}/Frontend/tournament-frontend"
-        ],
+        "fileLocation": ["relative", "${workspaceFolder}/Frontend/"],
         "pattern": "$tsc"
       }
     },
@@ -206,14 +191,9 @@
       "label": "build-frontend-dev",
       "type": "shell",
       "command": "npm",
-      "args": [
-        "run",
-        "ng",
-        "build",
-        "--configuration=development"
-      ],
+      "args": ["run", "ng", "build", "--configuration=development"],
       "options": {
-        "cwd": "${workspaceFolder}/Frontend/tournament-frontend"
+        "cwd": "${workspaceFolder}/Frontend/"
       },
       "group": "build",
       "presentation": {
@@ -223,10 +203,7 @@
         "owner": "typescript",
         "source": "ts",
         "applyTo": "closedDocuments",
-        "fileLocation": [
-          "relative",
-          "${workspaceFolder}/Frontend/tournament-frontend"
-        ],
+        "fileLocation": ["relative", "${workspaceFolder}/Frontend"],
         "pattern": "$tsc"
       }
     }

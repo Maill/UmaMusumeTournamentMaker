@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize, Subject, switchMap, takeUntil } from 'rxjs';
+import { finalize, Subject, takeUntil } from 'rxjs';
 
 // Import organisms
 import {
@@ -96,14 +96,11 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   TournamentStatus = TournamentStatus;
   TournamentType = TournamentType;
 
-
   ngOnInit(): void {
-    this.route.params
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((params) => {
-        this.tournamentId = +params['id'];
-        this.loadTournament();
-      });
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      this.tournamentId = +params['id'];
+      this.loadTournament();
+    });
   }
 
   private async initializeWebSocket(): Promise<void> {
@@ -116,7 +113,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
     try {
       // Join tournament WebSocket group
       await this.webSocketService.joinTournament(this.tournamentId);
-      
+
       // Subscribe to updates
       this.webSocketService.updates$
         .pipe(takeUntil(this.destroy$))
@@ -401,7 +398,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
         // Remove player from local state by ID
         if (this.state.tournament && update.data.playerId) {
           this.state.tournament.players = this.state.tournament.players.filter(
-            player => player.id !== update.data.playerId
+            (player) => player.id !== update.data.playerId
           );
         }
         break;
@@ -410,7 +407,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       case 'TournamentUpdated':
         // Use the tournament data directly from WebSocket update
         this.state.tournament = update.data;
-        
+
         // Check if tournament just completed and disconnect WebSocket
         if (update.data.status === TournamentStatus.Completed) {
           console.log('Tournament completed via WebSocket - disconnecting');

@@ -56,7 +56,12 @@ builder.Services.AddScoped<ITournamentMatchService, TournamentMatchService>();
 builder.Services.AddScoped<ITournamentService, TournamentService>();
 
 // Register SignalR and broadcast service
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.KeepAliveInterval = TimeSpan.FromSeconds(60);  // 1 minute heartbeat
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(120);  // 2 minutes timeout
+    options.HandshakeTimeout = TimeSpan.FromSeconds(15);  // WebSocket handshake timeout
+});
 builder.Services.AddScoped<ITournamentBroadcastService, TournamentBroadcastService>();
 
 builder.Services.AddMemoryCache();

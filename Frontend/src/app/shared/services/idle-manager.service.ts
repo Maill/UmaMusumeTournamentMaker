@@ -18,10 +18,21 @@ export class IdleManagerService {
     reason: null,
     tournamentId: null,
   });
+  private abortControllers: Record<
+    'mousemove' | 'click' | 'touchstart' | 'keydown' | 'scroll',
+    AbortController
+  > = {
+    click: new AbortController(),
+    mousemove: new AbortController(),
+    touchstart: new AbortController(),
+    keydown: new AbortController(),
+    scroll: new AbortController(),
+  };
 
   // Timeouts
   private readonly TAB_HIDDEN_TIMEOUT = 1 * 60 * 1000; // 5 minutes
   private readonly USER_INACTIVE_TIMEOUT = 1 * 60 * 1000; // 15 minutes
+  private readonly EVENTLISTENER_FIRING_TIMEOUT: number = 750; // 750ms
 
   // Public observables
   idleState$ = this.idleStateSubject.asObservable();
@@ -66,13 +77,36 @@ export class IdleManagerService {
     });
 
     // User activity detection
-    const activityEvents = ['click', 'keydown', 'scroll', 'mousemove', 'touchstart'];
-    activityEvents.forEach((event) => {
-      document.addEventListener(event, () => this.handleUserActivity(), { passive: true });
-    });
-
+    this.configureActivityEvents();
     // Start user inactivity timer
     this.resetUserInactiveTimer();
+  }
+
+  private configureActivityEvents(): void {
+    document.addEventListener('click', this.handleUserActivity, {
+      passive: true,
+      signal: this.abortControllers.click.signal,
+    });
+
+    document.addEventListener('mousemove', this.handleUserActivity, {
+      passive: true,
+      signal: this.abortControllers.mousemove.signal,
+    });
+
+    document.addEventListener('touchstart', this.handleUserActivity, {
+      passive: true,
+      signal: this.abortControllers.touchstart.signal,
+    });
+
+    document.addEventListener('keydown', this.handleUserActivity, {
+      passive: true,
+      signal: this.abortControllers.keydown.signal,
+    });
+
+    document.addEventListener('scroll', this.handleUserActivity, {
+      passive: true,
+      signal: this.abortControllers.scroll.signal,
+    });
   }
 
   private handleTabHidden(): void {
@@ -106,7 +140,7 @@ export class IdleManagerService {
     this.resetUserInactiveTimer();
   }
 
-  private handleUserActivity(): void {
+  private handleUserActivity = (event: Event): void => {
     // Only reset timer if tab is visible
     if (!document.hidden) {
       this.resetUserInactiveTimer();
@@ -123,7 +157,42 @@ export class IdleManagerService {
           tournamentId: this.idleStateSubject.value.tournamentId,
         });
       }
+
+      let abortController: AbortController = this.AbortAndRenewController(event.type);
+      setTimeout(() => {
+        document.addEventListener(event.type, this.handleUserActivity, {
+          signal: abortController.signal,
+          passive: true,
+        });
+      }, this.EVENTLISTENER_FIRING_TIMEOUT);
     }
+  };
+
+  private AbortAndRenewController(eventType: string): AbortController {
+    switch (eventType) {
+      case 'click':
+        this.abortControllers.click.abort();
+        this.abortControllers.click = new AbortController();
+        return this.abortControllers.click;
+      case 'mousemove':
+        this.abortControllers.mousemove.abort();
+        this.abortControllers.mousemove = new AbortController();
+        return this.abortControllers.mousemove;
+      case 'touchstart':
+        this.abortControllers.touchstart.abort();
+        this.abortControllers.touchstart = new AbortController();
+        return this.abortControllers.touchstart;
+      case 'scroll':
+        this.abortControllers.scroll.abort();
+        this.abortControllers.scroll = new AbortController();
+        return this.abortControllers.scroll;
+      case 'keydown':
+        this.abortControllers.keydown.abort();
+        this.abortControllers.keydown = new AbortController();
+        return this.abortControllers.keydown;
+    }
+
+    throw new Error(`Can't renew the AbortController. Unsupported event type: ${eventType}`);
   }
 
   private resetUserInactiveTimer(): void {

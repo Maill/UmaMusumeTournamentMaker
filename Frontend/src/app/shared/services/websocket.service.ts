@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   HubConnection,
   HubConnectionBuilder,
@@ -7,6 +7,7 @@ import {
 } from '@microsoft/signalr';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { IdleManagerService } from './idle-manager.service';
 
 export interface WebSocketUpdate {
   type:
@@ -26,8 +27,10 @@ export interface WebSocketUpdate {
   providedIn: 'root'
 })
 export class WebSocketService {
+  private idleManager = inject(IdleManagerService);
   private connection: HubConnection | null = null;
   private currentTournamentId: number | null = null;
+  private isIdleDisconnected = false;
 
   // Simple state tracking
   private connectionStateSubject = new BehaviorSubject<HubConnectionState>(
@@ -35,22 +38,13 @@ export class WebSocketService {
   );
   private updatesSubject = new Subject<WebSocketUpdate>();
 
-  // Idle management
-  private tabHiddenTimer: number | null = null;
-  private userInactiveTimer: number | null = null;
-  private isIdleDisconnected = false;
-
-  // Timeouts
-  private readonly TAB_HIDDEN_TIMEOUT = 5 * 60 * 1000; // 5 minutes
-  private readonly USER_INACTIVE_TIMEOUT = 15 * 60 * 1000; // 15 minutes
-
   // Public observables
   connectionState$ = this.connectionStateSubject.asObservable();
   updates$ = this.updatesSubject.asObservable();
 
   constructor() {
     this.initializeConnection();
-    this.setupIdleManagement();
+    this.setupIdleIntegration();
   }
 
   // Connection Management
@@ -64,7 +58,7 @@ export class WebSocketService {
       await this.connection?.start();
       this.connectionStateSubject.next(HubConnectionState.Connected);
       this.isIdleDisconnected = false;
-      this.resetUserInactiveTimer();
+      this.idleManager.startIdleDetection();
       console.log('WebSocket connected');
     } catch (error) {
       console.error('WebSocket connection failed:', error);
@@ -79,7 +73,7 @@ export class WebSocketService {
     }
     this.connectionStateSubject.next(HubConnectionState.Disconnected);
     this.currentTournamentId = null;
-    this.clearAllTimers();
+    this.idleManager.stopIdleDetection();
   }
 
   // Tournament Group Management - match backend method names exactly
@@ -213,70 +207,19 @@ export class WebSocketService {
     this.updatesSubject.next(update);
   }
 
-  // Idle Management
-  private setupIdleManagement(): void {
-    // Page Visibility API - handle tab switching
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        this.handleTabHidden();
-      } else {
-        this.handleTabVisible();
-      }
-    });
-
-    // User activity detection
-    const activityEvents = ['click', 'keydown', 'scroll', 'mousemove', 'touchstart'];
-    activityEvents.forEach((event) => {
-      document.addEventListener(event, () => this.handleUserActivity(), { passive: true });
-    });
-
-    // Start user inactivity timer
-    this.resetUserInactiveTimer();
-  }
-
-  private handleTabHidden(): void {
-    console.log('Tab hidden - starting disconnect timer');
-    this.clearTabHiddenTimer();
-
-    this.tabHiddenTimer = setTimeout(async () => {
-      if (this.connection?.state === HubConnectionState.Connected) {
-        console.log('Disconnecting due to tab being hidden for 5 minutes');
+  // Idle Management Integration
+  private setupIdleIntegration(): void {
+    // Subscribe to idle state changes
+    this.idleManager.idleState$.subscribe(async (state) => {
+      if (state.isIdle && this.connection?.state === HubConnectionState.Connected) {
+        console.log(`Disconnecting due to idle: ${state.reason}`);
         this.isIdleDisconnected = true;
         await this.disconnect();
+      } else if (!state.isIdle && this.isIdleDisconnected) {
+        console.log('Reconnecting after idle period ended');
+        await this.reconnectAfterIdle();
       }
-    }, this.TAB_HIDDEN_TIMEOUT);
-  }
-
-  private handleTabVisible(): void {
-    console.log('Tab visible - clearing disconnect timer');
-    this.clearTabHiddenTimer();
-
-    // Reconnect if we were idle disconnected
-    if (this.isIdleDisconnected && this.connection?.state === HubConnectionState.Disconnected) {
-      console.log('Reconnecting after tab became visible');
-      this.reconnectAfterIdle();
-    }
-
-    this.resetUserInactiveTimer();
-  }
-
-  private handleUserActivity(): void {
-    // Only reset timer if we're connected and tab is visible
-    if (!document.hidden && this.connection?.state === HubConnectionState.Connected) {
-      this.resetUserInactiveTimer();
-    }
-  }
-
-  private resetUserInactiveTimer(): void {
-    this.clearUserInactiveTimer();
-
-    this.userInactiveTimer = setTimeout(async () => {
-      if (this.connection?.state === HubConnectionState.Connected && !document.hidden) {
-        console.log('Disconnecting due to user inactivity for 15 minutes');
-        this.isIdleDisconnected = true;
-        await this.disconnect();
-      }
-    }, this.USER_INACTIVE_TIMEOUT);
+    });
   }
 
   private async reconnectAfterIdle(): Promise<void> {
@@ -290,24 +233,5 @@ export class WebSocketService {
     } catch (error) {
       console.error('Failed to reconnect after idle:', error);
     }
-  }
-
-  private clearTabHiddenTimer(): void {
-    if (this.tabHiddenTimer) {
-      clearTimeout(this.tabHiddenTimer);
-      this.tabHiddenTimer = null;
-    }
-  }
-
-  private clearUserInactiveTimer(): void {
-    if (this.userInactiveTimer) {
-      clearTimeout(this.userInactiveTimer);
-      this.userInactiveTimer = null;
-    }
-  }
-
-  private clearAllTimers(): void {
-    this.clearTabHiddenTimer();
-    this.clearUserInactiveTimer();
   }
 }

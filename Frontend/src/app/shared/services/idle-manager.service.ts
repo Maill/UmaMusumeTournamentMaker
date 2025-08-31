@@ -30,8 +30,8 @@ export class IdleManagerService {
   };
 
   // Timeouts
-  private readonly TAB_HIDDEN_TIMEOUT = 1 * 60 * 1000; // 5 minutes
-  private readonly USER_INACTIVE_TIMEOUT = 1 * 60 * 1000; // 15 minutes
+  private readonly TAB_HIDDEN_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+  private readonly USER_INACTIVE_TIMEOUT = 15 * 60 * 1000; // 15 minutes
   private readonly EVENTLISTENER_FIRING_TIMEOUT: number = 750; // 750ms
 
   // Public observables

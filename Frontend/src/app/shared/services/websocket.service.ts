@@ -13,7 +13,6 @@ export interface WebSocketUpdate {
   type:
     | 'PlayerAdded'
     | 'PlayerRemoved'
-    | 'MatchUpdated'
     | 'TournamentStarted'
     | 'NewRound'
     | 'TournamentUpdated'
@@ -144,10 +143,6 @@ export class WebSocketService {
 
     this.connection.on('PlayerRemoved', (playerId: number) => {
       this.emitUpdate('PlayerRemoved', { playerId });
-    });
-
-    this.connection.on('MatchUpdated', (match: any) => {
-      this.emitUpdate('MatchUpdated', match);
     });
 
     this.connection.on('TournamentStarted', (tournament: any) => {

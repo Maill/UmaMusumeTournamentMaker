@@ -103,15 +103,17 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       .subscribe((params) => {
         this.tournamentId = +params['id'];
         this.loadTournament();
-        
-        // Initialize WebSocket connection
-        this.initializeWebSocket();
       });
   }
 
   private async initializeWebSocket(): Promise<void> {
+    // Don't connect WebSocket for completed tournaments
+    if (this.state.tournament?.status === TournamentStatus.Completed) {
+      console.log('Skipping WebSocket connection for completed tournament');
+      return;
+    }
+
     try {
-      
       // Join tournament WebSocket group
       await this.webSocketService.joinTournament(this.tournamentId);
       
@@ -153,6 +155,8 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
           if (this.tournamentService.hasPassword(this.tournamentId)) {
             this.state.managementMode = true;
           }
+          // Initialize WebSocket connection after tournament data is loaded
+          this.initializeWebSocket();
         },
         error: (error: any) => {
           console.error('Failed to load tournament:', error);
@@ -388,13 +392,30 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   handleWebSocketUpdate(update: WebSocketUpdate): void {
     switch (update.type) {
       case 'PlayerAdded':
+        // Add player to local state
+        if (this.state.tournament && update.data) {
+          this.state.tournament.players.push(update.data);
+        }
+        break;
       case 'PlayerRemoved':
+        // Remove player from local state by ID
+        if (this.state.tournament && update.data.playerId) {
+          this.state.tournament.players = this.state.tournament.players.filter(
+            player => player.id !== update.data.playerId
+          );
+        }
+        break;
       case 'TournamentStarted':
       case 'NewRound':
       case 'TournamentUpdated':
-      case 'MatchUpdated':
-        // Reload tournament data for these updates
-        this.loadTournament();
+        // Use the tournament data directly from WebSocket update
+        this.state.tournament = update.data;
+        
+        // Check if tournament just completed and disconnect WebSocket
+        if (update.data.status === TournamentStatus.Completed) {
+          console.log('Tournament completed via WebSocket - disconnecting');
+          this.webSocketService.leaveTournament().catch(console.warn);
+        }
         break;
       case 'WinnerSelected':
         // Handle winner selection locally without DB reload

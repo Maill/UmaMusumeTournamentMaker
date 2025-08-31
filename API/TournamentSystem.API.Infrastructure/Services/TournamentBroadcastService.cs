@@ -35,12 +35,6 @@ namespace UmaMusumeTournamentMaker.API.Infrastructure.Services
                 .SendAsync("PlayerRemoved", playerId);
         }
 
-        public async Task BroadcastMatchUpdated(int tournamentId, MatchDto match)
-        {
-            await _hubContext.Clients.Group(GetTournamentGroup(tournamentId))
-                .SendAsync("MatchUpdated", match);
-        }
-
         public async Task BroadcastTournamentStarted(int tournamentId, TournamentDto tournament)
         {
             await _hubContext.Clients.Group(GetTournamentGroup(tournamentId))

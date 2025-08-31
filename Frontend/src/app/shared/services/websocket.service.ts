@@ -22,7 +22,9 @@ export interface WebSocketUpdate {
   timestamp: Date;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class WebSocketService {
   private connection: HubConnection | null = null;
   private currentTournamentId: number | null = null;

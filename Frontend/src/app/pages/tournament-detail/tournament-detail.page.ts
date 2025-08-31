@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize, Subject, switchMap, takeUntil } from 'rxjs';
 
@@ -31,8 +31,7 @@ import {
   PasswordModalData,
 } from '../../shared/molecules/password-modal/password-modal.component';
 import { TournamentService } from '../../shared/services/tournament.service';
-import { WebSocketFactory } from '../../shared/services/websocket.factory';
-import type { WebSocketService, WebSocketUpdate } from '../../shared/services/websocket.service';
+import { WebSocketService, WebSocketUpdate } from '../../shared/services/websocket.service';
 import {
   Round,
   Tournament,
@@ -68,9 +67,15 @@ interface TournamentDetailState {
   styleUrl: './tournament-detail.page.css',
 })
 export class TournamentDetailPageComponent implements OnInit, OnDestroy {
+  // Dependency injection
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private tournamentService = inject(TournamentService);
+  private webSocketService = inject(WebSocketService);
+
+  // Component state
   private destroy$ = new Subject<void>();
   private tournamentId: number = 0;
-  private webSocketService: WebSocketService | null = null;
 
   state: TournamentDetailState = {
     tournament: null,
@@ -91,12 +96,6 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   TournamentStatus = TournamentStatus;
   TournamentType = TournamentType;
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private tournamentService: TournamentService,
-    private webSocketFactory: WebSocketFactory
-  ) {}
 
   ngOnInit(): void {
     this.route.params
@@ -105,15 +104,13 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
         this.tournamentId = +params['id'];
         this.loadTournament();
         
-        // Lazy load WebSocket service and handle async properly
+        // Initialize WebSocket connection
         this.initializeWebSocket();
       });
   }
 
   private async initializeWebSocket(): Promise<void> {
     try {
-      // Lazy load WebSocket service
-      this.webSocketService = await this.webSocketFactory.getWebSocketService();
       
       // Join tournament WebSocket group
       await this.webSocketService.joinTournament(this.tournamentId);
@@ -132,11 +129,9 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.webSocketService) {
-      this.webSocketService.leaveTournament().catch((error: unknown) => {
-        console.warn('Failed to leave WebSocket group:', error);
-      });
-    }
+    this.webSocketService.leaveTournament().catch((error: unknown) => {
+      console.warn('Failed to leave WebSocket group:', error);
+    });
     this.destroy$.next();
     this.destroy$.complete();
   }

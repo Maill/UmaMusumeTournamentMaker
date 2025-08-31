@@ -4,23 +4,28 @@ import { BehaviorSubject } from 'rxjs';
 export interface IdleState {
   isIdle: boolean;
   reason: 'tab-hidden' | 'user-inactive' | null;
+  tournamentId: number | null;
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class IdleManagerService {
   private tabHiddenTimer: number | null = null;
   private userInactiveTimer: number | null = null;
-  private idleStateSubject = new BehaviorSubject<IdleState>({ isIdle: false, reason: null });
-  
+  private idleStateSubject = new BehaviorSubject<IdleState>({
+    isIdle: false,
+    reason: null,
+    tournamentId: null,
+  });
+
   // Timeouts
-  private readonly TAB_HIDDEN_TIMEOUT = 5 * 60 * 1000; // 5 minutes
-  private readonly USER_INACTIVE_TIMEOUT = 15 * 60 * 1000; // 15 minutes
-  
+  private readonly TAB_HIDDEN_TIMEOUT = 1 * 60 * 1000; // 5 minutes
+  private readonly USER_INACTIVE_TIMEOUT = 1 * 60 * 1000; // 15 minutes
+
   // Public observables
   idleState$ = this.idleStateSubject.asObservable();
-  
+
   constructor() {
     this.setupIdleDetection();
   }
@@ -32,14 +37,22 @@ export class IdleManagerService {
 
   stopIdleDetection(): void {
     this.clearAllTimers();
-    this.idleStateSubject.next({ isIdle: false, reason: null });
+    // Don't reset idle state - just stop the timers
   }
 
   resetIdleState(): void {
     if (this.idleStateSubject.value.isIdle) {
-      this.idleStateSubject.next({ isIdle: false, reason: null });
+      this.idleStateSubject.next({
+        isIdle: false,
+        reason: null,
+        tournamentId: this.idleStateSubject.value.tournamentId,
+      });
     }
     this.resetUserInactiveTimer();
+  }
+
+  setTournamentIdIntoState(tournamentId: number): void {
+    this.idleStateSubject.value.tournamentId = tournamentId;
   }
 
   private setupIdleDetection(): void {
@@ -65,23 +78,31 @@ export class IdleManagerService {
   private handleTabHidden(): void {
     console.log('Tab hidden - starting disconnect timer');
     this.clearTabHiddenTimer();
-    
+
     this.tabHiddenTimer = setTimeout(() => {
       console.log('Idle due to tab being hidden for 5 minutes');
-      this.idleStateSubject.next({ isIdle: true, reason: 'tab-hidden' });
+      this.idleStateSubject.next({
+        isIdle: true,
+        reason: 'tab-hidden',
+        tournamentId: this.idleStateSubject.value.tournamentId,
+      });
     }, this.TAB_HIDDEN_TIMEOUT);
   }
 
   private handleTabVisible(): void {
     console.log('Tab visible - clearing disconnect timer');
     this.clearTabHiddenTimer();
-    
+
     // Reset idle state if we were idle
-    if (this.idleStateSubject.value.isIdle) {
+    if (this.idleStateSubject.value.isIdle && this.idleStateSubject.value.reason === 'tab-hidden') {
       console.log('Tab became visible - resetting idle state');
-      this.idleStateSubject.next({ isIdle: false, reason: null });
+      this.idleStateSubject.next({
+        isIdle: false,
+        reason: null,
+        tournamentId: this.idleStateSubject.value.tournamentId,
+      });
     }
-    
+
     this.resetUserInactiveTimer();
   }
 
@@ -89,16 +110,33 @@ export class IdleManagerService {
     // Only reset timer if tab is visible
     if (!document.hidden) {
       this.resetUserInactiveTimer();
+
+      // Reset idle state if we were idle due to user inactivity
+      if (
+        this.idleStateSubject.value.isIdle &&
+        this.idleStateSubject.value.reason === 'user-inactive'
+      ) {
+        console.log('User activity detected - resetting idle state');
+        this.idleStateSubject.next({
+          isIdle: false,
+          reason: null,
+          tournamentId: this.idleStateSubject.value.tournamentId,
+        });
+      }
     }
   }
 
   private resetUserInactiveTimer(): void {
     this.clearUserInactiveTimer();
-    
+
     this.userInactiveTimer = setTimeout(() => {
       if (!document.hidden) {
         console.log('Idle due to user inactivity for 15 minutes');
-        this.idleStateSubject.next({ isIdle: true, reason: 'user-inactive' });
+        this.idleStateSubject.next({
+          isIdle: true,
+          reason: 'user-inactive',
+          tournamentId: this.idleStateSubject.value.tournamentId,
+        });
       }
     }, this.USER_INACTIVE_TIMEOUT);
   }

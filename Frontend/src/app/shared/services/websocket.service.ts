@@ -23,7 +23,7 @@ export interface WebSocketUpdate {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WebSocketService {
   private idleManager = inject(IdleManagerService);
@@ -71,7 +71,13 @@ export class WebSocketService {
       await this.connection.stop();
     }
     this.connectionStateSubject.next(HubConnectionState.Disconnected);
-    this.currentTournamentId = null;
+
+    // Only clear tournament ID if not disconnecting due to idle
+    if (!this.isIdleDisconnected) {
+      console.log('clear id');
+      this.currentTournamentId = null;
+    }
+
     this.idleManager.stopIdleDetection();
   }
 
@@ -90,6 +96,7 @@ export class WebSocketService {
       // Backend expects string
       await this.connection!.invoke('JoinTournament', tournamentId.toString());
       this.currentTournamentId = tournamentId;
+      this.idleManager.setTournamentIdIntoState(tournamentId);
       console.log(`Joined tournament group: ${tournamentId}`);
     } catch (error) {
       console.error('Failed to join tournament group:', error);
@@ -125,8 +132,18 @@ export class WebSocketService {
   private initializeConnection(): void {
     this.connection = new HubConnectionBuilder()
       .withUrl(`${environment.hubUrl}/tournamentHub`)
-      .withAutomaticReconnect()
+      .withAutomaticReconnect({
+        nextRetryDelayInMilliseconds: (retryContext) => {
+          if (this.isIdleDisconnected || retryContext.previousRetryCount > 3) {
+            return null; // Don't try to reconnect if client is idle or after 3 failed retries
+          }
+
+          return 5000; //Try to reconnect after 5 seconds
+        },
+      })
       .configureLogging(environment.production ? LogLevel.Warning : LogLevel.Information)
+      .withServerTimeout(120000) // 2 minutes - match server ClientTimeoutInterval
+      .withKeepAliveInterval(60000) // 1 minute - match server KeepAliveInterval
       .build();
 
     this.setupEventHandlers();
@@ -212,18 +229,18 @@ export class WebSocketService {
         await this.disconnect();
       } else if (!state.isIdle && this.isIdleDisconnected) {
         console.log('Reconnecting after idle period ended');
-        await this.reconnectAfterIdle();
+        await this.reconnectAfterIdle(state.tournamentId);
       }
     });
   }
 
-  private async reconnectAfterIdle(): Promise<void> {
+  private async reconnectAfterIdle(tournamentId: number | null): Promise<void> {
     try {
       await this.connect();
 
       // Rejoin tournament if we were in one
-      if (this.currentTournamentId) {
-        await this.joinTournament(this.currentTournamentId);
+      if (tournamentId) {
+        await this.joinTournament(tournamentId);
       }
     } catch (error) {
       console.error('Failed to reconnect after idle:', error);

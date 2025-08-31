@@ -1,9 +1,9 @@
 .create-tournament-page {
-  min-height: 100vh;
+  /* min-height: 100vh; */
 }
 
 .page-container {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0;
 }
@@ -13,6 +13,8 @@
   background: var(--bg-white);
   border-bottom: 1px solid var(--border-primary);
   box-shadow: var(--shadow-sm);
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
 }
 
 .header-navigation {
@@ -59,6 +61,7 @@
   border-top: 1px solid var(--border-primary);
   border-bottom: 1px solid var(--border-primary);
   padding: 3rem 2rem;
+  border-radius: var(--radius-lg);
 }
 
 .help-content {

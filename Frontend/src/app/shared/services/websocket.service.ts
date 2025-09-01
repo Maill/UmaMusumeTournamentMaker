@@ -1,30 +1,49 @@
-import { Injectable } from '@angular/core';
-import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
+import { Injectable, inject } from '@angular/core';
+import {
+  HubConnection,
+  HubConnectionBuilder,
+  HubConnectionState,
+  LogLevel,
+} from '@microsoft/signalr';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { IdleManagerService } from './idle-manager.service';
 
 export interface WebSocketUpdate {
-  type: 'PlayerAdded' | 'PlayerRemoved' | 'MatchUpdated' | 'TournamentStarted' | 'NewRound' | 'TournamentUpdated' | 'WinnerSelected';
+  type:
+    | 'PlayerAdded'
+    | 'PlayerRemoved'
+    | 'TournamentStarted'
+    | 'NewRound'
+    | 'TournamentUpdated'
+    | 'WinnerSelected';
   tournamentId: number;
   data: any;
   timestamp: Date;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class WebSocketService {
+  private idleManager = inject(IdleManagerService);
   private connection: HubConnection | null = null;
   private currentTournamentId: number | null = null;
-  
+  private isIdleDisconnected = false;
+
   // Simple state tracking
-  private connectionStateSubject = new BehaviorSubject<HubConnectionState>(HubConnectionState.Disconnected);
+  private connectionStateSubject = new BehaviorSubject<HubConnectionState>(
+    HubConnectionState.Disconnected
+  );
   private updatesSubject = new Subject<WebSocketUpdate>();
-  
+
   // Public observables
   connectionState$ = this.connectionStateSubject.asObservable();
   updates$ = this.updatesSubject.asObservable();
 
   constructor() {
     this.initializeConnection();
+    this.setupIdleIntegration();
   }
 
   // Connection Management
@@ -37,6 +56,8 @@ export class WebSocketService {
       this.connectionStateSubject.next(HubConnectionState.Connecting);
       await this.connection?.start();
       this.connectionStateSubject.next(HubConnectionState.Connected);
+      this.isIdleDisconnected = false;
+      this.idleManager.startIdleDetection();
       console.log('WebSocket connected');
     } catch (error) {
       console.error('WebSocket connection failed:', error);
@@ -50,7 +71,14 @@ export class WebSocketService {
       await this.connection.stop();
     }
     this.connectionStateSubject.next(HubConnectionState.Disconnected);
-    this.currentTournamentId = null;
+
+    // Only clear tournament ID if not disconnecting due to idle
+    if (!this.isIdleDisconnected) {
+      console.log('clear id');
+      this.currentTournamentId = null;
+    }
+
+    this.idleManager.stopIdleDetection();
   }
 
   // Tournament Group Management - match backend method names exactly
@@ -68,6 +96,7 @@ export class WebSocketService {
       // Backend expects string
       await this.connection!.invoke('JoinTournament', tournamentId.toString());
       this.currentTournamentId = tournamentId;
+      this.idleManager.setTournamentIdIntoState(tournamentId);
       console.log(`Joined tournament group: ${tournamentId}`);
     } catch (error) {
       console.error('Failed to join tournament group:', error);
@@ -103,8 +132,18 @@ export class WebSocketService {
   private initializeConnection(): void {
     this.connection = new HubConnectionBuilder()
       .withUrl(`${environment.hubUrl}/tournamentHub`)
-      .withAutomaticReconnect()
+      .withAutomaticReconnect({
+        nextRetryDelayInMilliseconds: (retryContext) => {
+          if (this.isIdleDisconnected || retryContext.previousRetryCount > 3) {
+            return null; // Don't try to reconnect if client is idle or after 3 failed retries
+          }
+
+          return 5000; //Try to reconnect after 5 seconds
+        },
+      })
       .configureLogging(environment.production ? LogLevel.Warning : LogLevel.Information)
+      .withServerTimeout(120000) // 2 minutes - match server ClientTimeoutInterval
+      .withKeepAliveInterval(60000) // 1 minute - match server KeepAliveInterval
       .build();
 
     this.setupEventHandlers();
@@ -121,10 +160,6 @@ export class WebSocketService {
 
     this.connection.on('PlayerRemoved', (playerId: number) => {
       this.emitUpdate('PlayerRemoved', { playerId });
-    });
-
-    this.connection.on('MatchUpdated', (match: any) => {
-      this.emitUpdate('MatchUpdated', match);
     });
 
     this.connection.on('TournamentStarted', (tournament: any) => {
@@ -155,7 +190,7 @@ export class WebSocketService {
     this.connection.onreconnected(async (connectionId) => {
       console.log('WebSocket reconnected:', connectionId);
       this.connectionStateSubject.next(HubConnectionState.Connected);
-      
+
       // Rejoin tournament group if we were in one
       if (this.currentTournamentId) {
         try {
@@ -178,9 +213,37 @@ export class WebSocketService {
       type,
       tournamentId: this.currentTournamentId || 0,
       data,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.updatesSubject.next(update);
+  }
+
+  // Idle Management Integration
+  private setupIdleIntegration(): void {
+    // Subscribe to idle state changes
+    this.idleManager.idleState$.subscribe(async (state) => {
+      if (state.isIdle && this.connection?.state === HubConnectionState.Connected) {
+        console.log(`Disconnecting due to idle: ${state.reason}`);
+        this.isIdleDisconnected = true;
+        await this.disconnect();
+      } else if (!state.isIdle && this.isIdleDisconnected) {
+        console.log('Reconnecting after idle period ended');
+        await this.reconnectAfterIdle(state.tournamentId);
+      }
+    });
+  }
+
+  private async reconnectAfterIdle(tournamentId: number | null): Promise<void> {
+    try {
+      await this.connect();
+
+      // Rejoin tournament if we were in one
+      if (tournamentId) {
+        await this.joinTournament(tournamentId);
+      }
+    } catch (error) {
+      console.error('Failed to reconnect after idle:', error);
+    }
   }
 }

@@ -21,13 +21,6 @@ namespace UmaMusumeTournamentMaker.API.Application.Interfaces
         Task BroadcastPlayerRemoved(int tournamentId, int playerId);
 
         /// <summary>
-        /// Broadcasts when a match winner is set
-        /// </summary>
-        /// <param name="tournamentId">The tournament ID</param>
-        /// <param name="match">The updated match</param>
-        Task BroadcastMatchUpdated(int tournamentId, MatchDto match);
-
-        /// <summary>
         /// Broadcasts when tournament starts
         /// </summary>
         /// <param name="tournamentId">The tournament ID</param>

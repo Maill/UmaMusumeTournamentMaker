@@ -128,7 +128,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.webSocketService.leaveTournament().catch((error: unknown) => {
+    this.webSocketService.leaveTournament(true).catch((error: unknown) => {
       console.warn('Failed to leave WebSocket group:', error);
     });
     this.destroy$.next();
@@ -411,7 +411,10 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
         // Check if tournament just completed and disconnect WebSocket
         if (update.data.status === TournamentStatus.Completed) {
           console.log('Tournament completed via WebSocket - disconnecting');
-          this.webSocketService.leaveTournament().catch(console.warn);
+          this.webSocketService
+            .leaveTournament()
+            .catch(console.warn)
+            .then(() => this.webSocketService.disconnect().catch(console.warn));
         }
         break;
       case 'WinnerSelected':

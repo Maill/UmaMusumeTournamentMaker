@@ -19,7 +19,7 @@ export class IdleManagerService {
     tournamentId: null,
   });
   private abortControllers: Record<
-    'mousemove' | 'click' | 'touchstart' | 'keydown' | 'scroll',
+    'mousemove' | 'click' | 'touchstart' | 'keydown' | 'scroll' | 'visibilitychange',
     AbortController
   > = {
     click: new AbortController(),
@@ -27,6 +27,7 @@ export class IdleManagerService {
     touchstart: new AbortController(),
     keydown: new AbortController(),
     scroll: new AbortController(),
+    visibilitychange: new AbortController(),
   };
 
   // Timeouts
@@ -37,9 +38,7 @@ export class IdleManagerService {
   // Public observables
   idleState$ = this.idleStateSubject.asObservable();
 
-  constructor() {
-    this.setupIdleDetection();
-  }
+  constructor() {}
 
   // Public methods to control idle detection
   startIdleDetection(): void {
@@ -66,20 +65,43 @@ export class IdleManagerService {
     this.idleStateSubject.value.tournamentId = tournamentId;
   }
 
-  private setupIdleDetection(): void {
+  setupIdleDetection(): void {
+    this.resetAbortControllers();
     // Page Visibility API - handle tab switching
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        this.handleTabHidden();
-      } else {
-        this.handleTabVisible();
-      }
-    });
+    document.addEventListener(
+      'visibilitychange',
+      () => {
+        if (document.hidden) {
+          this.handleTabHidden();
+        } else {
+          this.handleTabVisible();
+        }
+      },
+      { signal: this.abortControllers.visibilitychange.signal }
+    );
 
     // User activity detection
     this.configureActivityEvents();
     // Start user inactivity timer
     this.resetUserInactiveTimer();
+  }
+
+  disableIdleDetection(): void {
+    this.abortControllers.click.abort();
+    this.abortControllers.keydown.abort();
+    this.abortControllers.mousemove.abort();
+    this.abortControllers.scroll.abort();
+    this.abortControllers.touchstart.abort();
+    this.abortControllers.visibilitychange.abort();
+  }
+
+  private resetAbortControllers(): void {
+    this.abortControllers.click = new AbortController();
+    this.abortControllers.keydown = new AbortController();
+    this.abortControllers.mousemove = new AbortController();
+    this.abortControllers.scroll = new AbortController();
+    this.abortControllers.touchstart = new AbortController();
+    this.abortControllers.visibilitychange = new AbortController();
   }
 
   private configureActivityEvents(): void {

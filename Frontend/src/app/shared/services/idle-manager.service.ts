@@ -86,7 +86,7 @@ export class IdleManagerService {
     this.resetUserInactiveTimer();
   }
 
-  disableIdleDetection(): void {
+  destroyAllListeners(): void {
     this.abortControllers.click.abort();
     this.abortControllers.keydown.abort();
     this.abortControllers.mousemove.abort();
@@ -96,6 +96,7 @@ export class IdleManagerService {
   }
 
   private resetAbortControllers(): void {
+    this.destroyAllListeners();
     this.abortControllers.click = new AbortController();
     this.abortControllers.keydown = new AbortController();
     this.abortControllers.mousemove = new AbortController();

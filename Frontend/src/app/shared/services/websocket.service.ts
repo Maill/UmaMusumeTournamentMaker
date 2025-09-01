@@ -47,7 +47,7 @@ export class WebSocketService {
   }
 
   // Connection Management
-  async connect(): Promise<void> {
+  async connect(enableIdleDetection: boolean = false): Promise<void> {
     if (this.connection?.state === HubConnectionState.Connected) {
       return;
     }
@@ -57,6 +57,10 @@ export class WebSocketService {
       await this.connection?.start();
       this.connectionStateSubject.next(HubConnectionState.Connected);
       this.isIdleDisconnected = false;
+
+      if (enableIdleDetection) {
+        this.idleManager.setupIdleDetection();
+      }
       this.idleManager.startIdleDetection();
       console.log('WebSocket connected');
     } catch (error) {
@@ -66,7 +70,7 @@ export class WebSocketService {
     }
   }
 
-  async disconnect(): Promise<void> {
+  async disconnect(disableIdleDetection: boolean = false): Promise<void> {
     if (this.connection?.state === HubConnectionState.Connected) {
       await this.connection.stop();
     }
@@ -74,17 +78,19 @@ export class WebSocketService {
 
     // Only clear tournament ID if not disconnecting due to idle
     if (!this.isIdleDisconnected) {
-      console.log('clear id');
       this.currentTournamentId = null;
     }
 
     this.idleManager.stopIdleDetection();
+    if (disableIdleDetection) {
+      this.idleManager.disableIdleDetection();
+    }
   }
 
   // Tournament Group Management - match backend method names exactly
   async joinTournament(tournamentId: number): Promise<void> {
     if (this.connection?.state !== HubConnectionState.Connected) {
-      await this.connect();
+      await this.connect(true);
     }
 
     try {
@@ -104,7 +110,7 @@ export class WebSocketService {
     }
   }
 
-  async leaveTournament(): Promise<void> {
+  async leaveTournament(disconnectWebsocket: boolean = false): Promise<void> {
     if (!this.currentTournamentId || this.connection?.state !== HubConnectionState.Connected) {
       return;
     }
@@ -114,6 +120,10 @@ export class WebSocketService {
       await this.connection.invoke('LeaveTournament', this.currentTournamentId.toString());
       console.log(`Left tournament group: ${this.currentTournamentId}`);
       this.currentTournamentId = null;
+
+      if (disconnectWebsocket) {
+        this.disconnect(disconnectWebsocket);
+      }
     } catch (error) {
       console.error('Failed to leave tournament group:', error);
     }

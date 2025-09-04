@@ -10,7 +10,7 @@ namespace UmaMusumeTournamentMaker.API.Application.DTOs
         /// <summary>
         /// Tournament password for authorization
         /// </summary>
-        public string? Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
         /// <summary>
         /// List of match results for the current round

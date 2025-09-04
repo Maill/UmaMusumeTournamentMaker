@@ -13,6 +13,6 @@ namespace UmaMusumeTournamentMaker.API.Application.Interfaces
         Task<TournamentDto> StartNextRoundAsync(int tournamentId, StartNextRoundDto startNextRoundDto);
         Task<TournamentDto> UpdateTournamentAsync(int tournamentId, UpdateTournamentDto updateTournamentDto);
         Task<bool> DeleteTournamentAsync(int tournamentId, DeleteTournamentDto deleteTournamentDto);
-        Task<bool> ValidatePasswordAsync(int tournamentId, string password);
+        Task ChallengePasswordAsync(int tournamentId, string password);
     }
 }

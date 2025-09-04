@@ -218,16 +218,16 @@ namespace UmaMusumeTournamentMaker.API.Presentation.Controllers
         {
             try
             {
-                var isValid = await _tournamentService.ValidatePasswordAsync(id, validatePasswordDto.Password);
-
-                if (isValid)
-                {
-                    return Ok(new { message = "Password is valid", isValid = true });
-                }
-                else
-                {
-                    return Unauthorized(new { message = "Invalid password", isValid = false });
-                }
+                await _tournamentService.ChallengePasswordAsync(id, validatePasswordDto.Password);
+                return Ok(new { message = "Password is valid", isValid = true });
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
             }
             catch (Exception ex)
             {

@@ -18,6 +18,6 @@ namespace UmaMusumeTournamentMaker.API.Application.DTOs
         /// <summary>
         /// Tournament password for authorization
         /// </summary>
-        public string? Password { get; set; }
+        public string Password { get; set; }
     }
 }

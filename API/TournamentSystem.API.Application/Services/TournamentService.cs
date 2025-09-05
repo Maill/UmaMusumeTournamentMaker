@@ -81,7 +81,7 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
             });
         }
 
-        public async Task<PlayerDto> AddPlayerAsync(int tournamentId, AddPlayerDto addPlayerDto)
+        public async Task<PlayerDto> AddPlayerAsync(AddPlayerDto addPlayerDto)
         {
             return await _unitOfWork.GetStrategy().ExecuteAsync(async () =>
             {
@@ -89,21 +89,21 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
 
                 try
                 {
-                    await ChallengePasswordAsync(tournamentId, addPlayerDto.Password);
+                    await ChallengePasswordAsync(addPlayerDto.TournamentId, addPlayerDto.Password);
 
-                    var tournament = _cacheService.GetTournament(tournamentId)
-                        ?? await _unitOfWork.Tournaments.GetByIdAsync(tournamentId);
+                    var tournament = _cacheService.GetTournament(addPlayerDto.TournamentId)
+                        ?? await _unitOfWork.Tournaments.GetByIdAsync(addPlayerDto.TournamentId);
 
                     if (tournament!.Status != TournamentStatus.Created)
                         throw new InvalidOperationException("Cannot add players to a tournament that has already started");
 
-                    if (await _unitOfWork.Players.ExistsInTournamentAsync(tournamentId, addPlayerDto.Name))
+                    if (await _unitOfWork.Players.ExistsInTournamentAsync(addPlayerDto.TournamentId, addPlayerDto.Name))
                         throw new InvalidOperationException($"Player '{addPlayerDto.Name}' already exists in this tournament");
 
                     var player = new Player
                     {
                         Name = addPlayerDto.Name,
-                        TournamentId = tournamentId,
+                        TournamentId = addPlayerDto.TournamentId,
                         Wins = 0,
                         Losses = 0,
                         Points = 0,
@@ -115,7 +115,7 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
                     var addedPlayer = _unitOfWork.Players.AddPlayer(player);
                     await _unitOfWork.SaveChangesAsync();
                     await _unitOfWork.CommitTransactionAsync();
-                    _cacheService.AddPlayerToTournament(tournamentId, addedPlayer);
+                    _cacheService.AddPlayerToTournament(addPlayerDto.TournamentId, addedPlayer);
 
                     return addedPlayer.ToDto();
                 }
@@ -133,7 +133,7 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("TournamentService", $"Failed to add player '{addPlayerDto.Name}' to tournament {tournamentId}: {ex.Message}", ex);
+                    _logger.LogError("TournamentService", $"Failed to add player '{addPlayerDto.Name}' to tournament {addPlayerDto.TournamentId}: {ex.Message}", ex);
                     await _unitOfWork.RollbackTransactionAsync();
                     throw new InvalidOperationException($"An unexpected error occurred while adding player '{addPlayerDto.Name}' to the tournament. Please try again.", ex);
                 }
@@ -190,7 +190,7 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
             });
         }
 
-        public async Task<TournamentDto> StartTournamentAsync(int tournamentId, StartTournamentDto startTournamentDto)
+        public async Task<TournamentDto> StartTournamentAsync(StartTournamentDto startTournamentDto)
         {
             return await _unitOfWork.GetStrategy().ExecuteAsync(async () =>
             {
@@ -198,10 +198,10 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
 
                 try
                 {
-                    await ChallengePasswordAsync(tournamentId, startTournamentDto.Password);
+                    await ChallengePasswordAsync(startTournamentDto.TournamentId, startTournamentDto.Password);
 
-                    var tournament = _cacheService.GetTournament(tournamentId)
-                        ?? await _unitOfWork.Tournaments.GetByIdAsync(tournamentId);
+                    var tournament = _cacheService.GetTournament(startTournamentDto.TournamentId)
+                        ?? await _unitOfWork.Tournaments.GetByIdAsync(startTournamentDto.TournamentId);
 
                     if (tournament!.Status != TournamentStatus.Created)
                         throw new InvalidOperationException("Tournament has already been started");
@@ -219,7 +219,7 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
                     await _unitOfWork.SaveChangesAsync();
 
                     // Get updated tournament for broadcasting BEFORE committing transaction
-                    var updatedTournament = await _unitOfWork.Tournaments.GetByIdWithCompleteDetailsAsync(tournamentId);
+                    var updatedTournament = await _unitOfWork.Tournaments.GetByIdWithCompleteDetailsAsync(startTournamentDto.TournamentId);
 
                     await _unitOfWork.CommitTransactionAsync();
                     _cacheService.UpdateTournament(updatedTournament!);
@@ -240,14 +240,14 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("TournamentService", $"Failed to start tournament {tournamentId}: {ex.Message}", ex);
+                    _logger.LogError("TournamentService", $"Failed to start tournament {startTournamentDto.TournamentId}: {ex.Message}", ex);
                     await _unitOfWork.RollbackTransactionAsync();
                     throw new InvalidOperationException("An unexpected error occurred while starting the tournament. Please try again.", ex);
                 }
             });
         }
 
-        public async Task<TournamentDto> StartNextRoundAsync(int tournamentId, StartNextRoundDto startNextRoundDto)
+        public async Task<TournamentDto> StartNextRoundAsync(StartNextRoundDto startNextRoundDto)
         {
             return await _unitOfWork.GetStrategy().ExecuteAsync(async () =>
             {
@@ -255,10 +255,10 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
 
                 try
                 {
-                    await ChallengePasswordAsync(tournamentId, startNextRoundDto.Password);
+                    await ChallengePasswordAsync(startNextRoundDto.TournamentId, startNextRoundDto.Password);
 
-                    var tournament = _cacheService.GetTournament(tournamentId)
-                        ?? await _unitOfWork.Tournaments.GetByIdAsync(tournamentId);
+                    var tournament = _cacheService.GetTournament(startNextRoundDto.TournamentId)
+                        ?? await _unitOfWork.Tournaments.GetByIdAsync(startNextRoundDto.TournamentId);
 
                     if (tournament!.Status != TournamentStatus.InProgress)
                         throw new InvalidOperationException("Tournament is not in progress");
@@ -291,7 +291,7 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
                     await _unitOfWork.SaveChangesAsync();
 
                     // Get updated tournament for broadcasting BEFORE committing transaction
-                    var updatedTournament = await _unitOfWork.Tournaments.GetByIdWithCompleteDetailsAsync(tournamentId);
+                    var updatedTournament = await _unitOfWork.Tournaments.GetByIdWithCompleteDetailsAsync(startNextRoundDto.TournamentId);
 
                     await _unitOfWork.CommitTransactionAsync();
                     _cacheService.UpdateTournament(updatedTournament!);
@@ -312,7 +312,7 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("TournamentService", $"Failed to start next round for tournament {tournamentId}: {ex.Message}", ex);
+                    _logger.LogError("TournamentService", $"Failed to start next round for tournament {startNextRoundDto.TournamentId}: {ex.Message}", ex);
                     await _unitOfWork.RollbackTransactionAsync();
                     throw new InvalidOperationException("An unexpected error occurred while starting the next round. Please try again.", ex);
                 }
@@ -361,7 +361,7 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
             return tournamentCompleted;
         }
 
-        public async Task<TournamentDto> UpdateTournamentAsync(int tournamentId, UpdateTournamentDto updateTournamentDto)
+        public async Task<TournamentDto> UpdateTournamentAsync(UpdateTournamentDto updateTournamentDto)
         {
             return await _unitOfWork.GetStrategy().ExecuteAsync(async () =>
             {
@@ -369,10 +369,10 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
 
                 try
                 {
-                    await ChallengePasswordAsync(tournamentId, updateTournamentDto.Password);
+                    await ChallengePasswordAsync(updateTournamentDto.TournamentId, updateTournamentDto.Password);
 
-                    var tournament = _cacheService.GetTournament(tournamentId)
-                        ?? await _unitOfWork.Tournaments.GetByIdAsync(tournamentId);
+                    var tournament = _cacheService.GetTournament(updateTournamentDto.TournamentId)
+                        ?? await _unitOfWork.Tournaments.GetByIdAsync(updateTournamentDto.TournamentId);
 
                     tournament!.Name = updateTournamentDto.Name;
                     _unitOfWork.Tournaments.Update(tournament);
@@ -392,14 +392,14 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("TournamentService", $"Failed to update tournament {tournamentId}: {ex.Message}", ex);
+                    _logger.LogError("TournamentService", $"Failed to update tournament {updateTournamentDto.TournamentId}: {ex.Message}", ex);
                     await _unitOfWork.RollbackTransactionAsync();
                     throw new InvalidOperationException("An unexpected error occurred while updating the tournament. Please try again.", ex);
                 }
             });
         }
 
-        public async Task<bool> DeleteTournamentAsync(int tournamentId, DeleteTournamentDto deleteTournamentDto)
+        public async Task<bool> DeleteTournamentAsync(DeleteTournamentDto deleteTournamentDto)
         {
             return await _unitOfWork.GetStrategy().ExecuteAsync(async () =>
             {
@@ -407,13 +407,13 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
 
                 try
                 {
-                    await ChallengePasswordAsync(tournamentId, deleteTournamentDto.Password);
+                    await ChallengePasswordAsync(deleteTournamentDto.TournamentId, deleteTournamentDto.Password);
 
-                    var result = await _unitOfWork.Tournaments.DeleteAsync(tournamentId);
+                    var result = await _unitOfWork.Tournaments.DeleteAsync(deleteTournamentDto.TournamentId);
                     await _unitOfWork.SaveChangesAsync();
                     await _unitOfWork.CommitTransactionAsync();
                     if (result)
-                        _cacheService.RemoveTournament(tournamentId);
+                        _cacheService.RemoveTournament(deleteTournamentDto.TournamentId);
 
                     return result;
                 }
@@ -427,7 +427,7 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("TournamentService", $"Failed to delete tournament {tournamentId}: {ex.Message}", ex);
+                    _logger.LogError("TournamentService", $"Failed to delete tournament {deleteTournamentDto.TournamentId}: {ex.Message}", ex);
                     await _unitOfWork.RollbackTransactionAsync();
                     throw new InvalidOperationException("An unexpected error occurred while deleting the tournament. Please try again.", ex);
                 }
@@ -446,6 +446,23 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
                 }
                 else 
                     tournament.ValidatePassword(password);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
+            catch (ArgumentException)
+            {
+                // Tournament not found
+                throw;
+            }
+        }
+
+        public async Task ChallengePasswordAsync(ChallengePasswordDto challengePasswordDto)
+        {
+            try
+            {
+                await ChallengePasswordAsync(challengePasswordDto.TournamentId, challengePasswordDto.Password);
             }
             catch (UnauthorizedAccessException)
             {

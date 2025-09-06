@@ -1,26 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 
 // Import organisms
-import {
-  TournamentFormComponent,
-  TournamentFormData,
-  TournamentFormState,
-} from '../../shared/organisms/tournament-form/tournament-form.component';
+import { TournamentFormComponent } from '../../shared/organisms/tournament-form/tournament-form.component';
 
 // Import atoms and types
 import { BaseButtonComponent } from '../../shared/atoms/button/base-button.component';
 import { BaseIconComponent } from '../../shared/atoms/icon/base-icon.component';
 import { TournamentService } from '../../shared/services/tournament.service';
-import { CreateTournamentRequest } from '../../shared/types/tournament.types';
-
-interface CreateTournamentPageState {
-  isCreating: boolean;
-  error: string | null;
-  formData: TournamentFormData | null;
-}
+import { CreateTournamentRequest } from '../../shared/types/api.types';
+import {
+  CreateTournamentPageState,
+  TournamentFormData,
+  TournamentFormState,
+} from '../../shared/types/components.types';
 
 @Component({
   selector: 'app-create-tournament-page',
@@ -30,6 +25,9 @@ interface CreateTournamentPageState {
   styleUrl: './create-tournament.page.css',
 })
 export class CreateTournamentPageComponent implements OnDestroy {
+  private tournamentService: TournamentService = inject(TournamentService);
+  private router: Router = inject(Router);
+
   private destroy$ = new Subject<void>();
 
   state: CreateTournamentPageState = {
@@ -37,8 +35,6 @@ export class CreateTournamentPageComponent implements OnDestroy {
     error: null,
     formData: null,
   };
-
-  constructor(private router: Router, private tournamentService: TournamentService) {}
 
   ngOnDestroy(): void {
     this.destroy$.next();

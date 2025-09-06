@@ -1,23 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BaseButtonComponent } from '../../atoms/button/base-button.component';
 import { BaseInputComponent } from '../../atoms/input/base-input.component';
-import { BaseSelectComponent, SelectOption } from '../../atoms/select/base-select.component';
+import { BaseSelectComponent } from '../../atoms/select/base-select.component';
 import { ErrorDisplayComponent } from '../../molecules/error-display/error-display.component';
-import { CreateTournamentRequest, TournamentType } from '../../types/tournament.types';
-
-export interface TournamentFormData {
-  name: string;
-  type: TournamentType;
-  password?: string;
-}
-
-export interface TournamentFormState {
-  isLoading: boolean;
-  error: string | null;
-  showPassword: boolean;
-}
+import { CreateTournamentRequest } from '../../types/api.types';
+import {
+  SelectOption,
+  TournamentFormData,
+  TournamentFormState,
+} from '../../types/components.types';
+import { TournamentType } from '../../types/tournament.types';
 
 @Component({
   selector: 'app-tournament-form',
@@ -85,9 +79,9 @@ export interface TournamentFormState {
 
         <!-- Password (Optional) -->
         <app-input
-          label="Password (Optional)"
+          label="Password"
           type="password"
-          placeholder="Leave empty for public tournament"
+          placeholder="Tournament's password for management access"
           [disabled]="state.isLoading"
           formControlName="password"
           [error]="getFieldError('password')"
@@ -126,6 +120,8 @@ export interface TournamentFormState {
   styleUrl: './tournament-form.component.css',
 })
 export class TournamentFormComponent implements OnInit {
+  private fb: FormBuilder = inject(FormBuilder);
+
   @Input() title: string = 'Create New Tournament';
   @Input() subtitle: string = '';
   @Input() submitText: string = 'Create Tournament';
@@ -170,8 +166,6 @@ export class TournamentFormComponent implements OnInit {
     },
   };
 
-  constructor(private fb: FormBuilder) {}
-
   ngOnInit(): void {
     this.initializeForm();
   }
@@ -179,7 +173,7 @@ export class TournamentFormComponent implements OnInit {
   private initializeForm(): void {
     this.tournamentForm = this.fb.group({
       name: [
-        this.initialData?.name || '',
+        '',
         [
           Validators.required,
           Validators.minLength(3),
@@ -187,8 +181,8 @@ export class TournamentFormComponent implements OnInit {
           Validators.pattern(/^[a-zA-Z0-9\s\-_]+$/),
         ],
       ],
-      type: [this.initialData?.type ?? TournamentType.Swiss, [Validators.required]],
-      password: [this.initialData?.password || '', [Validators.maxLength(50)]],
+      type: [TournamentType.Swiss, [Validators.required]],
+      password: ['', [Validators.maxLength(50), Validators.required, Validators.minLength(6)]],
     });
 
     // Subscribe to form changes

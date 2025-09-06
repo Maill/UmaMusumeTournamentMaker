@@ -4,22 +4,8 @@ import { BaseButtonComponent } from '../../atoms/button/base-button.component';
 import { BaseIconComponent } from '../../atoms/icon/base-icon.component';
 import { ErrorDisplayComponent } from '../../molecules/error-display/error-display.component';
 import { PlayerInputComponent } from '../../molecules/player-input/player-input.component';
+import { PlayerManagementState } from '../../types/components.types';
 import { Player } from '../../types/tournament.types';
-
-export interface PlayerManagementState {
-  isAddingPlayer: boolean;
-  isRemovingPlayer: boolean;
-  isStartingTournament: boolean;
-  canManage: boolean;
-  error: string | null;
-  addPlayerError: string | null;
-}
-
-export interface PlayerAction {
-  type: 'add' | 'remove' | 'start-tournament';
-  playerId?: number;
-  playerName?: string;
-}
 
 @Component({
   selector: 'app-player-management',
@@ -136,7 +122,6 @@ export interface PlayerAction {
       @if (state.canManage && canStartTournament()) {
       <div class="start-tournament-section">
         <div class="start-info">
-          <app-icon name="trophy" size="md" color="success" ariaLabel="Ready to start"> </app-icon>
           <div class="start-text">
             <h3>Ready to Start!</h3>
             <p>You have {{ players.length }} players registered. The tournament can begin.</p>

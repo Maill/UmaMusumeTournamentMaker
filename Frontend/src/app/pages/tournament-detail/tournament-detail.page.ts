@@ -4,19 +4,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { finalize, Subject, takeUntil } from 'rxjs';
 
 // Import organisms
-import {
-  MatchTableComponent,
-  MatchTableData,
-  MatchTableState,
-} from '../../shared/organisms/match-table/match-table.component';
-import {
-  PlayerManagementComponent,
-  PlayerManagementState,
-} from '../../shared/organisms/player-management/player-management.component';
-import {
-  StandingsTableComponent,
-  StandingsTableData,
-} from '../../shared/organisms/standings-table/standings-table.component';
+import { MatchTableComponent } from '../../shared/organisms/match-table/match-table.component';
+import { PlayerManagementComponent } from '../../shared/organisms/player-management/player-management.component';
+import { StandingsTableComponent } from '../../shared/organisms/standings-table/standings-table.component';
 
 // Import molecules and atoms
 import { BaseBadgeComponent } from '../../shared/atoms/badge/base-badge.component';
@@ -24,29 +14,29 @@ import { BaseButtonComponent } from '../../shared/atoms/button/base-button.compo
 import { BaseIconComponent } from '../../shared/atoms/icon/base-icon.component';
 import { LoadingSpinnerComponent } from '../../shared/atoms/spinner/loading-spinner.component';
 import { ErrorDisplayComponent } from '../../shared/molecules/error-display/error-display.component';
+import { PasswordModalComponent } from '../../shared/molecules/password-modal/password-modal.component';
+import { TournamentDeleteModal } from '../../shared/molecules/tournament-delete-modal/tournament-delete-modal';
+import { TournamentEditModal } from '../../shared/molecules/tournament-edit-modal/tournament-edit-modal';
 
 // Import types and services
-import {
-  PasswordModalComponent,
-  PasswordModalData,
-} from '../../shared/molecules/password-modal/password-modal.component';
+import { LocalStorageService } from '../../shared/services/local-storage.service';
 import { TournamentService } from '../../shared/services/tournament.service';
-import { WebSocketService, WebSocketUpdate } from '../../shared/services/websocket.service';
+import { WebSocketService } from '../../shared/services/websocket.service';
+import {
+  EditTournamentData,
+  MatchTableData,
+  MatchTableState,
+  PlayerManagementState,
+  StandingsTableData,
+  TournamentDetailState,
+} from '../../shared/types/components.types';
+import { HttpError, LocalStorageError, WebSocketUpdate } from '../../shared/types/service.types';
 import {
   Round,
   Tournament,
   TournamentStatus,
   TournamentType,
 } from '../../shared/types/tournament.types';
-
-interface TournamentDetailState {
-  tournament: Tournament | null;
-  isLoading: boolean;
-  error: string | null;
-  managementMode: boolean;
-  isUpdating: boolean;
-  passwordModal: PasswordModalData;
-}
 
 @Component({
   selector: 'app-tournament-detail-page',
@@ -62,16 +52,19 @@ interface TournamentDetailState {
     BaseIconComponent,
     BaseBadgeComponent,
     PasswordModalComponent,
+    TournamentDeleteModal,
+    TournamentEditModal,
   ],
   templateUrl: './tournament-detail.page.html',
   styleUrl: './tournament-detail.page.css',
 })
 export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   // Dependency injection
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private tournamentService = inject(TournamentService);
-  private webSocketService = inject(WebSocketService);
+  private route: ActivatedRoute = inject(ActivatedRoute);
+  private router: Router = inject(Router);
+  private tournamentService: TournamentService = inject(TournamentService);
+  private webSocketService: WebSocketService = inject(WebSocketService);
+  private localStorageService: LocalStorageService = inject(LocalStorageService);
 
   // Component state
   private destroy$ = new Subject<void>();
@@ -89,6 +82,19 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       message: 'Enter the tournament password to manage this tournament.',
       isLoading: false,
       error: null,
+    },
+    tournamentDeleteModal: {
+      error: null,
+      isLoading: false,
+      isVisible: false,
+    },
+    tournamentEditModal: {
+      formData: {
+        name: '',
+      },
+      error: null,
+      isLoading: false,
+      isVisible: false,
     },
   };
 
@@ -148,17 +154,15 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (tournament: Tournament) => {
           this.state.tournament = tournament;
+          this.state.tournamentEditModal.formData.name = tournament.name;
           // Auto-enter management mode if password is stored
-          if (this.tournamentService.hasPassword(this.tournamentId)) {
+          if (this.localStorageService.hasPassword(this.tournamentId)) {
             this.state.managementMode = true;
           }
           // Initialize WebSocket connection after tournament data is loaded
           this.initializeWebSocket();
         },
-        error: (error: any) => {
-          console.error('Failed to load tournament:', error);
-          this.state.error = error.message || 'Failed to load tournament. Please try again.';
-        },
+        error: this.handleError.bind(this, 'Failed to load tournament. Please try again.', null),
       });
   }
 
@@ -168,55 +172,9 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   }
 
   // Management mode methods
-  enterManagementMode(): void {
-    // Check if password is already stored
-    if (this.tournamentService.hasPassword(this.tournamentId)) {
-      this.state.managementMode = true;
-    } else {
-      // Show password modal
-      this.state.passwordModal = {
-        ...this.state.passwordModal,
-        isVisible: true,
-        error: null,
-      };
-    }
-  }
-
   exitManagementMode(): void {
+    this.localStorageService.clearPassword(this.tournamentId);
     this.state.managementMode = false;
-  }
-
-  onPasswordSubmitted(password: string): void {
-    this.state.passwordModal.isLoading = true;
-    this.state.passwordModal.error = null;
-
-    this.tournamentService
-      .validatePassword(this.tournamentId, password)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          this.state.passwordModal.isLoading = false;
-          if (response.isValid) {
-            // Password is correct - store it and enter management mode
-            this.tournamentService.setPassword(this.tournamentId, password);
-            this.state.managementMode = true;
-            this.state.passwordModal.isVisible = false;
-          } else {
-            // Password is incorrect - show error
-            this.state.passwordModal.error = 'Invalid password. Please try again.';
-          }
-        },
-        error: (error) => {
-          this.state.passwordModal.isLoading = false;
-          this.state.passwordModal.error = 'Failed to validate password. Please try again.';
-          console.error('Password validation failed:', error);
-        },
-      });
-  }
-
-  onPasswordCancelled(): void {
-    this.state.passwordModal.isVisible = false;
-    this.state.passwordModal.error = null;
   }
 
   // Player management methods
@@ -225,11 +183,13 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
 
     this.state.isUpdating = true;
     const request = {
+      tournamentId: this.tournamentId,
       name: playerName,
+      password: '', //Service will fetch password from localstorage
     };
 
     this.tournamentService
-      .addPlayer(this.tournamentId, request)
+      .addPlayer(request)
       .pipe(
         finalize(() => (this.state.isUpdating = false)),
         takeUntil(this.destroy$)
@@ -239,10 +199,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
           console.log('Player added successfully:', response.message);
           // Tournament data will be updated via WebSocket
         },
-        error: (error: any) => {
-          console.error('Failed to add player:', error);
-          this.state.error = error.message || 'Failed to add player. Please try again.';
-        },
+        error: this.handleError.bind(this, 'Failed to add player. Please try again.', null),
       });
   }
 
@@ -253,8 +210,10 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
     const request = {
       tournamentId: this.tournamentId,
       playerId: event.playerId,
+      password: '', //Service will fetch password from localstorage
     };
 
+    this.exitManagementMode.bind(this);
     this.tournamentService
       .removePlayer(request)
       .pipe(
@@ -266,10 +225,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
           console.log('Player removed successfully:', response.message);
           // Tournament data will be updated via WebSocket
         },
-        error: (error: any) => {
-          console.error('Failed to remove player:', error);
-          this.state.error = error.message || 'Failed to remove player. Please try again.';
-        },
+        error: this.handleError.bind(this, 'Failed to remove player. Please try again.', null),
       });
   }
 
@@ -277,17 +233,9 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
     if (!this.state.tournament) return;
 
     this.state.isUpdating = true;
-    const password = this.tournamentService.getPassword(this.tournamentId);
-    console.log(
-      'Starting tournament:',
-      this.tournamentId,
-      'with password:',
-      password ? 'PROVIDED' : 'NOT PROVIDED'
-    );
-
     const request = {
       tournamentId: this.tournamentId,
-      password: password,
+      password: '',
     };
 
     this.tournamentService
@@ -301,11 +249,11 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
           console.log('Tournament started successfully:', response.message);
           // Tournament data will be updated via WebSocket
         },
-        error: (error: any) => {
-          console.error('Failed to start tournament:', error);
-          console.error('Request was:', request);
-          this.state.error = error.message || 'Failed to start tournament. Please try again.';
-        },
+        error: this.handleError.bind(
+          this,
+          'Failed to start tournament. Please try again.',
+          request
+        ),
       });
   }
 
@@ -327,10 +275,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
           console.log('Winner selection broadcasted:', response.message);
           // Tournament data will be updated via WebSocket
         },
-        error: (error: any) => {
-          console.error('Failed to set match winner:', error);
-          this.state.error = error.message || 'Failed to set match winner. Please try again.';
-        },
+        error: this.handleError.bind(this, 'Failed to set match winner. Please try again.', null),
       });
   }
 
@@ -374,15 +319,156 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
           console.log('Next round started:', response.message);
           // Tournament data will be updated via WebSocket
         },
-        error: (error: any) => {
-          console.error('Failed to start next round:', error);
-          this.state.error = error.message || 'Failed to start next round. Please try again.';
-        },
+        error: this.handleError.bind(this, 'Failed to start next round. Please try again.', null),
       });
   }
 
   clearError(): void {
     this.state.error = null;
+  }
+
+  // Password Modal handling
+  passwordModalSubmitted(password: string): void {
+    this.state.passwordModal.isLoading = true;
+    this.state.passwordModal.error = null;
+
+    const request = {
+      tournamentId: this.tournamentId,
+      password,
+    };
+
+    this.tournamentService
+      .validateTournamentPassword(request)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.state.passwordModal.isLoading = false;
+          if (response.isValid) {
+            // Password is correct - store it and enter management mode
+            this.localStorageService.setPassword(this.tournamentId, password);
+            this.state.managementMode = true;
+            this.state.passwordModal.isVisible = false;
+          } else {
+            // Password is incorrect - show error
+            this.state.passwordModal.error = 'Invalid password. Please try again.';
+          }
+        },
+        error: (error) => {
+          this.state.passwordModal.isLoading = false;
+          this.state.passwordModal.error = 'Failed to validate password. Please try again.';
+          console.error('Password validation failed:', error);
+        },
+      });
+  }
+
+  passwordModalCancelled(): void {
+    this.state.passwordModal.isVisible = false;
+    this.state.passwordModal.error = null;
+  }
+
+  showPasswordModal(): void {
+    this.state.passwordModal = {
+      ...this.state.passwordModal,
+      isVisible: true,
+      error: null,
+    };
+  }
+
+  // Tournament Deletion Modal handling
+  tournamentDeleteModalSubmitted(password: string): void {
+    this.state.tournamentDeleteModal.isLoading = true;
+    this.state.tournamentDeleteModal.error = null;
+
+    var request = {
+      tournamentId: this.tournamentId,
+      password: password,
+    };
+    this.tournamentService
+      .deleteTournament(request)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          //Response via Websocket
+        },
+        error: (error) => {
+          this.state.tournamentDeleteModal.isLoading = false;
+
+          if (error instanceof HttpError && error.httpCode == 401) {
+            if (error.httpCode == 401) {
+              this.state.tournamentDeleteModal.error =
+                'Failed to validate password. Please try again.';
+            } else {
+              this.state.tournamentDeleteModal.error = error.message;
+            }
+          } else {
+            console.error(error);
+            this.state.tournamentDeleteModal.error = 'Unexpected error. Please try again.';
+          }
+        },
+      });
+  }
+
+  tournamentDeleteModalCancelled(): void {
+    this.state.tournamentDeleteModal.isVisible = false;
+    this.state.tournamentDeleteModal.error = null;
+  }
+
+  showTournamentDeleteModal(): void {
+    this.state.tournamentDeleteModal = {
+      ...this.state.tournamentDeleteModal,
+      isVisible: true,
+      error: null,
+    };
+  }
+
+  // Tournament Edition Modal handling
+  tournamentEditModalSubmitted(data: EditTournamentData) {
+    this.state.tournamentEditModal.isLoading = true;
+    this.state.tournamentEditModal.error = null;
+    console.log('hit');
+    const request = {
+      tournamentId: this.tournamentId,
+      name: data.name,
+      password: '',
+    };
+
+    this.tournamentService
+      .updateTournament(request)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          //Response via Websocket
+        },
+        error: (error) => {
+          this.state.tournamentEditModal.isLoading = false;
+
+          if (error instanceof HttpError && error.httpCode == 401) {
+            if (error.httpCode == 401) {
+              this.state.tournamentEditModal.error =
+                'Failed to update tournament. Please try again.';
+            } else {
+              this.state.tournamentEditModal.error = error.message;
+            }
+          } else {
+            console.error(error);
+            this.state.tournamentEditModal.error = 'Unexpected error. Please try again.';
+          }
+        },
+      });
+  }
+
+  tournamentEditCancelled(): void {
+    this.state.tournamentEditModal.formData.name = this.state.tournament?.name!;
+    this.state.tournamentEditModal.isVisible = false;
+    this.state.tournamentEditModal.error = null;
+  }
+
+  showTournamentEditModal(): void {
+    this.state.tournamentEditModal = {
+      ...this.state.tournamentEditModal,
+      isVisible: true,
+      error: null,
+    };
   }
 
   // WebSocket update handling
@@ -402,9 +488,13 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
           );
         }
         break;
-      case 'TournamentStarted':
-      case 'NewRound':
       case 'TournamentUpdated':
+        this.state.tournament!.name = update.data;
+        this.state.tournamentEditModal.isLoading = false;
+        this.tournamentEditCancelled();
+        break;
+      case 'NewRound':
+      case 'TournamentStarted':
         // Use the tournament data directly from WebSocket update
         this.state.tournament = update.data;
 
@@ -420,6 +510,9 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       case 'WinnerSelected':
         // Handle winner selection locally without DB reload
         this.handleWinnerSelection(update.data);
+        break;
+      case 'TournamentDeletion':
+        this.goBack();
         break;
     }
   }
@@ -511,11 +604,6 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       : 'Start Next Round';
   }
 
-  isLastRound(): boolean {
-    // Tournament-specific logic would go here
-    return false;
-  }
-
   getCompletedMatchesInRound(round: Round): number {
     return round.matches.filter((match) => match.winnerId).length;
   }
@@ -568,4 +656,22 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
         return 'warning';
     }
   }
+
+  // Error Handling
+  private handleError = (defaultErrorMessage: string, additionalObject: any, error: any) => {
+    console.error(defaultErrorMessage, error);
+    this.state.error = error.message || defaultErrorMessage;
+
+    if (additionalObject !== null) {
+      console.error('Additional info:', additionalObject);
+    }
+
+    if (
+      error instanceof LocalStorageError ||
+      (error instanceof HttpError && error.httpCode == 401)
+    ) {
+      this.exitManagementMode();
+    }
+    return;
+  };
 }

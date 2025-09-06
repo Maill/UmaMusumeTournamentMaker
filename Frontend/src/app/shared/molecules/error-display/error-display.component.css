@@ -32,7 +32,7 @@
 /* Content layout */
 .error-content {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.75rem;
 }
 
@@ -55,7 +55,6 @@
 .error-message {
   font-size: 0.9rem;
   line-height: 1.4;
-  margin-bottom: 0.5rem;
 }
 
 .error-details {
@@ -103,7 +102,7 @@
 }
 
 /* Animation for retry button */
-.error-actions app-button[data-loading="true"] {
+.error-actions app-button[data-loading='true'] {
   pointer-events: none;
 }
 
@@ -113,21 +112,21 @@
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .error-actions {
     align-self: stretch;
     justify-content: space-between;
   }
-  
+
   .error-actions app-button {
     flex: 1;
     max-width: 120px;
   }
-  
+
   .error-compact .error-content {
     flex-direction: row;
   }
-  
+
   .error-compact .error-actions {
     flex-direction: column;
     align-self: flex-start;
@@ -147,13 +146,13 @@
     background-color: var(--bg-white);
     border-color: var(--danger-primary);
   }
-  
+
   .error-warning {
     border-width: 2px;
     background-color: var(--bg-white);
     border-color: var(--warning-primary);
   }
-  
+
   .error-info {
     border-width: 2px;
     background-color: var(--bg-white);

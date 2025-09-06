@@ -50,13 +50,19 @@ namespace UmaMusumeTournamentMaker.API.Infrastructure.Services
         public async Task BroadcastTournamentUpdated(int tournamentId, TournamentDto tournament)
         {
             await _hubContext.Clients.Group(GetTournamentGroup(tournamentId))
-                .SendAsync("TournamentUpdated", tournament);
+                .SendAsync("TournamentUpdated", tournament.Name);
         }
 
         public async Task BroadcastWinnerSelection(int tournamentId, int matchId, int winnerId)
         {
             await _hubContext.Clients.Group(GetTournamentGroup(tournamentId))
                 .SendAsync("WinnerSelected", new { matchId, winnerId });
+        }
+
+        public async Task BroadcastTournamentDeletion(int tournamentId)
+        {
+            await _hubContext.Clients.Group(GetTournamentGroup(tournamentId))
+                .SendAsync("TournamentDeletion");
         }
     }
 }

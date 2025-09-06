@@ -27,6 +27,7 @@ import {
   StandingsTableData,
   TournamentDetailState,
 } from '../../shared/types/components.types';
+import { HttpError, LocalStorageError } from '../../shared/types/service.types';
 import {
   Round,
   Tournament,
@@ -54,8 +55,8 @@ import {
 })
 export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   // Dependency injection
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
+  private route: ActivatedRoute = inject(ActivatedRoute);
+  private router: Router = inject(Router);
   private tournamentService: TournamentService = inject(TournamentService);
   private webSocketService: WebSocketService = inject(WebSocketService);
   private localStorageService: LocalStorageService = inject(LocalStorageService);
@@ -142,10 +143,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
           // Initialize WebSocket connection after tournament data is loaded
           this.initializeWebSocket();
         },
-        error: (error: any) => {
-          console.error('Failed to load tournament:', error);
-          this.state.error = error.message || 'Failed to load tournament. Please try again.';
-        },
+        error: this.handleError.bind(this, 'Failed to load tournament. Please try again.', null),
       });
   }
 
@@ -170,6 +168,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   }
 
   exitManagementMode(): void {
+    this.localStorageService.clearPassword(this.tournamentId);
     this.state.managementMode = false;
   }
 
@@ -233,10 +232,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
           console.log('Player added successfully:', response.message);
           // Tournament data will be updated via WebSocket
         },
-        error: (error: any) => {
-          console.error('Failed to add player:', error);
-          this.state.error = error.message || 'Failed to add player. Please try again.';
-        },
+        error: this.handleError.bind(this, 'Failed to add player. Please try again.', null),
       });
   }
 
@@ -250,6 +246,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       password: '', //Service will fetch password from localstorage
     };
 
+    this.exitManagementMode.bind(this);
     this.tournamentService
       .removePlayer(request)
       .pipe(
@@ -261,10 +258,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
           console.log('Player removed successfully:', response.message);
           // Tournament data will be updated via WebSocket
         },
-        error: (error: any) => {
-          console.error('Failed to remove player:', error);
-          this.state.error = error.message || 'Failed to remove player. Please try again.';
-        },
+        error: this.handleError.bind(this, 'Failed to remove player. Please try again.', null),
       });
   }
 
@@ -288,11 +282,11 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
           console.log('Tournament started successfully:', response.message);
           // Tournament data will be updated via WebSocket
         },
-        error: (error: any) => {
-          console.error('Failed to start tournament:', error);
-          console.error('Request was:', request);
-          this.state.error = error.message || 'Failed to start tournament. Please try again.';
-        },
+        error: this.handleError.bind(
+          this,
+          'Failed to start tournament. Please try again.',
+          request
+        ),
       });
   }
 
@@ -314,10 +308,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
           console.log('Winner selection broadcasted:', response.message);
           // Tournament data will be updated via WebSocket
         },
-        error: (error: any) => {
-          console.error('Failed to set match winner:', error);
-          this.state.error = error.message || 'Failed to set match winner. Please try again.';
-        },
+        error: this.handleError.bind(this, 'Failed to set match winner. Please try again.', null),
       });
   }
 
@@ -361,10 +352,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
           console.log('Next round started:', response.message);
           // Tournament data will be updated via WebSocket
         },
-        error: (error: any) => {
-          console.error('Failed to start next round:', error);
-          this.state.error = error.message || 'Failed to start next round. Please try again.';
-        },
+        error: this.handleError.bind(this, 'Failed to start next round. Please try again.', null),
       });
   }
 
@@ -550,4 +538,22 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
         return 'warning';
     }
   }
+
+  // Error Handling
+  private handleError = (defaultErrorMessage: string, additionalObject: any, error: any) => {
+    console.error(defaultErrorMessage, error);
+    this.state.error = error.message || defaultErrorMessage;
+
+    if (additionalObject !== null) {
+      console.error('Additional info:', additionalObject);
+    }
+
+    if (
+      error instanceof LocalStorageError ||
+      (error instanceof HttpError && error.httpCode == 401)
+    ) {
+      this.exitManagementMode();
+    }
+    return;
+  };
 }

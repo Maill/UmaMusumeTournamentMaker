@@ -20,3 +20,18 @@ export interface IdleState {
   reason: 'tab-hidden' | 'user-inactive' | null;
   tournamentId: number | null;
 }
+
+export class LocalStorageError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+export class HttpError extends Error {
+  httpCode: number;
+
+  constructor(message: string, code: number) {
+    super(message);
+    this.httpCode = code;
+  }
+}

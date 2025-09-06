@@ -34,7 +34,7 @@ export interface CreateTournamentPageState {
 export interface TournamentFormData {
   name: string;
   type: TournamentType;
-  password?: string;
+  password: string;
 }
 
 export interface TournamentFormState {

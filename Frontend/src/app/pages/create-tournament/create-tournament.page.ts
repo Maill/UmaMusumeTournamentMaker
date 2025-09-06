@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 
@@ -25,6 +25,9 @@ import {
   styleUrl: './create-tournament.page.css',
 })
 export class CreateTournamentPageComponent implements OnDestroy {
+  private tournamentService: TournamentService = inject(TournamentService);
+  private router: Router = inject(Router);
+
   private destroy$ = new Subject<void>();
 
   state: CreateTournamentPageState = {
@@ -32,8 +35,6 @@ export class CreateTournamentPageComponent implements OnDestroy {
     error: null,
     formData: null,
   };
-
-  constructor(private router: Router, private tournamentService: TournamentService) {}
 
   ngOnDestroy(): void {
     this.destroy$.next();

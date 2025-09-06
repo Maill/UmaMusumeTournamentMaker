@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BaseButtonComponent } from '../../atoms/button/base-button.component';
 import { BaseInputComponent } from '../../atoms/input/base-input.component';
@@ -79,9 +79,9 @@ import { TournamentType } from '../../types/tournament.types';
 
         <!-- Password (Optional) -->
         <app-input
-          label="Password (Optional)"
+          label="Password"
           type="password"
-          placeholder="Leave empty for public tournament"
+          placeholder="Tournament's password for management access"
           [disabled]="state.isLoading"
           formControlName="password"
           [error]="getFieldError('password')"
@@ -120,6 +120,8 @@ import { TournamentType } from '../../types/tournament.types';
   styleUrl: './tournament-form.component.css',
 })
 export class TournamentFormComponent implements OnInit {
+  private fb: FormBuilder = inject(FormBuilder);
+
   @Input() title: string = 'Create New Tournament';
   @Input() subtitle: string = '';
   @Input() submitText: string = 'Create Tournament';
@@ -164,8 +166,6 @@ export class TournamentFormComponent implements OnInit {
     },
   };
 
-  constructor(private fb: FormBuilder) {}
-
   ngOnInit(): void {
     this.initializeForm();
   }
@@ -173,7 +173,7 @@ export class TournamentFormComponent implements OnInit {
   private initializeForm(): void {
     this.tournamentForm = this.fb.group({
       name: [
-        this.initialData?.name || '',
+        '',
         [
           Validators.required,
           Validators.minLength(3),
@@ -181,8 +181,8 @@ export class TournamentFormComponent implements OnInit {
           Validators.pattern(/^[a-zA-Z0-9\s\-_]+$/),
         ],
       ],
-      type: [this.initialData?.type ?? TournamentType.Swiss, [Validators.required]],
-      password: [this.initialData?.password || '', [Validators.maxLength(50)]],
+      type: [TournamentType.Swiss, [Validators.required]],
+      password: ['', [Validators.maxLength(50), Validators.required, Validators.minLength(6)]],
     });
 
     // Subscribe to form changes

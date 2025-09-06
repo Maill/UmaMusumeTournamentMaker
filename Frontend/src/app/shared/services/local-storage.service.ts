@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { LocalStorageError } from '../types/service.types';
 
 @Injectable({
   providedIn: 'root',
@@ -10,8 +11,14 @@ export class LocalStorageService {
     localStorage.setItem(`${this.PASSWORD_KEY_PREFIX}${tournamentId}`, password);
   }
 
-  getPassword(tournamentId: number): string | null {
-    return localStorage.getItem(`${this.PASSWORD_KEY_PREFIX}${tournamentId}`) || null;
+  getPassword(tournamentId: number): string {
+    let password = localStorage.getItem(`${this.PASSWORD_KEY_PREFIX}${tournamentId}`);
+    if (password === null)
+      throw new LocalStorageError(
+        `Password not found in Local Storage. Local Storage may have been reset. Please re-enter the password.`
+      );
+
+    return password!;
   }
 
   hasPassword(tournamentId: number): boolean {

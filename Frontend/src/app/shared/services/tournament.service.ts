@@ -17,6 +17,7 @@ import {
   UpdateTournamentRequest,
   ValidatePasswordRequest,
 } from '../types/api.types';
+import { HttpError, LocalStorageError } from '../types/service.types';
 import { LocalStorageService } from './local-storage.service';
 
 @Injectable({
@@ -150,9 +151,16 @@ export class TournamentService {
     this.loadingSubject.next(true);
     this.errorSubject.next(null);
 
-    const storedPassword = this.localStorageService.getPassword(request.tournamentId);
-    request.name = request.name.trim();
-    request.password = request.password || storedPassword || '';
+    try {
+      const storedPassword = this.localStorageService.getPassword(request.tournamentId);
+      request.name = request.name.trim();
+      request.password = request.password || storedPassword;
+    } catch (error: any) {
+      if (error instanceof LocalStorageError) {
+        this.loadingSubject.next(false);
+        return throwError(() => error);
+      }
+    }
 
     return this.http.post<{ message: string }>(`${this.apiUrl}/players`, request).pipe(
       tap((response) => {
@@ -224,7 +232,7 @@ export class TournamentService {
     this.errorSubject.next(null);
 
     const storedPassword = this.localStorageService.getPassword(request.tournamentId);
-    request.password = request.password || storedPassword || '';
+    request.password = request.password ?? storedPassword;
 
     return this.http.post<{ message: string }>(`${this.apiUrl}/next-round`, request).pipe(
       tap((response) => {
@@ -291,6 +299,6 @@ export class TournamentService {
     }
 
     this.errorSubject.next(errorMessage);
-    return throwError(() => new Error(errorMessage));
+    return throwError(() => new HttpError(errorMessage, error.status));
   };
 }

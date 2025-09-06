@@ -14,11 +14,11 @@ import { BaseButtonComponent } from '../../shared/atoms/button/base-button.compo
 import { BaseIconComponent } from '../../shared/atoms/icon/base-icon.component';
 import { LoadingSpinnerComponent } from '../../shared/atoms/spinner/loading-spinner.component';
 import { ErrorDisplayComponent } from '../../shared/molecules/error-display/error-display.component';
-
-// Import types and services
 import { PasswordModalComponent } from '../../shared/molecules/password-modal/password-modal.component';
 import { TournamentDeleteModal } from '../../shared/molecules/tournament-delete-modal/tournament-delete-modal';
 import { TournamentEditModal } from '../../shared/molecules/tournament-edit-modal/tournament-edit-modal';
+
+// Import types and services
 import { LocalStorageService } from '../../shared/services/local-storage.service';
 import { TournamentService } from '../../shared/services/tournament.service';
 import { WebSocketService } from '../../shared/services/websocket.service';

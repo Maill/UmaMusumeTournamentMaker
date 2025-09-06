@@ -64,16 +64,16 @@
       </div>
       <div class="header-actions">
         @if (!state.managementMode) {
-        <app-button variant="primary" (clicked)="enterManagementMode()">
+        <app-button variant="primary" (clicked)="showPasswordModal()">
           <app-icon name="cog" size="sm"></app-icon>
           Enter Management
         </app-button>
         } @else {
-        <app-button variant="danger" (clicked)="enterManagementMode()">
+        <app-button variant="danger" (clicked)="showTournamentDeleteModal()">
           <app-icon name="delete" size="sm"></app-icon>
           Delete Tournament
         </app-button>
-        <app-button variant="secondary" (clicked)="enterManagementMode()">
+        <app-button variant="primary" (clicked)="showTournamentEditModal()">
           <app-icon name="edit" size="sm"></app-icon>
           Edit Tournament Name
         </app-button>
@@ -183,8 +183,22 @@
   <!-- Password Modal -->
   <app-password-modal
     [data]="state.passwordModal"
-    (passwordSubmitted)="onPasswordSubmitted($event)"
-    (cancelled)="onPasswordCancelled()"
+    (passwordSubmitted)="passwordModalSubmitted($event)"
+    (cancelled)="passwordModalCancelled()"
   >
   </app-password-modal>
+
+  <app-tournament-delete-modal
+    [data]="state.tournamentDeleteModal"
+    (passwordSubmitted)="tournamentDeleteModalSubmitted($event)"
+    (cancelled)="tournamentDeleteModalCancelled()"
+  >
+  </app-tournament-delete-modal>
+
+  <app-tournament-edit-modal
+    [data]="state.tournamentEditModal"
+    (dataSubmitted)="tournamentEditModalSubmitted($event)"
+    (cancelled)="tournamentEditCancelled()"
+  >
+  </app-tournament-edit-modal>
 </div>

@@ -202,11 +202,17 @@ namespace UmaMusumeTournamentMaker.API.Presentation.Controllers
                 if (!result)
                     return NotFound(new { message = "Tournament not found" });
 
+                await _broadcastService.BroadcastTournamentDeletion(deleteTournamentDto.TournamentId);
+
                 return NoContent();
             }
             catch (UnauthorizedAccessException ex)
             {
                 return Unauthorized(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {

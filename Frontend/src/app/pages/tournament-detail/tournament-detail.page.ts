@@ -17,17 +17,20 @@ import { ErrorDisplayComponent } from '../../shared/molecules/error-display/erro
 
 // Import types and services
 import { PasswordModalComponent } from '../../shared/molecules/password-modal/password-modal.component';
+import { TournamentDeleteModal } from '../../shared/molecules/tournament-delete-modal/tournament-delete-modal';
+import { TournamentEditModal } from '../../shared/molecules/tournament-edit-modal/tournament-edit-modal';
 import { LocalStorageService } from '../../shared/services/local-storage.service';
 import { TournamentService } from '../../shared/services/tournament.service';
-import { WebSocketService, WebSocketUpdate } from '../../shared/services/websocket.service';
+import { WebSocketService } from '../../shared/services/websocket.service';
 import {
+  EditTournamentData,
   MatchTableData,
   MatchTableState,
   PlayerManagementState,
   StandingsTableData,
   TournamentDetailState,
 } from '../../shared/types/components.types';
-import { HttpError, LocalStorageError } from '../../shared/types/service.types';
+import { HttpError, LocalStorageError, WebSocketUpdate } from '../../shared/types/service.types';
 import {
   Round,
   Tournament,
@@ -49,6 +52,8 @@ import {
     BaseIconComponent,
     BaseBadgeComponent,
     PasswordModalComponent,
+    TournamentDeleteModal,
+    TournamentEditModal,
   ],
   templateUrl: './tournament-detail.page.html',
   styleUrl: './tournament-detail.page.css',
@@ -77,6 +82,19 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       message: 'Enter the tournament password to manage this tournament.',
       isLoading: false,
       error: null,
+    },
+    tournamentDeleteModal: {
+      error: null,
+      isLoading: false,
+      isVisible: false,
+    },
+    tournamentEditModal: {
+      formData: {
+        name: '',
+      },
+      error: null,
+      isLoading: false,
+      isVisible: false,
     },
   };
 
@@ -136,6 +154,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (tournament: Tournament) => {
           this.state.tournament = tournament;
+          this.state.tournamentEditModal.formData.name = tournament.name;
           // Auto-enter management mode if password is stored
           if (this.localStorageService.hasPassword(this.tournamentId)) {
             this.state.managementMode = true;
@@ -153,61 +172,9 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   }
 
   // Management mode methods
-  enterManagementMode(): void {
-    // Check if password is already stored
-    if (this.localStorageService.hasPassword(this.tournamentId)) {
-      this.state.managementMode = true;
-    } else {
-      // Show password modal
-      this.state.passwordModal = {
-        ...this.state.passwordModal,
-        isVisible: true,
-        error: null,
-      };
-    }
-  }
-
   exitManagementMode(): void {
     this.localStorageService.clearPassword(this.tournamentId);
     this.state.managementMode = false;
-  }
-
-  onPasswordSubmitted(password: string): void {
-    this.state.passwordModal.isLoading = true;
-    this.state.passwordModal.error = null;
-
-    const request = {
-      tournamentId: this.tournamentId,
-      password,
-    };
-
-    this.tournamentService
-      .validateTournamentPassword(request)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          this.state.passwordModal.isLoading = false;
-          if (response.isValid) {
-            // Password is correct - store it and enter management mode
-            this.localStorageService.setPassword(this.tournamentId, password);
-            this.state.managementMode = true;
-            this.state.passwordModal.isVisible = false;
-          } else {
-            // Password is incorrect - show error
-            this.state.passwordModal.error = 'Invalid password. Please try again.';
-          }
-        },
-        error: (error) => {
-          this.state.passwordModal.isLoading = false;
-          this.state.passwordModal.error = 'Failed to validate password. Please try again.';
-          console.error('Password validation failed:', error);
-        },
-      });
-  }
-
-  onPasswordCancelled(): void {
-    this.state.passwordModal.isVisible = false;
-    this.state.passwordModal.error = null;
   }
 
   // Player management methods
@@ -360,6 +327,150 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
     this.state.error = null;
   }
 
+  // Password Modal handling
+  passwordModalSubmitted(password: string): void {
+    this.state.passwordModal.isLoading = true;
+    this.state.passwordModal.error = null;
+
+    const request = {
+      tournamentId: this.tournamentId,
+      password,
+    };
+
+    this.tournamentService
+      .validateTournamentPassword(request)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.state.passwordModal.isLoading = false;
+          if (response.isValid) {
+            // Password is correct - store it and enter management mode
+            this.localStorageService.setPassword(this.tournamentId, password);
+            this.state.managementMode = true;
+            this.state.passwordModal.isVisible = false;
+          } else {
+            // Password is incorrect - show error
+            this.state.passwordModal.error = 'Invalid password. Please try again.';
+          }
+        },
+        error: (error) => {
+          this.state.passwordModal.isLoading = false;
+          this.state.passwordModal.error = 'Failed to validate password. Please try again.';
+          console.error('Password validation failed:', error);
+        },
+      });
+  }
+
+  passwordModalCancelled(): void {
+    this.state.passwordModal.isVisible = false;
+    this.state.passwordModal.error = null;
+  }
+
+  showPasswordModal(): void {
+    this.state.passwordModal = {
+      ...this.state.passwordModal,
+      isVisible: true,
+      error: null,
+    };
+  }
+
+  // Tournament Deletion Modal handling
+  tournamentDeleteModalSubmitted(password: string): void {
+    this.state.tournamentDeleteModal.isLoading = true;
+    this.state.tournamentDeleteModal.error = null;
+
+    var request = {
+      tournamentId: this.tournamentId,
+      password: password,
+    };
+    this.tournamentService
+      .deleteTournament(request)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          //Response via Websocket
+        },
+        error: (error) => {
+          this.state.tournamentDeleteModal.isLoading = false;
+
+          if (error instanceof HttpError && error.httpCode == 401) {
+            if (error.httpCode == 401) {
+              this.state.tournamentDeleteModal.error =
+                'Failed to validate password. Please try again.';
+            } else {
+              this.state.tournamentDeleteModal.error = error.message;
+            }
+          } else {
+            console.error(error);
+            this.state.tournamentDeleteModal.error = 'Unexpected error. Please try again.';
+          }
+        },
+      });
+  }
+
+  tournamentDeleteModalCancelled(): void {
+    this.state.tournamentDeleteModal.isVisible = false;
+    this.state.tournamentDeleteModal.error = null;
+  }
+
+  showTournamentDeleteModal(): void {
+    this.state.tournamentDeleteModal = {
+      ...this.state.tournamentDeleteModal,
+      isVisible: true,
+      error: null,
+    };
+  }
+
+  // Tournament Edition Modal handling
+  tournamentEditModalSubmitted(data: EditTournamentData) {
+    this.state.tournamentEditModal.isLoading = true;
+    this.state.tournamentEditModal.error = null;
+    console.log('hit');
+    const request = {
+      tournamentId: this.tournamentId,
+      name: data.name,
+      password: '',
+    };
+
+    this.tournamentService
+      .updateTournament(request)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          //Response via Websocket
+        },
+        error: (error) => {
+          this.state.tournamentEditModal.isLoading = false;
+
+          if (error instanceof HttpError && error.httpCode == 401) {
+            if (error.httpCode == 401) {
+              this.state.tournamentEditModal.error =
+                'Failed to update tournament. Please try again.';
+            } else {
+              this.state.tournamentEditModal.error = error.message;
+            }
+          } else {
+            console.error(error);
+            this.state.tournamentEditModal.error = 'Unexpected error. Please try again.';
+          }
+        },
+      });
+  }
+
+  tournamentEditCancelled(): void {
+    this.state.tournamentEditModal.formData.name = this.state.tournament?.name!;
+    this.state.tournamentEditModal.isVisible = false;
+    this.state.tournamentEditModal.error = null;
+  }
+
+  showTournamentEditModal(): void {
+    this.state.tournamentEditModal = {
+      ...this.state.tournamentEditModal,
+      isVisible: true,
+      error: null,
+    };
+  }
+
   // WebSocket update handling
   handleWebSocketUpdate(update: WebSocketUpdate): void {
     switch (update.type) {
@@ -377,9 +488,13 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
           );
         }
         break;
-      case 'TournamentStarted':
-      case 'NewRound':
       case 'TournamentUpdated':
+        this.state.tournament!.name = update.data;
+        this.state.tournamentEditModal.isLoading = false;
+        this.tournamentEditCancelled();
+        break;
+      case 'NewRound':
+      case 'TournamentStarted':
         // Use the tournament data directly from WebSocket update
         this.state.tournament = update.data;
 
@@ -395,6 +510,9 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       case 'WinnerSelected':
         // Handle winner selection locally without DB reload
         this.handleWinnerSelection(update.data);
+        break;
+      case 'TournamentDeletion':
+        this.goBack();
         break;
     }
   }

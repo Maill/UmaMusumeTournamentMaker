@@ -48,5 +48,12 @@ namespace UmaMusumeTournamentMaker.API.Application.Interfaces
         /// <param name="matchId">The match ID</param>
         /// <param name="winnerId">The selected winner ID</param>
         Task BroadcastWinnerSelection(int tournamentId, int matchId, int winnerId);
+
+        /// <summary>
+        /// Broadcast tournament deletion for real-time UI updates
+        /// </summary>
+        /// <param name="tournamentId">The tournament ID</param>
+        /// <returns></returns>
+        Task BroadcastTournamentDeletion(int tournamentId);
     }
 }

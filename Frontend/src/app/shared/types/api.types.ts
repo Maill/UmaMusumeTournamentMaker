@@ -32,8 +32,8 @@ export interface StartNextRoundRequest {
 
 export interface UpdateTournamentRequest {
   tournamentId: number;
-  name?: string;
-  password?: string;
+  name: string;
+  password: string;
 }
 
 export interface DeleteTournamentRequest {

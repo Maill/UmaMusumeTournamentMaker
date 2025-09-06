@@ -9,10 +9,12 @@ export enum WebSocketUpdateType {
   TournamentUpdated = 'TournamentUpdated',
   PlayerAdded = 'PlayerAdded',
   PlayerRemoved = 'PlayerRemoved',
-  MatchWinnerSet = 'MatchWinnerSet',
-  RoundStarted = 'RoundStarted',
-  TournamentCompleted = 'TournamentCompleted',
+  WinnerSelected = 'WinnerSelected',
+  NewRound = 'NewRound',
+  TournamentStarted = 'TournamentStarted',
   ConnectionStatusChanged = 'ConnectionStatusChanged',
+  TournamentDeletion = 'TournamentDeletion',
+  TournamentEdit = 'TournamentEdit',
 }
 
 export interface IdleState {

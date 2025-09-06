@@ -7,20 +7,8 @@ import {
 } from '@microsoft/signalr';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { WebSocketUpdate, WebSocketUpdateType } from '../types/service.types';
 import { IdleManagerService } from './idle-manager.service';
-
-export interface WebSocketUpdate {
-  type:
-    | 'PlayerAdded'
-    | 'PlayerRemoved'
-    | 'TournamentStarted'
-    | 'NewRound'
-    | 'TournamentUpdated'
-    | 'WinnerSelected';
-  tournamentId: number;
-  data: any;
-  timestamp: Date;
-}
 
 @Injectable({
   providedIn: 'root',
@@ -156,27 +144,31 @@ export class WebSocketService {
 
     // Match backend events exactly
     this.connection.on('PlayerAdded', (player: any) => {
-      this.emitUpdate('PlayerAdded', player);
+      this.emitUpdate(WebSocketUpdateType.PlayerAdded, player);
     });
 
     this.connection.on('PlayerRemoved', (playerId: number) => {
-      this.emitUpdate('PlayerRemoved', { playerId });
+      this.emitUpdate(WebSocketUpdateType.PlayerRemoved, { playerId });
     });
 
     this.connection.on('TournamentStarted', (tournament: any) => {
-      this.emitUpdate('TournamentStarted', tournament);
+      this.emitUpdate(WebSocketUpdateType.TournamentStarted, tournament);
     });
 
     this.connection.on('NewRound', (tournament: any) => {
-      this.emitUpdate('NewRound', tournament);
+      this.emitUpdate(WebSocketUpdateType.NewRound, tournament);
     });
 
-    this.connection.on('TournamentUpdated', (tournament: any) => {
-      this.emitUpdate('TournamentUpdated', tournament);
+    this.connection.on('TournamentUpdated', (tournamentName: string) => {
+      this.emitUpdate(WebSocketUpdateType.TournamentUpdated, tournamentName);
     });
 
     this.connection.on('WinnerSelected', (data: { matchId: number; winnerId: number }) => {
-      this.emitUpdate('WinnerSelected', data);
+      this.emitUpdate(WebSocketUpdateType.WinnerSelected, data);
+    });
+
+    this.connection.on('TournamentDeletion', () => {
+      this.emitUpdate(WebSocketUpdateType.TournamentDeletion, null);
     });
   }
 

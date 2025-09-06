@@ -53,19 +53,19 @@ import { TournamentDeleteModalData } from '../../types/components.types';
             Cancel
           </app-button>
           <app-button
-            variant="primary"
+            variant="danger"
             (clicked)="onSubmit()"
             [loading]="data.isLoading"
             [disabled]="!password.trim()"
           >
-            Enter Management
+            Delete Tournament
           </app-button>
         </div>
       </div>
     </div>
     }
   `,
-  styleUrl: './tournament-delete-modal.css',
+  styleUrl: '../password-modal/password-modal.component.css',
 })
 export class TournamentDeleteModal {
   @Input() data: TournamentDeleteModalData = {

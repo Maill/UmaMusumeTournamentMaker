@@ -122,7 +122,6 @@ import { Player } from '../../types/tournament.types';
       @if (state.canManage && canStartTournament()) {
       <div class="start-tournament-section">
         <div class="start-info">
-          <app-icon name="trophy" size="md" color="success" ariaLabel="Ready to start"> </app-icon>
           <div class="start-text">
             <h3>Ready to Start!</h3>
             <p>You have {{ players.length }} players registered. The tournament can begin.</p>

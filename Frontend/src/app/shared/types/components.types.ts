@@ -15,6 +15,8 @@ export interface TournamentDetailState {
   managementMode: boolean;
   isUpdating: boolean;
   passwordModal: PasswordModalData;
+  tournamentDeleteModal: TournamentDeleteModalData;
+  tournamentEditModal: TournamentEditModalData;
 }
 
 export interface PasswordModalData {
@@ -139,4 +141,15 @@ export interface SelectOption<T = any> {
   value: T;
   label: string;
   disabled?: boolean;
+}
+
+export interface EditTournamentData {
+  name: string;
+}
+
+export interface TournamentEditModalData {
+  formData: EditTournamentData;
+  isVisible: boolean;
+  isLoading: boolean;
+  error: string | null;
 }

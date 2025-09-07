@@ -20,7 +20,7 @@
       type="error"
       [retryable]="true"
       retryText="Reload Tournament"
-      title="Failed to Load Tournament"
+      title="Failed to Load Tournament. Tournament doesn't exist or may have been deleted."
       (retryClicked)="loadTournament()"
       (dismissed)="clearError()"
     >

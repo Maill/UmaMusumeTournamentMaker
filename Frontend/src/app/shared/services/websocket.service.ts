@@ -117,6 +117,10 @@ export class WebSocketService {
     }
   }
 
+  isConnected(): boolean {
+    return this.connection?.state === HubConnectionState.Connected;
+  }
+
   // Private Methods
   private initializeConnection(): void {
     this.connection = new HubConnectionBuilder()

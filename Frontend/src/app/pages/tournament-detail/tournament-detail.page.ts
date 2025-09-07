@@ -111,7 +111,10 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
 
   private async initializeWebSocket(): Promise<void> {
     // Don't connect WebSocket for completed tournaments
-    if (this.state.tournament?.status === TournamentStatus.Completed) {
+    if (
+      this.state.tournament?.status === TournamentStatus.Completed &&
+      !this.state.managementMode
+    ) {
       console.log('Skipping WebSocket connection for completed tournament');
       return;
     }
@@ -172,9 +175,13 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   }
 
   // Management mode methods
-  exitManagementMode(): void {
+  async exitManagementMode(): Promise<void> {
     this.localStorageService.clearPassword(this.tournamentId);
     this.state.managementMode = false;
+    await this.webSocketService
+      .leaveTournament()
+      .catch(console.warn)
+      .then(() => this.webSocketService.disconnect(true).catch(console.warn));
   }
 
   // Player management methods
@@ -341,13 +348,20 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       .validateTournamentPassword(request)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response) => {
+        next: async (response) => {
           this.state.passwordModal.isLoading = false;
           if (response.isValid) {
             // Password is correct - store it and enter management mode
             this.localStorageService.setPassword(this.tournamentId, password);
             this.state.managementMode = true;
             this.state.passwordModal.isVisible = false;
+
+            if (
+              this.state.tournament?.status == TournamentStatus.Completed &&
+              !this.webSocketService.isConnected()
+            ) {
+              await this.initializeWebSocket();
+            }
           } else {
             // Password is incorrect - show error
             this.state.passwordModal.error = 'Invalid password. Please try again.';
@@ -425,7 +439,6 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   tournamentEditModalSubmitted(data: EditTournamentData) {
     this.state.tournamentEditModal.isLoading = true;
     this.state.tournamentEditModal.error = null;
-    console.log('hit');
     const request = {
       tournamentId: this.tournamentId,
       name: data.name,
@@ -499,12 +512,12 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
         this.state.tournament = update.data;
 
         // Check if tournament just completed and disconnect WebSocket
-        if (update.data.status === TournamentStatus.Completed) {
+        if (update.data.status === TournamentStatus.Completed && !this.state.managementMode) {
           console.log('Tournament completed via WebSocket - disconnecting');
           this.webSocketService
             .leaveTournament()
             .catch(console.warn)
-            .then(() => this.webSocketService.disconnect().catch(console.warn));
+            .then(() => this.webSocketService.disconnect(true).catch(console.warn));
         }
         break;
       case 'WinnerSelected':

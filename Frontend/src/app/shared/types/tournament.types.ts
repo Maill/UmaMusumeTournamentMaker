@@ -25,8 +25,7 @@ export interface MatchPlayer {
 
 export interface Match {
   id: number;
-  players: MatchPlayer[];
-  winner?: MatchPlayer;
+  playerIds: number[];
   winnerId?: number;
   completedAt?: Date;
 }

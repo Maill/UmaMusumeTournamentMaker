@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace TournamentSystem.API.SQLiteMigrations.Migrations
+namespace UmaMusumeTournamentMaker.API.SQLiteMigrations.Migrations
 {
     /// <inheritdoc />
     public partial class InitialMigration : Migration
@@ -41,8 +42,6 @@ namespace TournamentSystem.API.SQLiteMigrations.Migrations
                     Wins = table.Column<int>(type: "INTEGER", nullable: false),
                     Losses = table.Column<int>(type: "INTEGER", nullable: false),
                     Points = table.Column<int>(type: "INTEGER", nullable: false),
-                    RoundWins = table.Column<int>(type: "INTEGER", nullable: false),
-                    RoundLosses = table.Column<int>(type: "INTEGER", nullable: false),
                     Group = table.Column<string>(type: "TEXT", nullable: false),
                     TournamentId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
@@ -76,32 +75,6 @@ namespace TournamentSystem.API.SQLiteMigrations.Migrations
                         name: "FK_Rounds_Tournaments_TournamentId",
                         column: x => x.TournamentId,
                         principalTable: "Tournaments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PlayerOpponents",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    PlayerId = table.Column<int>(type: "INTEGER", nullable: false),
-                    OpponentId = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PlayerOpponents", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PlayerOpponents_Players_OpponentId",
-                        column: x => x.OpponentId,
-                        principalTable: "Players",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PlayerOpponents_Players_PlayerId",
-                        column: x => x.PlayerId,
-                        principalTable: "Players",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -181,16 +154,6 @@ namespace TournamentSystem.API.SQLiteMigrations.Migrations
                 column: "PlayerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlayerOpponents_OpponentId",
-                table: "PlayerOpponents",
-                column: "OpponentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlayerOpponents_PlayerId",
-                table: "PlayerOpponents",
-                column: "PlayerId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Players_TournamentId",
                 table: "Players",
                 column: "TournamentId");
@@ -206,9 +169,6 @@ namespace TournamentSystem.API.SQLiteMigrations.Migrations
         {
             migrationBuilder.DropTable(
                 name: "MatchPlayers");
-
-            migrationBuilder.DropTable(
-                name: "PlayerOpponents");
 
             migrationBuilder.DropTable(
                 name: "Matches");

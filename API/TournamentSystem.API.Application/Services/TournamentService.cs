@@ -107,8 +107,6 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
                         Wins = 0,
                         Losses = 0,
                         Points = 0,
-                        RoundWins = 0,
-                        RoundLosses = 0,
                         Group = string.Empty
                     };
 

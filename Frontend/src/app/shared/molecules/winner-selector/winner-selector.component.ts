@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { BaseIconComponent } from '../../atoms/icon/base-icon.component';
 import { BaseSelectComponent } from '../../atoms/select/base-select.component';
 import { SelectOption } from '../../types/components.types';
-import { MatchPlayer } from '../../types/tournament.types';
+import { Player } from '../../types/tournament.types';
 
 @Component({
   selector: 'app-winner-selector',
@@ -55,7 +55,7 @@ import { MatchPlayer } from '../../types/tournament.types';
 })
 export class WinnerSelectorComponent {
   @Input() matchId: number = 0;
-  @Input() players: MatchPlayer[] = [];
+  @Input() players: Player[] = [];
   @Input() selectedWinnerId: number | null = null;
   @Input() disabled: boolean = false;
   @Input() error: string | null = null;

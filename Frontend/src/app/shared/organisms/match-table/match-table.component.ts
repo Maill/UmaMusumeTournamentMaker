@@ -7,6 +7,7 @@ import { LoadingSpinnerComponent } from '../../atoms/spinner/loading-spinner.com
 import { ErrorDisplayComponent } from '../../molecules/error-display/error-display.component';
 import { MatchRowComponent } from '../../molecules/match-row/match-row.component';
 import { MatchTableData, MatchTableState } from '../../types/components.types';
+import { Match, Player } from '../../types/tournament.types';
 
 @Component({
   selector: 'app-match-table',
@@ -90,6 +91,7 @@ import { MatchTableData, MatchTableState } from '../../types/components.types';
             @for (match of getMatchesWithNumbers(); track match.id) {
             <tr
               app-match-row
+              [players]="getMatchPlayers(match)"
               [match]="match"
               [allowWinnerChange]="data.canManage"
               [showCompletedAt]="showCompletedTime"
@@ -228,6 +230,13 @@ export class MatchTableComponent {
 
   isRoundComplete(): boolean {
     return this.data.round.isCompleted || this.getPendingMatchesCount() === 0;
+  }
+
+  getMatchPlayers(match: Match): Record<number, Player> {
+    return Object.fromEntries(
+      Object.entries(this.data.players).filter(([key]) => match.playerIds.includes(Number(key)))
+    );
+    //return match.playerIds.map((id) => (this.data.players[id] ? [this.data.players[id]] : []));
   }
 
   getMatchStatusSummary(): { completed: number; pending: number; total: number } {

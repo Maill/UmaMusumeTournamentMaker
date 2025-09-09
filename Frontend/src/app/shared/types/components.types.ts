@@ -71,6 +71,7 @@ export interface PlayerAction {
 }
 
 export interface MatchTableData {
+  players: Record<number, Player>;
   round: Round;
   canManage: boolean;
   isLoading: boolean;

@@ -16,7 +16,6 @@ namespace UmaMusumeTournamentMaker.API.Application.Extensions
         {
             player.Wins++;
             player.Points++;
-            player.RoundWins++;
         }
 
         /// <summary>
@@ -26,7 +25,6 @@ namespace UmaMusumeTournamentMaker.API.Application.Extensions
         public static void ApplyLossStatistics(this Player player)
         {
             player.Losses++;
-            player.RoundLosses++;
         }
     }
 }

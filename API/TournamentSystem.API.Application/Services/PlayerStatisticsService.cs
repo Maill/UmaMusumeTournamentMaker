@@ -20,27 +20,6 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
         }
 
         /// <summary>
-        /// Records all opponents from a match for a specific player
-        /// Uses batch operations for optimal performance
-        /// </summary>
-        public void RecordOpponents(Player player, Match match)
-        {
-            var opponents = match.MatchPlayers
-                .Where(mp => mp.PlayerId != player.Id)
-                .Select(opponent => new PlayerOpponent
-                {
-                    PlayerId = player.Id,
-                    OpponentId = opponent.PlayerId
-                })
-                .ToList();
-
-            if (opponents.Any())
-            {
-                _unitOfWork.Players.AddMultipleOpponents(opponents);
-            }
-        }
-
-        /// <summary>
         /// Updates all player statistics for a completed match
         /// Uses batch operations and Unit of Work for optimal performance
         /// Single transaction for all updates
@@ -66,28 +45,6 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
             }
 
             _unitOfWork.Players.UpdateMultiplePlayers(playersToUpdate);
-
-            // Batch record all opponent relationships
-            var allOpponents = new List<PlayerOpponent>();
-
-            foreach (var matchPlayer in match.MatchPlayers)
-            {
-                var player = matchPlayer.Player;
-                var opponents = match.MatchPlayers
-                    .Where(mp => mp.PlayerId != player.Id)
-                    .Select(opponent => new PlayerOpponent
-                    {
-                        PlayerId = player.Id,
-                        OpponentId = opponent.PlayerId
-                    });
-
-                allOpponents.AddRange(opponents);
-            }
-
-            if (allOpponents.Any())
-            {
-                _unitOfWork.Players.AddMultipleOpponents(allOpponents);
-            }
         }
     }
 }

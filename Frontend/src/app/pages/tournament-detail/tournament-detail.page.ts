@@ -539,16 +539,18 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       const match = currentRound.matches.find((m) => m.id === data.matchId);
       if (match) {
         // Find the winner player
-        const winner = match.players.find((p) => p.id === data.winnerId);
+        const winner = match.playerIds.find((pId) => pId === data.winnerId);
         if (winner) {
           // Update the match with the selected winner
           match.winnerId = data.winnerId;
-          match.winner = winner;
 
           // Force change detection by creating a new tournament object
           this.state.tournament = { ...this.state.tournament };
 
-          console.log(`Winner selected for match ${data.matchId}:`, winner.name);
+          console.log(
+            `Winner selected for match ${data.matchId}:`,
+            this.state.tournament.players.find((p) => p.id === winner)?.id
+          );
         }
       }
     }
@@ -569,6 +571,9 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   getMatchTableData(): MatchTableData {
     const currentRound = this.getCurrentRound();
     return {
+      players: Object.fromEntries(
+        this.state.tournament!.players.map((player) => [player.id, player])
+      ),
       round: currentRound!,
       canManage: this.state.managementMode,
       isLoading: this.state.isUpdating,

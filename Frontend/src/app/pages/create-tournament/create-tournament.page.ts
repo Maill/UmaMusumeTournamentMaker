@@ -83,46 +83,6 @@ export class CreateTournamentPageComponent implements OnDestroy {
     };
   }
 
-  private getErrorMessage(error: any): string {
-    // Parse different types of errors
-    if (error?.error?.message) {
-      return error.error.message;
-    }
-
-    if (error?.message) {
-      return error.message;
-    }
-
-    if (typeof error === 'string') {
-      return error;
-    }
-
-    // Handle validation errors
-    if (error?.error?.errors) {
-      const validationErrors = Object.values(error.error.errors).flat().join(', ');
-      return `Validation failed: ${validationErrors}`;
-    }
-
-    // Handle network errors
-    if (error?.status === 0) {
-      return 'Unable to connect to the server. Please check your internet connection.';
-    }
-
-    if (error?.status === 400) {
-      return 'Invalid tournament data. Please check your inputs and try again.';
-    }
-
-    if (error?.status === 409) {
-      return 'A tournament with this name already exists. Please choose a different name.';
-    }
-
-    if (error?.status >= 500) {
-      return 'Server error occurred. Please try again later.';
-    }
-
-    return 'An unexpected error occurred while creating the tournament. Please try again.';
-  }
-
   // Utility methods for template
   canNavigateAway(): boolean {
     if (this.state.isCreating) {

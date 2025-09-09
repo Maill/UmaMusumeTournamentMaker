@@ -50,11 +50,6 @@ namespace UmaMusumeTournamentMaker.API.Infrastructure.Repositories
 
         // Batch Operations
 
-        public void AddMultipleOpponents(List<PlayerOpponent> opponents)
-        {
-            _context.PlayerOpponents.AddRange(opponents);
-        }
-
         public void UpdateMultiplePlayers(List<Player> players)
         {
             _context.Players.UpdateRange(players);

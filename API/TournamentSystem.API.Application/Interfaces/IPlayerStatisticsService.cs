@@ -9,12 +9,6 @@ namespace UmaMusumeTournamentMaker.API.Application.Interfaces
     public interface IPlayerStatisticsService
     {
         /// <summary>
-        /// Records all opponents from a match for a specific player
-        /// Creates PlayerOpponent records for tracking who has played against whom
-        /// </summary>
-        void RecordOpponents(Player player, Match match);
-
-        /// <summary>
         /// Updates all player statistics for a completed match
         /// Handles winner stats, loser stats, and opponent tracking
         /// </summary>

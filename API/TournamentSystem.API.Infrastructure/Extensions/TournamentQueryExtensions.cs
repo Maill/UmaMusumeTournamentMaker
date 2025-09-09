@@ -41,7 +41,6 @@ namespace UmaMusumeTournamentMaker.API.Infrastructure.Extensions
         {
             return query
                 .Include(t => t.Players)
-                    .ThenInclude(p => p.PlayerOpponents)
                 .Include(t => t.Rounds)
                     .ThenInclude(r => r.Matches)
                         .ThenInclude(m => m.MatchPlayers);

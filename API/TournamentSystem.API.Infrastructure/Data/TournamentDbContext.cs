@@ -14,7 +14,6 @@ namespace UmaMusumeTournamentMaker.API.Infrastructure.Data
         public DbSet<Round> Rounds { get; set; }
         public DbSet<Match> Matches { get; set; }
         public DbSet<MatchPlayer> MatchPlayers { get; set; }
-        public DbSet<PlayerOpponent> PlayerOpponents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -78,20 +77,6 @@ namespace UmaMusumeTournamentMaker.API.Infrastructure.Data
                 entity.HasOne(e => e.Player)
                       .WithMany(e => e.MatchPlayers)
                       .HasForeignKey(e => e.PlayerId)
-                      .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            // PlayerOpponent
-            modelBuilder.Entity<PlayerOpponent>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.HasOne(e => e.Player)
-                      .WithMany(e => e.PlayerOpponents)
-                      .HasForeignKey(e => e.PlayerId)
-                      .OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne(e => e.Opponent)
-                      .WithMany()
-                      .HasForeignKey(e => e.OpponentId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
         }

@@ -197,7 +197,7 @@ export class TournamentFormComponent implements OnInit {
       const request: CreateTournamentRequest = {
         name: formData.name.trim(),
         type: formData.type,
-        password: formData.password?.trim() || undefined,
+        password: formData.password.trim() || undefined,
       };
 
       this.formSubmitted.emit(request);

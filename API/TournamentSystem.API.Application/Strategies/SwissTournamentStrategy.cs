@@ -238,7 +238,7 @@ namespace UmaMusumeTournamentMaker.API.Application.Strategies
             if (podiumContenders.Count > 3)
                 podiumContenders.AddRange(sortedPlayers.Where(p => p.Points >= thirdPlace.Points));
 
-            podiumContenders = podiumContenders.GetPlayersSortedByStandings();
+            podiumContenders = podiumContenders.Distinct().GetPlayersSortedByStandings();
 
             _logger.LogDebug("HybridSwiss", $"Podium contenders (tied for top 3): {podiumContenders.Count} players (threshold: {thirdPlace.Points} points, {thirdPlace.Wins} wins, {thirdPlace.Losses} losses) - IDs: {string.Join(", ", podiumContenders.Select(p => p.Id))}");
 
@@ -249,22 +249,24 @@ namespace UmaMusumeTournamentMaker.API.Application.Strategies
                 return new List<IPlayerCombinationService.PlayerTriple>();
             }
 
-            // Get available players to fill out matches if needed (below podium contention level)
-            var availablePlayers = sortedPlayers
-                .Skip(2) // Except top 2 (if top should be included, they were added before)
-                .Except(podiumContenders)  // Not already in contender group
-                .Where(p => p.Points <= thirdPlace.Points)   // Only players clearly below podium level
-                .ToList();
-
             var tiebreakerPlayers = new List<Player>(podiumContenders);
-
-            // Add players to reach multiple of 3 for proper matches
-            while (tiebreakerPlayers.Count % 3 != 0 && availablePlayers.Any())
+            if (podiumContenders.Count % 3 != 0) // If not multiple of 3, add more players
             {
-                var nextPlayer = availablePlayers.First();
-                tiebreakerPlayers.Add(nextPlayer);
-                availablePlayers.Remove(nextPlayer);
-                _logger.LogDebug("HybridSwiss", $"Added player {nextPlayer.Id} to reach multiple of 3");
+                // Get available players to fill out matches if needed (below podium contention level)
+                var availablePlayers = sortedPlayers
+                    .Skip(2) // Except top 2 (if top should be included, they were added before)
+                    .Except(podiumContenders)  // Not already in contender group
+                    .GetPlayersSortedByStandings()
+                    .ToList();
+
+                // Add players to reach multiple of 3 for proper matches
+                while (tiebreakerPlayers.Count % 3 != 0 && availablePlayers.Any())
+                {
+                    var nextPlayer = availablePlayers.First();
+                    tiebreakerPlayers.Add(nextPlayer);
+                    availablePlayers.Remove(nextPlayer);
+                    _logger.LogDebug("HybridSwiss", $"Added player {nextPlayer.Id} to reach multiple of 3");
+                }
             }
 
             _logger.LogDebug("HybridSwiss", $"Final tiebreaker participants: {tiebreakerPlayers.Count} players - IDs: {string.Join(", ", tiebreakerPlayers.Select(p => p.Id))}");

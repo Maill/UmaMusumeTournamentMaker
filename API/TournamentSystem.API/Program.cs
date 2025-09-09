@@ -23,7 +23,7 @@ var provider = builder.Configuration.GetValue("Provider", "PostgreSQL");
 #endif
 builder.Services.AddDbContext<TournamentDbContext>(options => _ = provider switch
 {
-    "SQLite" => options.UseSqlite(connectionString, sqliteOptions => sqliteOptions.MigrationsAssembly("TournamentSystem.API.SQLiteMigrations")),
+    "SQLite" => options.UseSqlite(connectionString, sqliteOptions => sqliteOptions.MigrationsAssembly("UmaMusumeTournamentMaker.API.SQLiteMigrations")),
     "PostgreSQL" => options.UseNpgsql(connectionString,
             npgsqlOptions =>
             {
@@ -34,7 +34,7 @@ builder.Services.AddDbContext<TournamentDbContext>(options => _ = provider switc
 
                 //npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
 
-                npgsqlOptions.MigrationsAssembly("TournamentSystem.API.PostgreSQLMigrations");
+                npgsqlOptions.MigrationsAssembly("UmaMusumeTournamentMaker.API.PostgreSQLMigrations");
             }),
     _ => throw new Exception($"Unsupported provider: {provider}")
 });

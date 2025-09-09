@@ -60,12 +60,9 @@ namespace UmaMusumeTournamentMaker.API.Application.Extensions
                 Wins = player.Wins,
                 Losses = player.Losses,
                 Points = player.Points,
-                RoundWins = player.RoundWins,
-                RoundLosses = player.RoundLosses,
                 Group = player.Group,
                 WinRate = player.WinRate,
                 TotalMatches = player.TotalMatches,
-                RoundMatches = player.RoundMatches
             };
         }
 
@@ -81,7 +78,7 @@ namespace UmaMusumeTournamentMaker.API.Application.Extensions
                 CreatedAt = round.CreatedAt,
                 IsCompleted = round.IsCompleted,
                 RoundType = round.RoundType,
-                Matches = round.Matches?.Select(m => m.ToDto()).ToList() ?? new()
+                Matches = round.Matches?.Select(m => m.ToDto()).ToList() ?? []
             };
         }
 
@@ -97,8 +94,7 @@ namespace UmaMusumeTournamentMaker.API.Application.Extensions
                 WinnerId = match.WinnerId,
                 CreatedAt = match.CreatedAt,
                 CompletedAt = match.CompletedAt,
-                Players = match.MatchPlayers?.Select(mp => mp.Player.ToDto()).ToList() ?? new(),
-                Winner = match.Winner?.ToDto()
+                PlayerIds = match.MatchPlayers.Select(p => p.PlayerId).ToList() ?? [],
             };
         }
 

@@ -20,9 +20,6 @@ namespace UmaMusumeTournamentMaker.API.Application.DTOs
         public DateTime? CompletedAt { get; init; }
 
         [Required]
-        public List<PlayerDto> Players { get; init; } = new();
-
-        [Required]
-        public PlayerDto? Winner { get; init; }
+        public List<int> PlayerIds { get; init; } = new();
     }
 }

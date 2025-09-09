@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace TournamentSystem.API.PostgreSQLMigrations.Migrations
+namespace UmaMusumeTournamentMaker.API.PostgreSQLMigrations.Migrations
 {
     /// <inheritdoc />
     public partial class InitialMigration : Migration
@@ -42,8 +43,6 @@ namespace TournamentSystem.API.PostgreSQLMigrations.Migrations
                     Wins = table.Column<int>(type: "integer", nullable: false),
                     Losses = table.Column<int>(type: "integer", nullable: false),
                     Points = table.Column<int>(type: "integer", nullable: false),
-                    RoundWins = table.Column<int>(type: "integer", nullable: false),
-                    RoundLosses = table.Column<int>(type: "integer", nullable: false),
                     Group = table.Column<string>(type: "text", nullable: false),
                     TournamentId = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -77,32 +76,6 @@ namespace TournamentSystem.API.PostgreSQLMigrations.Migrations
                         name: "FK_Rounds_Tournaments_TournamentId",
                         column: x => x.TournamentId,
                         principalTable: "Tournaments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PlayerOpponents",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    PlayerId = table.Column<int>(type: "integer", nullable: false),
-                    OpponentId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PlayerOpponents", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PlayerOpponents_Players_OpponentId",
-                        column: x => x.OpponentId,
-                        principalTable: "Players",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PlayerOpponents_Players_PlayerId",
-                        column: x => x.PlayerId,
-                        principalTable: "Players",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -182,16 +155,6 @@ namespace TournamentSystem.API.PostgreSQLMigrations.Migrations
                 column: "PlayerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlayerOpponents_OpponentId",
-                table: "PlayerOpponents",
-                column: "OpponentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlayerOpponents_PlayerId",
-                table: "PlayerOpponents",
-                column: "PlayerId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Players_TournamentId",
                 table: "Players",
                 column: "TournamentId");
@@ -207,9 +170,6 @@ namespace TournamentSystem.API.PostgreSQLMigrations.Migrations
         {
             migrationBuilder.DropTable(
                 name: "MatchPlayers");
-
-            migrationBuilder.DropTable(
-                name: "PlayerOpponents");
 
             migrationBuilder.DropTable(
                 name: "Matches");

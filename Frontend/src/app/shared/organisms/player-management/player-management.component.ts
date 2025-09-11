@@ -141,9 +141,8 @@ import { Player } from '../../types/tournament.types';
         </app-button>
       </div>
       }
-
       <!-- Minimum Players Warning -->
-      @if (players.length < minPlayersRequired && players.length > 0) {
+      @else if (players.length < minPlayersRequired && players.length > 0) {
       <div class="warning-section">
         <app-icon name="warning" size="md" color="warning" ariaLabel="Warning"> </app-icon>
         <div class="warning-text">
@@ -169,7 +168,7 @@ export class PlayerManagementComponent {
     error: null,
     addPlayerError: null,
   };
-  @Input() minPlayersRequired: number = 3;
+  @Input() minPlayersRequired: number = 4;
   @Input() allowPlayerRemoval: boolean = true;
   @Input() showPlayerStats: boolean = false;
   @Input() removingPlayerId: number | null = null;
@@ -198,6 +197,7 @@ export class PlayerManagementComponent {
   }
 
   canStartTournament(): boolean {
+    console.log(this.minPlayersRequired);
     return (
       this.players.length >= this.minPlayersRequired &&
       !this.state.isAddingPlayer &&
@@ -208,30 +208,5 @@ export class PlayerManagementComponent {
 
   isPlayerBeingRemoved(playerId: number): boolean {
     return this.removingPlayerId === playerId;
-  }
-
-  getPlayerCount(): number {
-    return this.players.length;
-  }
-
-  getRemainingPlayersNeeded(): number {
-    return Math.max(0, this.minPlayersRequired - this.players.length);
-  }
-
-  getTournamentReadyStatus(): { ready: boolean; message: string } {
-    const count = this.players.length;
-    const needed = this.minPlayersRequired;
-
-    if (count < needed) {
-      return {
-        ready: false,
-        message: `Need ${needed - count} more players to start`,
-      };
-    }
-
-    return {
-      ready: true,
-      message: `Ready to start with ${count} players`,
-    };
   }
 }

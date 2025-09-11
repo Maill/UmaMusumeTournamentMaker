@@ -204,8 +204,8 @@ namespace UmaMusumeTournamentMaker.API.Application.Services
                     if (tournament!.Status != TournamentStatus.Created)
                         throw new InvalidOperationException("Tournament has already been started");
 
-                    if (tournament.Players.Count < 3)
-                        throw new InvalidOperationException("Need at least 3 players to start a tournament");
+                    if (tournament.Players.Count < 4)
+                        throw new InvalidOperationException("Need at least 4 players to start a tournament");
 
                     tournament.Status = TournamentStatus.InProgress;
                     tournament.StartedAt = DateTime.UtcNow;

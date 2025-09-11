@@ -207,8 +207,8 @@ The core innovation of this system is its **sophisticated Swiss-Round-Robin hybr
 #### Pairing Intelligence
 
 - **Competitiveness Analysis**: Uses statistical variance to create balanced matchups
-- **Performance-Based Matching**: Similar skill levels compete together for exciting matches
-- **No-Repeat Guarantee**: Complex algorithm ensures no player faces same opponents twice
+- **Performance-Based Matching**: Similar skill levels compete together for exciting matches _(Dev Note: this need calibration, this actually works but needs to be tone down. Competitive pairing should occurs when a player has played against most of the other players.)_
+- **No-Repeat Guarantee**: Complex algorithm ensures no player faces same opponents twice _(Dev Note: this need calibration, you may face the same opponents multiple times due to competitive pairing being too agressive.)_
 - **Priority System**: Players with fewer matches get priority in next round generation
 
 #### Match Generation Process
@@ -411,7 +411,7 @@ The Angular frontend features modern reactive patterns:
 
 ## 🧪 Testing _(TODO)_
 
-There are no tests for the moment. (TBH, I didn't thought that this application will grow that big and skipped the tests). But they are planned!
+There are no tests for the moment. (TBH, I didn't thought that this application will grow that big and skipped the tests). But they are planned VERY SOON!
 
 ### Backend Testing
 
@@ -574,7 +574,3 @@ cd Frontend && npm start                           # Frontend on :4200
 - **VS Code Tasks**: `.vscode/tasks.json`
 - **VS Code Debug**: `.vscode/launch.json`
 - **VS Code Settings**: `.vscode/settings.json`
-
----
-
-**Start your tournaments!** 🎯

@@ -1,6 +1,6 @@
 export enum TournamentType {
   Swiss = 1,
-  ChampionsMeeting = 2,
+  // ChampionsMeeting = 2,
 }
 
 export enum TournamentStatus {

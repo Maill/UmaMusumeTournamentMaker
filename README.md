@@ -2,9 +2,11 @@
 
 A web application tournament maker for the game Uma Musume.
 
+## Website link: https://umamusumetournamentmaker-599360421785.europe-west1.run.app
+
 ## 🎯 Main Features
 
-The web application implements a **unique tournament format** that combines the best of Swiss and Round-Robin systems:
+The web application implements a **creative tournament format** that combines the best of Swiss and Round-Robin systems:
 
 - **3-Player Simultaneous Matches** for dynamic competition
 - **No Repeat Opponents Algorithm** ensuring fair play across all rounds
@@ -15,6 +17,7 @@ The web application implements a **unique tournament format** that combines the 
 
 - [🎮 Tournament System Features](#-tournament-system-features)
 - [🎯 Usage Flow](#-usage-flow)
+- [📷 Screenshots](#-screenshots)
 
 ## 🎮 Tournament System Features
 
@@ -22,58 +25,30 @@ The web application implements a **unique tournament format** that combines the 
 
 The core innovation of this system is its **sophisticated Swiss-Round-Robin hybrid algorithm**:
 
-#### Pairing Intelligence
-
-- **Competitiveness Analysis**: Uses standings to create balanced matchups
-- **Performance-Based Matching**: Similar skill levels compete together for exciting matches
-- **No-Repeat Guarantee**: Complex algorithm ensures no player faces same opponents twice _(Dev Note: this need calibration, you may face the same opponents multiple times)_
-- **Priority System**: Players with fewer matches get priority in next round generation
-
-#### Match Generation Process
-
-1. **Calculate Player Priorities**: Players needing matches get higher priority
-2. **Generate All Possible 3-Player Combinations**: Exclude previously used combinations
-3. **Score Each Combination**: Rate competitiveness using points and wins variance
-4. **Optimize Selection**: Choose best combinations ensuring all priority players get matches
-5. **Handle Odd Numbers**: Rotating bye system with compensation points
-
-#### Tournament Progression Logic
-
-- **Target Achievement**: Each player must reach calculated target matches
-- **Tie Resolution**: Automatic tiebreaker rounds when needed
-- **Final Championship**: Always concludes with top 3 players in climactic match
-- **Flexible Scaling**: Supports any number of players from 4 to unlimited
-
 ### Tournament Types
 
 #### Swiss-Round-Robin Tournament (Primary Format)
 
-The system implements a unique **hybrid Swiss-Round-Robin system** optimized for 3-player matches:
+The system implements a **hybrid Swiss-Round-Robin system** optimized for 3-player matches:
 
 **Core Mechanics:**
 
-- **3-Player Matches**: Every match involves exactly 3 players competing simultaneously
-- **No Repeat Opponents**: Advanced algorithm ensures no player faces the same opponents twice
-- **Swiss-Style Pairing**: Players with similar performance levels are matched together
-- **Target-Based Progression**: Each player plays a predetermined number of matches based on tournament size
+- **3-Player Matches**: Every match involves exactly 3 players with 3 Umas respectively competing simultaneously. Like matches in Champions Meeting.
+- **No Repeat Opponents**: Advanced algorithm ensures no player faces the same opponents twice _(Dev Note: this need calibration, you may face the same opponents multiple times)_
+- **Swiss-Style Pairing**: Players with similar performance levels are matched together _(Dev Note: this need calibration, this actually work but needs to be tone down. Competitive pairing should occurs when a play has played against most of the other players)_
+- **Target-Based Progression**: Each player plays a predetermined number of matches based on tournament size:
+  - 4 players → 3 matches each + eventual tiebrakers + final
+  - 5-6 players → 4 matches each + eventual tiebrakers + final
+  - 7-9 players → 5 matches each + eventual tiebrakers + final
+  - 10-12 players → 6 matches each + eventual tiebrakers + final
+  - 13+ players → Scales to max 8 matches + eventual tiebrakers + final
 
 **Tournament Structure:**
 
 - **Regular Rounds**: Players compete until reaching their target match count
-- **Automatic Tiebreaker Rounds**: Generated when top 3 positions are tied (max 2 tiebreaker rounds)
+- **Automatic Tiebreaker Rounds**: Generated when top 3 is not clear.
 - **Final Championship**: Top 3 players compete in the climactic final match
-- **Bye System**: For odd player counts, rotating bye system with compensation points
-
-**Advanced Features:**
-
-- **Competitiveness Scoring**: Algorithm pairs players with similar skill levels using variance analysis
-- **Priority Queue System**: Players with fewer matches get priority for next round generation
-- **Dynamic Targets**: Match targets scale intelligently with tournament size:
-  - 4 players → 3 matches each + final
-  - 5-6 players → 4 matches each + final
-  - 7-9 players → 5 matches each + final
-  - 10-12 players → 6 matches each + final
-  - 13+ players → Scales to max 8 matches + final
+- **Bye System**: For odd player counts, rotating [bye system](https://support.chess.com/en/articles/8706000-what-is-a-bye-in-a-tournament) with compensation points
 
 **Scoring System:**
 
@@ -84,10 +59,9 @@ The system implements a unique **hybrid Swiss-Round-Robin system** optimized for
 
 #### Champions Meeting Tournament (In Development)
 
-- Multi-round tournament with group divisions
-- Players advance through groups based on performance
-- Three rounds: First Round, Second Round (Groups A & B), Final Round
-- Complex advancement criteria based on wins
+[Read here](https://gametora.com/umamusume/events/champions-meeting) (Gamatora.com) for the full explanation of the format.
+
+This will be the next tournament format to be implemented.
 
 ### Core Functionality
 
@@ -97,7 +71,7 @@ The system implements a unique **hybrid Swiss-Round-Robin system** optimized for
 - **Multi-user Support**: Multiple users can manage tournaments simultaneously
 - **Real-time Updates**: Live synchronization via WebSockets for all tournament actions
 - **Optimistic UI**: Immediate feedback with rollback on API failures
-- **Responsive Design**: Works on desktop and mobile devices
+- **Responsive Design**: Works on desktop and mobile devices _(TODO: A good part of the UI is mobile compatible, but some functionnalities are broken in mobile mode. Depending on demand, I will fix it quickly. Or a contributor might do it.)_
 
 ## 🎯 Usage Flow
 
@@ -106,7 +80,7 @@ The system implements a unique **hybrid Swiss-Round-Robin system** optimized for
 #### Setup Phase
 
 1. **Create Tournament**: Choose Swiss-Round-Robin format, set name and optional password
-2. **Add Players**: Add participants (minimum 3, no maximum limit)
+2. **Add Players**: Add participants (minimum 4, no maximum limit)
 3. **Player Management**: Add/remove players with real-time sync across all users
 4. **Start Tournament**: System generates first round with optimal 3-player matchups
 
@@ -130,9 +104,19 @@ The system implements a unique **hybrid Swiss-Round-Robin system** optimized for
 
 #### Tournament Completion
 
-- **Dynamic Standings**: Real-time leaderboard with Points → Wins → Losses ranking
+- **Dynamic Standings**: Real-time leaderboard with Points → Wins → Losses ranking. Leaderboard is updated when the new round is created.
 - **Final Results**: Championship match determines ultimate winner
-- **Tournament History**: Complete match history and statistics preserved
+- **Tournament History**: Complete match history and statistics preserved. _(Dev Note: Matches history UI not made for now)_
+
+## 📷 Screenshots
+
+![](./screenshots/1.png)
+![](./screenshots/2.png)
+![](./screenshots/3.png)
+![](./screenshots/4.png)
+![](./screenshots/5.png)
+![](./screenshots/6.png)
+![](./screenshots/7.png)
 
 ## 📄 License
 

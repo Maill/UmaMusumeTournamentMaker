@@ -630,8 +630,8 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
     switch (this.state.tournament?.type) {
       case TournamentType.Swiss:
         return 'Swiss Tournament';
-      case TournamentType.ChampionsMeeting:
-        return 'Champions Meeting';
+      // case TournamentType.ChampionsMeeting:
+      //   return 'Champions Meeting';
       default:
         return 'Unknown';
     }

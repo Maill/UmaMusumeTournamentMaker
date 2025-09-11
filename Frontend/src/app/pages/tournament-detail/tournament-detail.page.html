@@ -93,7 +93,6 @@
         <app-player-management
           [players]="state.tournament.players"
           [state]="getPlayerManagementState()"
-          [minPlayersRequired]="3"
           [allowPlayerRemoval]="true"
           (playerAdded)="onPlayerAdd($event)"
           (playerRemoved)="onPlayerRemove($event)"

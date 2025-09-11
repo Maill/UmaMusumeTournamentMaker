@@ -120,8 +120,8 @@ export class TournamentCardComponent {
     switch (this.tournament.type) {
       case TournamentType.Swiss:
         return 'Swiss';
-      case TournamentType.ChampionsMeeting:
-        return 'Champions Meeting';
+      // case TournamentType.ChampionsMeeting:
+      //   return 'Champions Meeting';
       default:
         return 'Unknown';
     }
@@ -144,8 +144,8 @@ export class TournamentCardComponent {
     switch (this.tournament.type) {
       case TournamentType.Swiss:
         return 'primary';
-      case TournamentType.ChampionsMeeting:
-        return 'info';
+      // case TournamentType.ChampionsMeeting:
+      //   return 'info';
       default:
         return 'secondary';
     }

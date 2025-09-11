@@ -145,12 +145,12 @@ export class TournamentFormComponent implements OnInit {
   tournamentTypeOptions: SelectOption<TournamentType>[] = [
     {
       value: TournamentType.Swiss,
-      label: 'Swiss Tournament',
+      label: 'Round-Robin/Swiss Hybrid Tournament',
     },
-    {
-      value: TournamentType.ChampionsMeeting,
-      label: 'Champions Meeting Tournament (W.I.P)',
-    },
+    // {
+    //   value: TournamentType.ChampionsMeeting,
+    //   label: 'Champions Meeting Tournament (W.I.P)',
+    // },
   ];
 
   private typeDescriptions: Record<TournamentType, { name: string; description: string }> = {
@@ -159,11 +159,11 @@ export class TournamentFormComponent implements OnInit {
       description:
         'Players are paired each round based on their current standings. Continues until a clear winner emerges or maximum rounds are reached.',
     },
-    [TournamentType.ChampionsMeeting]: {
-      name: 'Champions Meeting Tournament (W.I.P)',
-      description:
-        'Multi-round tournament with group divisions based on performance. Top performers advance to final groups. (This tournament type is still VERY early work and is very likely to not work at all)',
-    },
+    // [TournamentType.ChampionsMeeting]: {
+    //   name: 'Champions Meeting Tournament (W.I.P)',
+    //   description:
+    //     'Multi-round tournament with group divisions based on performance. Top performers advance to final groups. (This tournament type is still VERY early work and is very likely to not work at all)',
+    // },
   };
 
   ngOnInit(): void {

@@ -259,6 +259,9 @@ namespace UmaMusumeTournamentMaker.API.Application.Strategies
                     .GetPlayersSortedByStandings()
                     .ToList();
 
+                if (!availablePlayers.Any())
+                    availablePlayers.Add(sortedPlayers[1]); //In case of low count player tournament's add the 2nd place
+
                 // Add players to reach multiple of 3 for proper matches
                 while (tiebreakerPlayers.Count % 3 != 0 && availablePlayers.Any())
                 {

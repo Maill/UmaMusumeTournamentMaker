@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BaseIconComponent } from '../../atoms/icon/base-icon.component';
@@ -9,7 +9,7 @@ import { Player } from '../../types/tournament.types';
 @Component({
   selector: 'app-winner-selector',
   standalone: true,
-  imports: [CommonModule, FormsModule, BaseSelectComponent, BaseIconComponent],
+  imports: [FormsModule, BaseSelectComponent, BaseIconComponent],
   template: `
     <div class="winner-selector-wrapper">
       <div class="selector-container">

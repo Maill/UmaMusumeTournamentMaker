@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { BaseBadgeComponent } from '../../atoms/badge/base-badge.component';
 import { BaseIconComponent } from '../../atoms/icon/base-icon.component';
@@ -9,7 +9,7 @@ import { WinnerSelectorComponent } from '../winner-selector/winner-selector.comp
 @Component({
   selector: 'tr[app-match-row]',
   standalone: true,
-  imports: [CommonModule, BaseBadgeComponent, BaseIconComponent, WinnerSelectorComponent],
+  imports: [BaseBadgeComponent, BaseIconComponent, WinnerSelectorComponent],
   host: {
     class: 'match-row',
     '[class.completed]': 'isCompleted()',

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { BaseButtonComponent } from '../../atoms/button/base-button.component';
 import { BaseIconComponent } from '../../atoms/icon/base-icon.component';
@@ -11,12 +11,11 @@ import { Player } from '../../types/tournament.types';
   selector: 'app-player-management',
   standalone: true,
   imports: [
-    CommonModule,
     PlayerInputComponent,
     BaseButtonComponent,
     BaseIconComponent,
-    ErrorDisplayComponent,
-  ],
+    ErrorDisplayComponent
+],
   template: `
     <div class="player-management-container">
       <!-- Section Header -->

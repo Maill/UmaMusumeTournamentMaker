@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BaseButtonComponent } from '../../atoms/button/base-button.component';
@@ -17,32 +17,31 @@ import { TournamentType } from '../../types/tournament.types';
   selector: 'app-tournament-form',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     BaseInputComponent,
     BaseSelectComponent,
     BaseButtonComponent,
-    ErrorDisplayComponent,
-  ],
+    ErrorDisplayComponent
+],
   template: `
     <div class="tournament-form-container">
       <div class="form-header">
         <h1 class="form-title">{{ title }}</h1>
         @if (subtitle) {
-        <p class="form-subtitle">{{ subtitle }}</p>
+          <p class="form-subtitle">{{ subtitle }}</p>
         }
       </div>
-
+    
       @if (state.error) {
-      <app-error-display
-        [message]="state.error"
-        type="error"
-        [dismissible]="true"
-        (dismissed)="clearError()"
-      >
-      </app-error-display>
+        <app-error-display
+          [message]="state.error"
+          type="error"
+          [dismissible]="true"
+          (dismissed)="clearError()"
+          >
+        </app-error-display>
       }
-
+    
       <form [formGroup]="tournamentForm" (ngSubmit)="onSubmit()" class="tournament-form">
         <!-- Tournament Name -->
         <app-input
@@ -54,9 +53,9 @@ import { TournamentType } from '../../types/tournament.types';
           formControlName="name"
           [error]="getFieldError('name')"
           helpText="Choose a descriptive name for your tournament"
-        >
+          >
         </app-input>
-
+    
         <!-- Tournament Type -->
         <app-select
           label="Tournament Type"
@@ -66,17 +65,19 @@ import { TournamentType } from '../../types/tournament.types';
           formControlName="type"
           [error]="getFieldError('type')"
           placeholder="Select tournament type"
-        >
+          >
         </app-select>
-
+    
         <!-- Tournament Type Description -->
-        <div class="type-description" *ngIf="getSelectedTypeDescription()">
-          <div class="description-card">
-            <h3>{{ getSelectedTypeName() }}</h3>
-            <p>{{ getSelectedTypeDescription() }}</p>
+        @if (getSelectedTypeDescription()) {
+          <div class="type-description">
+            <div class="description-card">
+              <h3>{{ getSelectedTypeName() }}</h3>
+              <p>{{ getSelectedTypeDescription() }}</p>
+            </div>
           </div>
-        </div>
-
+        }
+    
         <!-- Password (Optional) -->
         <app-input
           label="Password"
@@ -86,9 +87,9 @@ import { TournamentType } from '../../types/tournament.types';
           formControlName="password"
           [error]="getFieldError('password')"
           helpText="Set a password to restrict tournament management access"
-        >
+          >
         </app-input>
-
+    
         <!-- Form Actions -->
         <div class="form-actions">
           <app-button
@@ -98,25 +99,25 @@ import { TournamentType } from '../../types/tournament.types';
             [loading]="state.isLoading"
             [loadingText]="submitLoadingText"
             [fullWidth]="true"
-          >
+            >
             {{ submitText }}
           </app-button>
-
+    
           @if (showCancel) {
-          <app-button
-            type="button"
-            variant="secondary"
-            [disabled]="state.isLoading"
-            [fullWidth]="true"
-            (clicked)="onCancel()"
-          >
-            {{ cancelText }}
-          </app-button>
+            <app-button
+              type="button"
+              variant="secondary"
+              [disabled]="state.isLoading"
+              [fullWidth]="true"
+              (clicked)="onCancel()"
+              >
+              {{ cancelText }}
+            </app-button>
           }
         </div>
       </form>
     </div>
-  `,
+    `,
   styleUrl: './tournament-form.component.css',
 })
 export class TournamentFormComponent implements OnInit {

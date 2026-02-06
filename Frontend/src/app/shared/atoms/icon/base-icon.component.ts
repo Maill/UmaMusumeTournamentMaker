@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 export type IconName =
@@ -38,7 +37,7 @@ export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
 @Component({
   selector: 'app-icon',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <span [class]="getIconClasses()" [attr.aria-label]="ariaLabel" [innerHTML]="getIconSvg()">
     </span>
@@ -51,7 +50,7 @@ export class BaseIconComponent {
   @Input() color: string = '';
   @Input() ariaLabel: string = '';
 
-  constructor(private sanitizer: DomSanitizer) {}
+  private sanitizer: DomSanitizer = inject(DomSanitizer);
 
   private icons: Record<IconName, string> = {
     trophy: `🏆`,

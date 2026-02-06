@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, inject, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -20,7 +20,7 @@ import {
 @Component({
   selector: 'app-create-tournament-page',
   standalone: true,
-  imports: [CommonModule, TournamentFormComponent, BaseButtonComponent, BaseIconComponent],
+  imports: [TournamentFormComponent, BaseButtonComponent, BaseIconComponent],
   templateUrl: './create-tournament.page.html',
   styleUrl: './create-tournament.page.css',
 })

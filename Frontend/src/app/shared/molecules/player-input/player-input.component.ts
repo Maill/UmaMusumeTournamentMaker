@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import {
   AfterViewInit,
   Component,
@@ -15,7 +15,7 @@ import { BaseInputComponent } from '../../atoms/input/base-input.component';
 @Component({
   selector: 'app-player-input',
   standalone: true,
-  imports: [CommonModule, FormsModule, BaseInputComponent, BaseButtonComponent],
+  imports: [FormsModule, BaseInputComponent, BaseButtonComponent],
   template: `
     <div class="player-input-wrapper">
       <div class="input-group">

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { BaseIconComponent, IconName } from '../../atoms/icon/base-icon.component';
 import { LoadingSpinnerComponent } from '../../atoms/spinner/loading-spinner.component';
@@ -13,12 +13,11 @@ export type StandingsViewMode = 'current' | 'final' | 'live';
   selector: 'app-standings-table',
   standalone: true,
   imports: [
-    CommonModule,
     StandingsRowComponent,
     BaseIconComponent,
     LoadingSpinnerComponent,
-    ErrorDisplayComponent,
-  ],
+    ErrorDisplayComponent
+],
   template: `
     <div class="standings-table-container">
       <!-- Table Header -->

@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -30,7 +29,6 @@ interface TournamentListState {
   selector: 'app-tournament-list-page',
   standalone: true,
   imports: [
-    CommonModule,
     TournamentCardComponent,
     TournamentCardSkeletonComponent,
     ErrorDisplayComponent,
@@ -50,7 +48,8 @@ export class TournamentListPageComponent implements OnInit, OnDestroy {
     hasLoaded: false,
   };
 
-  constructor(private tournamentService: TournamentService, private router: Router) {}
+  private router: Router = inject(Router);
+  constructor(private tournamentService: TournamentService) {}
 
   ngOnInit(): void {
     this.loadTournaments();
@@ -98,7 +97,7 @@ export class TournamentListPageComponent implements OnInit, OnDestroy {
 
   getActiveTournamentsCount(): number {
     return this.state.tournaments.filter(
-      (t) => t.status === TournamentStatus.Created || t.status === TournamentStatus.InProgress
+      (t) => t.status === TournamentStatus.Created || t.status === TournamentStatus.InProgress,
     ).length;
   }
 

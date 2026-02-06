@@ -1,11 +1,11 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { BadgeVariant } from '../../types/ui.types';
 
 @Component({
   selector: 'app-badge',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <span [class]="getBadgeClasses()">
       <ng-content></ng-content>

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BaseButtonComponent } from '../../atoms/button/base-button.component';
@@ -9,7 +9,7 @@ import { PasswordModalData } from '../../types/components.types';
 @Component({
   selector: 'app-password-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, BaseButtonComponent, BaseIconComponent, BaseInputComponent],
+  imports: [FormsModule, BaseButtonComponent, BaseIconComponent, BaseInputComponent],
   template: `
     @if (data.isVisible) {
     <div class="modal-overlay" (click)="onOverlayClick()">

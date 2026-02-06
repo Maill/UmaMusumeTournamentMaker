@@ -1,11 +1,11 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Input } from '@angular/core';
 import { LoadingSize } from '../../types/ui.types';
 
 @Component({
   selector: 'app-loading-spinner',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <!--<span [class]="getSpinnerClasses()" role="status" [attr.aria-label]="ariaLabel">
       <span class="visually-hidden">{{ loadingText }}</span>

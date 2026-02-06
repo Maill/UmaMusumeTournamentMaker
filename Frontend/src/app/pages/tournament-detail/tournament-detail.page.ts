@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize, Subject, takeUntil } from 'rxjs';
@@ -42,7 +42,6 @@ import {
   selector: 'app-tournament-detail-page',
   standalone: true,
   imports: [
-    CommonModule,
     PlayerManagementComponent,
     MatchTableComponent,
     StandingsTableComponent,
@@ -53,8 +52,8 @@ import {
     BaseBadgeComponent,
     PasswordModalComponent,
     TournamentDeleteModal,
-    TournamentEditModal,
-  ],
+    TournamentEditModal
+],
   templateUrl: './tournament-detail.page.html',
   styleUrl: './tournament-detail.page.css',
 })

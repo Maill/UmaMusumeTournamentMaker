@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { BaseBadgeComponent } from '../../atoms/badge/base-badge.component';
 import { BaseButtonComponent } from '../../atoms/button/base-button.component';
@@ -13,14 +13,13 @@ import { Match, Player } from '../../types/tournament.types';
   selector: 'app-match-table',
   standalone: true,
   imports: [
-    CommonModule,
     MatchRowComponent,
     BaseIconComponent,
     LoadingSpinnerComponent,
     ErrorDisplayComponent,
     BaseBadgeComponent,
-    BaseButtonComponent,
-  ],
+    BaseButtonComponent
+],
   template: `
     <div class="match-table-container">
       <!-- Table Header -->

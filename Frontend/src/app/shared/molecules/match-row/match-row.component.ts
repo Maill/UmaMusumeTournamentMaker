@@ -99,11 +99,11 @@ export class MatchRowComponent {
     playerName?: string;
   }>();
 
-  readonly isCompleted = computed(() => !!this.match().winnerId);
+  isCompleted(): boolean { return !!this.match().winnerId; }
 
   readonly playersForWinnerSelector = computed(() => Object.values(this.players()));
 
-  readonly completedTimeDisplay = computed(() => {
+  completedTimeDisplay(): string {
     if (!this.match().completedAt) return '';
 
     const completedDate = new Date(this.match().completedAt!);
@@ -120,12 +120,12 @@ export class MatchRowComponent {
     if (diffDays < 7) return `${diffDays}d ago`;
 
     return completedDate.toLocaleDateString();
-  });
+  }
 
-  readonly fullCompletedDate = computed(() => {
+  fullCompletedDate(): string {
     if (!this.match().completedAt) return '';
     return new Date(this.match().completedAt!).toLocaleString();
-  });
+  }
 
   onWinnerChange(event: { matchId: number; winnerId: number | null; playerName?: string }): void {
     this.winnerChanged.emit(event);

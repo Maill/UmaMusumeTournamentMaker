@@ -170,7 +170,7 @@ export class StandingsTableComponent {
 
   readonly errorDismissed = output<void>();
 
-  readonly tableTitle = computed(() => {
+  tableTitle(): string {
     const t = this.title();
     if (t) return t;
 
@@ -183,21 +183,21 @@ export class StandingsTableComponent {
       default:
         return this.data().tournamentComplete ? 'Final Standings' : 'Current Standings';
     }
-  });
+  }
 
-  readonly titleIcon = computed<IconName>(() => {
+  titleIcon(): IconName {
     return this.data().tournamentComplete ? 'podium' : 'trending-up';
-  });
+  }
 
-  readonly titleColor = computed(() => {
+  titleColor(): string {
     return this.data().tournamentComplete ? 'warning' : 'primary';
-  });
+  }
 
-  readonly ariaLabel = computed(() => {
+  ariaLabel(): string {
     return this.data().tournamentComplete
       ? 'Final tournament standings'
       : 'Current tournament standings';
-  });
+  }
 
   readonly playersWithRankings = computed(() => {
     const sortedPlayers = [...this.data().players].sort((a, b) => {
@@ -225,12 +225,12 @@ export class StandingsTableComponent {
     return Math.round((totalWinRate / this.data().players.length) * 100);
   });
 
-  readonly emptyStateMessage = computed(() => {
+  emptyStateMessage(): string {
     if (this.data().tournamentComplete) {
       return 'This tournament had no players.';
     }
     return 'No players have joined this tournament yet.';
-  });
+  }
 
   onErrorDismiss(): void {
     this.errorDismissed.emit();

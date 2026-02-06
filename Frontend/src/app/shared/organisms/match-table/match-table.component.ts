@@ -187,7 +187,7 @@ export class MatchTableComponent {
   readonly nextRoundStarted = output<void>();
   readonly errorDismissed = output<void>();
 
-  readonly isRoundFinal = computed(() => this.data().round.roundType == 'Final');
+  isRoundFinal(): boolean { return this.data().round.roundType == 'Final'; }
 
   readonly matchesWithNumbers = computed(() => {
     return this.data().round.matches.map((match, index) => ({
@@ -211,30 +211,30 @@ export class MatchTableComponent {
     return Math.round((this.completedMatchesCount() / total) * 100);
   });
 
-  readonly titleIcon = computed<IconName>(() => {
+  titleIcon(): IconName {
     return this.isRoundFinal() ? 'trophy' : 'target';
-  });
+  }
 
-  readonly titleText = computed(() => {
+  titleText(): string {
     const baseText = `Round ${this.data().round.roundNumber} matches`;
     if (this.isRoundFinal()) return 'Final Round';
     if (this.data().round.roundType == 'Tiebreaker') return `Tiebreaker - ${baseText}`;
     return baseText;
-  });
+  }
 
-  readonly nextRoundText = computed(() => {
+  nextRoundText(): string {
     return this.isRoundFinal()
       ? 'Crown you tournament winner!'
       : 'All matches have been completed. Ready to proceed to the next round.';
-  });
+  }
 
-  readonly nextRoundTitle = computed(() => {
+  nextRoundTitle(): string {
     return this.isRoundFinal() ? 'Finale complete!' : 'Round Complete!';
-  });
+  }
 
-  readonly nextRoundIcon = computed<IconName>(() => {
+  nextRoundIcon(): IconName {
     return this.isRoundFinal() ? 'confetti' : 'chevron-right';
-  });
+  }
 
   onWinnerChange(event: { matchId: number; winnerId: number | null; playerName?: string }): void {
     this.winnerChanged.emit(event);

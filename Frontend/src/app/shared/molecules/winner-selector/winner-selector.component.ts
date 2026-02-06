@@ -92,11 +92,11 @@ export class WinnerSelectorComponent {
     return options;
   });
 
-  readonly selectedPlayerName = computed(() => {
+  selectedPlayerName(): string {
     if (!this.selectedWinnerId()) return '';
     const selectedPlayer = this.players().find((p) => p.id === this.selectedWinnerId());
     return selectedPlayer?.name || '';
-  });
+  }
 
   onWinnerChange(winnerId: number): void {
     const actualWinnerId = winnerId === 0 ? null : winnerId;

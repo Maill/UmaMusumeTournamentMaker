@@ -112,7 +112,7 @@ export class BaseSelectComponent<T = any> implements ControlValueAccessor {
     this.focused.emit(event);
   }
 
-  readonly selectClasses = computed(() => {
+  selectClasses(): string {
     const classes = ['form-control', 'form-select'];
     if (this.error()) {
       classes.push('is-invalid');
@@ -121,5 +121,5 @@ export class BaseSelectComponent<T = any> implements ControlValueAccessor {
       classes.push('disabled');
     }
     return classes.join(' ');
-  });
+  }
 }

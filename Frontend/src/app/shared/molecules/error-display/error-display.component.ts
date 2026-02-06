@@ -1,5 +1,5 @@
 
-import { Component, computed, input, output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { BaseButtonComponent } from '../../atoms/button/base-button.component';
 import { BaseIconComponent } from '../../atoms/icon/base-icon.component';
 import { ErrorType } from '../../types/components.types';
@@ -82,15 +82,15 @@ export class ErrorDisplayComponent {
     }
   }
 
-  readonly errorClasses = computed(() => {
+  errorClasses(): string {
     const classes = ['error-display', `error-${this.type()}`];
     if (this.compact()) {
       classes.push('error-compact');
     }
     return classes.join(' ');
-  });
+  }
 
-  readonly iconName = computed<'warning' | 'info' | 'close'>(() => {
+  iconName(): 'warning' | 'info' | 'close' {
     switch (this.type()) {
       case 'error':
         return 'warning';
@@ -101,9 +101,9 @@ export class ErrorDisplayComponent {
       default:
         return 'warning';
     }
-  });
+  }
 
-  readonly iconColor = computed(() => {
+  iconColor(): string {
     switch (this.type()) {
       case 'error':
         return 'danger';
@@ -114,5 +114,5 @@ export class ErrorDisplayComponent {
       default:
         return 'danger';
     }
-  });
+  }
 }

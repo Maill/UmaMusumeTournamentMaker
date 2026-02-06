@@ -1,5 +1,5 @@
 
-import { Component, computed, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { BaseBadgeComponent } from '../../atoms/badge/base-badge.component';
 import { BaseIconComponent } from '../../atoms/icon/base-icon.component';
 import { StandingsRowData } from '../../types/components.types';
@@ -94,36 +94,36 @@ export class StandingsRowComponent {
   readonly showGamesPlayed = input<boolean>(false);
   readonly highlightTop3 = input<boolean>(true);
 
-  readonly isHighlighted = computed(() => {
+  isHighlighted(): boolean {
     return !!(
       this.highlightTop3() === true &&
       (this.player().isChampion || this.player().isRunnerUp || this.player().isThirdPlace)
     );
-  });
+  }
 
-  readonly showBadge = computed(() => {
+  showBadge(): boolean {
     return !!(this.player().isChampion || this.player().isRunnerUp || this.player().isThirdPlace);
-  });
+  }
 
-  readonly badgeVariant = computed<'warning' | 'silver' | 'bronze' | 'secondary'>(() => {
+  badgeVariant(): 'warning' | 'silver' | 'bronze' | 'secondary' {
     if (this.player().isChampion) return 'warning';
     if (this.player().isRunnerUp) return 'silver';
     if (this.player().isThirdPlace) return 'bronze';
     return 'secondary';
-  });
+  }
 
-  readonly badgeText = computed(() => {
+  badgeText(): string {
     if (this.player().isChampion) return '1st Place - Standings Champion';
     if (this.player().isRunnerUp) return '2nd Place';
     if (this.player().isThirdPlace) return '3rd Place';
     return '';
-  });
+  }
 
-  readonly winRateDisplay = computed(() => {
+  winRateDisplay(): string {
     return `${Math.round(this.player().winRate * 100)}%`;
-  });
+  }
 
-  readonly totalGames = computed(() => {
+  totalGames(): number {
     return this.player().wins + this.player().losses;
-  });
+  }
 }

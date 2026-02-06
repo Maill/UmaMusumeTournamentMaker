@@ -1,4 +1,4 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 import { ButtonVariant, ButtonSize, ButtonType } from '../../types/ui.types';
 
@@ -39,7 +39,7 @@ export class BaseButtonComponent {
     }
   }
 
-  readonly buttonClasses = computed(() => {
+  buttonClasses(): string {
     const classes = ['btn', `btn-${this.variant()}`, `btn-${this.size()}`];
     if (this.fullWidth()) {
       classes.push('btn-full-width');
@@ -48,5 +48,5 @@ export class BaseButtonComponent {
       classes.push('btn-loading');
     }
     return classes.join(' ');
-  });
+  }
 }

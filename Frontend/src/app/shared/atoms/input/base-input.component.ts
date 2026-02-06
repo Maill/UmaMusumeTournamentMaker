@@ -118,7 +118,7 @@ export class BaseInputComponent implements ControlValueAccessor {
     this.escapePressed.emit(event);
   }
 
-  readonly inputClasses = computed(() => {
+  inputClasses(): string {
     const classes = ['form-control'];
     if (this.error()) {
       classes.push('is-invalid');
@@ -130,5 +130,5 @@ export class BaseInputComponent implements ControlValueAccessor {
       classes.push('readonly');
     }
     return classes.join(' ');
-  });
+  }
 }

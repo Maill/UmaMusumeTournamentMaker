@@ -1,4 +1,4 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 import { BadgeVariant } from '../../types/ui.types';
 
@@ -34,7 +34,7 @@ export class BaseBadgeComponent {
     this.dismissed.emit(event);
   }
 
-  readonly badgeClasses = computed(() => {
+  badgeClasses(): string {
     const classes = ['badge', `badge-${this.variant()}`];
     if (this.pill()) {
       classes.push('badge-pill');
@@ -43,5 +43,5 @@ export class BaseBadgeComponent {
       classes.push('badge-dismissible');
     }
     return classes.join(' ');
-  });
+  }
 }

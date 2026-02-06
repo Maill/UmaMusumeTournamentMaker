@@ -1,6 +1,6 @@
 
 import { CommonModule } from '@angular/common';
-import { Component, computed, input, output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { BaseBadgeComponent } from '../../atoms/badge/base-badge.component';
 import { BaseIconComponent } from '../../atoms/icon/base-icon.component';
 import { TournamentCardData } from '../../types/components.types';
@@ -117,16 +117,16 @@ export class TournamentCardComponent {
     }
   }
 
-  readonly tournamentTypeName = computed(() => {
+  tournamentTypeName(): string {
     switch (this.tournament().type) {
       case TournamentType.Swiss:
         return 'Swiss';
       default:
         return 'Unknown';
     }
-  });
+  }
 
-  readonly statusText = computed(() => {
+  statusText(): string {
     switch (this.tournament().status) {
       case TournamentStatus.Created:
         return 'Created';
@@ -137,18 +137,18 @@ export class TournamentCardComponent {
       default:
         return 'Unknown';
     }
-  });
+  }
 
-  readonly typeVariant = computed<'primary' | 'secondary' | 'info'>(() => {
+  typeVariant(): 'primary' | 'secondary' | 'info' {
     switch (this.tournament().type) {
       case TournamentType.Swiss:
         return 'primary';
       default:
         return 'secondary';
     }
-  });
+  }
 
-  readonly statusVariant = computed<'warning' | 'primary' | 'success' | 'secondary'>(() => {
+  statusVariant(): 'warning' | 'primary' | 'success' | 'secondary' {
     switch (this.tournament().status) {
       case TournamentStatus.Created:
         return 'warning';
@@ -159,5 +159,5 @@ export class TournamentCardComponent {
       default:
         return 'secondary';
     }
-  });
+  }
 }

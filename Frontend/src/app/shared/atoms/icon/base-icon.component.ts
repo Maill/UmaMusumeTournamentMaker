@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 export type IconName =
@@ -84,16 +84,16 @@ export class BaseIconComponent {
     podium: `🏅`,
   };
 
-  readonly iconSvg = computed<SafeHtml>(() => {
+  iconSvg(): SafeHtml {
     const svg = this.icons[this.name()] || this.icons.info;
     return this.sanitizer.bypassSecurityTrustHtml(svg);
-  });
+  }
 
-  readonly iconClasses = computed(() => {
+  iconClasses(): string {
     const classes = ['icon', `icon-${this.size()}`];
     if (this.color()) {
       classes.push(`icon-${this.color()}`);
     }
     return classes.join(' ');
-  });
+  }
 }

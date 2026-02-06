@@ -1,5 +1,5 @@
 
-import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 
@@ -33,16 +33,17 @@ export class CreateTournamentPageComponent {
   readonly error = signal<string | null>(null);
   readonly formData = signal<TournamentFormData | null>(null);
 
-  // Computed signals
-  readonly formState = computed<TournamentFormState>(() => ({
-    isLoading: this.isCreating(),
-    error: this.error(),
-    showPassword: true,
-  }));
+  formState(): TournamentFormState {
+    return {
+      isLoading: this.isCreating(),
+      error: this.error(),
+      showPassword: true,
+    };
+  }
 
-  readonly pageTitle = computed(() =>
-    this.isCreating() ? 'Creating Tournament...' : 'Create New Tournament',
-  );
+  pageTitle(): string {
+    return this.isCreating() ? 'Creating Tournament...' : 'Create New Tournament';
+  }
 
   onCreateTournament(request: CreateTournamentRequest): void {
     this.isCreating.set(true);

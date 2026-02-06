@@ -111,16 +111,16 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
     return this.tournament()!.rounds.find((r) => !r.isCompleted) || null;
   });
 
-  readonly tournamentTypeName = computed(() => {
+  tournamentTypeName(): string {
     switch (this.tournament()?.type) {
       case TournamentType.Swiss:
         return 'Swiss Tournament';
       default:
         return 'Unknown';
     }
-  });
+  }
 
-  readonly statusText = computed(() => {
+  statusText(): string {
     switch (this.tournament()?.status) {
       case TournamentStatus.Created:
         return 'Setup Phase';
@@ -131,13 +131,13 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       default:
         return 'Unknown';
     }
-  });
+  }
 
-  readonly typeVariant = computed<'primary' | 'info'>(() =>
-    this.tournament()?.type === TournamentType.Swiss ? 'primary' : 'info',
-  );
+  typeVariant(): 'primary' | 'info' {
+    return this.tournament()?.type === TournamentType.Swiss ? 'primary' : 'info';
+  }
 
-  readonly statusVariant = computed<'warning' | 'primary' | 'success'>(() => {
+  statusVariant(): 'warning' | 'primary' | 'success' {
     switch (this.tournament()?.status) {
       case TournamentStatus.Created:
         return 'warning';
@@ -148,15 +148,15 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       default:
         return 'warning';
     }
-  });
+  }
 
-  readonly winnerName = computed(() => {
+  winnerName(): string {
     if (!this.tournament()?.winnerId) return '';
     const winner = this.tournament()!.players.find(
       (p) => p.id === this.tournament()?.winnerId,
     );
     return winner?.name || '';
-  });
+  }
 
   readonly canStartNextRound = computed(() => {
     const round = this.currentRound();
@@ -164,18 +164,20 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
     return round.matches.every((match) => match.winnerId) && this.managementMode();
   });
 
-  readonly nextRoundButtonText = computed(() =>
-    this.currentRound()?.roundType == 'Final' ? 'Complete Tournament' : 'Start Next Round',
-  );
+  nextRoundButtonText(): string {
+    return this.currentRound()?.roundType == 'Final' ? 'Complete Tournament' : 'Start Next Round';
+  }
 
-  readonly playerManagementState = computed<PlayerManagementState>(() => ({
-    isAddingPlayer: this.isUpdating(),
-    isRemovingPlayer: this.isUpdating(),
-    isStartingTournament: this.isUpdating(),
-    canManage: this.managementMode(),
-    error: this.error(),
-    addPlayerError: null,
-  }));
+  playerManagementState(): PlayerManagementState {
+    return {
+      isAddingPlayer: this.isUpdating(),
+      isRemovingPlayer: this.isUpdating(),
+      isStartingTournament: this.isUpdating(),
+      canManage: this.managementMode(),
+      error: this.error(),
+      addPlayerError: null,
+    };
+  }
 
   readonly matchTableData = computed<MatchTableData>(() => ({
     players: Object.fromEntries(
@@ -187,12 +189,14 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
     error: this.error(),
   }));
 
-  readonly matchTableState = computed<MatchTableState>(() => ({
-    updatingMatchId: this.isUpdating() ? -1 : null,
-    canStartNextRound: this.canStartNextRound(),
-    isStartingNextRound: this.isUpdating(),
-    nextRoundButtonText: this.nextRoundButtonText(),
-  }));
+  matchTableState(): MatchTableState {
+    return {
+      updatingMatchId: this.isUpdating() ? -1 : null,
+      canStartNextRound: this.canStartNextRound(),
+      isStartingNextRound: this.isUpdating(),
+      nextRoundButtonText: this.nextRoundButtonText(),
+    };
+  }
 
   readonly standingsData = computed<StandingsTableData>(() => ({
     players: this.tournament()?.players || [],

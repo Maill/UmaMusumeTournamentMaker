@@ -1,5 +1,5 @@
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BaseButtonComponent } from '../../atoms/button/base-button.component';
 import { BaseIconComponent } from '../../atoms/icon/base-icon.component';
@@ -11,34 +11,34 @@ import { PasswordModalData } from '../../types/components.types';
   standalone: true,
   imports: [FormsModule, BaseButtonComponent, BaseIconComponent, BaseInputComponent],
   template: `
-    @if (data.isVisible) {
+    @if (data().isVisible) {
     <div class="modal-overlay" (click)="onOverlayClick()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3 class="modal-title">{{ data.title }}</h3>
+          <h3 class="modal-title">{{ data().title }}</h3>
           <button class="modal-close" (click)="onCancel()">
             <app-icon name="close" size="sm"></app-icon>
           </button>
         </div>
 
         <div class="modal-body">
-          <p class="modal-message">{{ data.message }}</p>
+          <p class="modal-message">{{ data().message }}</p>
 
           <div class="password-input">
             <app-input
               type="password"
               placeholder="Enter tournament password"
               [(ngModel)]="password"
-              [disabled]="data.isLoading"
+              [disabled]="data().isLoading"
               (keyup.enter)="onSubmit()"
             >
             </app-input>
           </div>
 
-          @if (data.error) {
+          @if (data().error) {
           <div class="error-message">
             <app-icon name="warning" size="sm" color="danger"></app-icon>
-            {{ data.error }}
+            {{ data().error }}
           </div>
           }
         </div>
@@ -47,15 +47,15 @@ import { PasswordModalData } from '../../types/components.types';
           <app-button
             variant="outline-secondary"
             (clicked)="onCancel()"
-            [disabled]="data.isLoading"
+            [disabled]="data().isLoading"
           >
             Cancel
           </app-button>
           <app-button
             variant="primary"
             (clicked)="onSubmit()"
-            [loading]="data.isLoading"
-            [disabled]="!password.trim()"
+            [loading]="data().isLoading"
+            [disabled]="!password().trim()"
           >
             Enter Management
           </app-button>
@@ -67,27 +67,27 @@ import { PasswordModalData } from '../../types/components.types';
   styleUrl: './password-modal.component.css',
 })
 export class PasswordModalComponent {
-  @Input() data: PasswordModalData = {
+  readonly data = input<PasswordModalData>({
     isVisible: false,
     title: '',
     message: '',
     isLoading: false,
     error: null,
-  };
+  });
 
-  @Output() passwordSubmitted = new EventEmitter<string>();
-  @Output() cancelled = new EventEmitter<void>();
+  readonly passwordSubmitted = output<string>();
+  readonly cancelled = output<void>();
 
-  protected password: string = '';
+  readonly password = signal('');
 
   onSubmit(): void {
-    if (this.password.trim()) {
-      this.passwordSubmitted.emit(this.password.trim());
+    if (this.password().trim()) {
+      this.passwordSubmitted.emit(this.password().trim());
     }
   }
 
   onCancel(): void {
-    this.password = '';
+    this.password.set('');
     this.cancelled.emit();
   }
 

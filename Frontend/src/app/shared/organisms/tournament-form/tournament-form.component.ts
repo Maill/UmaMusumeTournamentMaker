@@ -1,5 +1,5 @@
 
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { Component, inject, input, OnInit, output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BaseButtonComponent } from '../../atoms/button/base-button.component';
 import { BaseInputComponent } from '../../atoms/input/base-input.component';
@@ -26,22 +26,22 @@ import { TournamentType } from '../../types/tournament.types';
   template: `
     <div class="tournament-form-container">
       <div class="form-header">
-        <h1 class="form-title">{{ title }}</h1>
-        @if (subtitle) {
-          <p class="form-subtitle">{{ subtitle }}</p>
+        <h1 class="form-title">{{ title() }}</h1>
+        @if (subtitle()) {
+          <p class="form-subtitle">{{ subtitle() }}</p>
         }
       </div>
-    
-      @if (state.error) {
+
+      @if (state().error) {
         <app-error-display
-          [message]="state.error"
+          [message]="state().error!"
           type="error"
           [dismissible]="true"
           (dismissed)="clearError()"
           >
         </app-error-display>
       }
-    
+
       <form [formGroup]="tournamentForm" (ngSubmit)="onSubmit()" class="tournament-form">
         <!-- Tournament Name -->
         <app-input
@@ -49,25 +49,25 @@ import { TournamentType } from '../../types/tournament.types';
           type="text"
           placeholder="Enter tournament name"
           [required]="true"
-          [disabled]="state.isLoading"
+          [disabled]="state().isLoading"
           formControlName="name"
           [error]="getFieldError('name')"
           helpText="Choose a descriptive name for your tournament"
           >
         </app-input>
-    
+
         <!-- Tournament Type -->
         <app-select
           label="Tournament Type"
           [options]="tournamentTypeOptions"
           [required]="true"
-          [disabled]="state.isLoading"
+          [disabled]="state().isLoading"
           formControlName="type"
           [error]="getFieldError('type')"
           placeholder="Select tournament type"
           >
         </app-select>
-    
+
         <!-- Tournament Type Description -->
         @if (getSelectedTypeDescription()) {
           <div class="type-description">
@@ -77,41 +77,41 @@ import { TournamentType } from '../../types/tournament.types';
             </div>
           </div>
         }
-    
+
         <!-- Password (Optional) -->
         <app-input
           label="Password"
           type="password"
           placeholder="Tournament's password for management access"
-          [disabled]="state.isLoading"
+          [disabled]="state().isLoading"
           formControlName="password"
           [error]="getFieldError('password')"
           helpText="Set a password to restrict tournament management access"
           >
         </app-input>
-    
+
         <!-- Form Actions -->
         <div class="form-actions">
           <app-button
             type="submit"
             variant="primary"
-            [disabled]="!tournamentForm.valid || state.isLoading"
-            [loading]="state.isLoading"
-            [loadingText]="submitLoadingText"
+            [disabled]="!tournamentForm.valid || state().isLoading"
+            [loading]="state().isLoading"
+            [loadingText]="submitLoadingText()"
             [fullWidth]="true"
             >
-            {{ submitText }}
+            {{ submitText() }}
           </app-button>
-    
-          @if (showCancel) {
+
+          @if (showCancel()) {
             <app-button
               type="button"
               variant="secondary"
-              [disabled]="state.isLoading"
+              [disabled]="state().isLoading"
               [fullWidth]="true"
               (clicked)="onCancel()"
               >
-              {{ cancelText }}
+              {{ cancelText() }}
             </app-button>
           }
         </div>
@@ -123,23 +123,23 @@ import { TournamentType } from '../../types/tournament.types';
 export class TournamentFormComponent implements OnInit {
   private fb: FormBuilder = inject(FormBuilder);
 
-  @Input() title: string = 'Create New Tournament';
-  @Input() subtitle: string = '';
-  @Input() submitText: string = 'Create Tournament';
-  @Input() submitLoadingText: string = 'Creating Tournament...';
-  @Input() cancelText: string = 'Cancel';
-  @Input() showCancel: boolean = true;
-  @Input() initialData?: TournamentFormData;
-  @Input() state: TournamentFormState = {
+  readonly title = input<string>('Create New Tournament');
+  readonly subtitle = input<string>('');
+  readonly submitText = input<string>('Create Tournament');
+  readonly submitLoadingText = input<string>('Creating Tournament...');
+  readonly cancelText = input<string>('Cancel');
+  readonly showCancel = input<boolean>(true);
+  readonly initialData = input<TournamentFormData | undefined>(undefined);
+  readonly state = input<TournamentFormState>({
     isLoading: false,
     error: null,
     showPassword: true,
-  };
+  });
 
-  @Output() formSubmitted = new EventEmitter<CreateTournamentRequest>();
-  @Output() formCancelled = new EventEmitter<void>();
-  @Output() formChanged = new EventEmitter<TournamentFormData>();
-  @Output() errorDismissed = new EventEmitter<void>();
+  readonly formSubmitted = output<CreateTournamentRequest>();
+  readonly formCancelled = output<void>();
+  readonly formChanged = output<TournamentFormData>();
+  readonly errorDismissed = output<void>();
 
   tournamentForm!: FormGroup;
 
@@ -148,10 +148,6 @@ export class TournamentFormComponent implements OnInit {
       value: TournamentType.Swiss,
       label: 'Round-Robin/Swiss Hybrid Tournament',
     },
-    // {
-    //   value: TournamentType.ChampionsMeeting,
-    //   label: 'Champions Meeting Tournament (W.I.P)',
-    // },
   ];
 
   private typeDescriptions: Record<TournamentType, { name: string; description: string }> = {
@@ -160,11 +156,6 @@ export class TournamentFormComponent implements OnInit {
       description:
         'Players are paired each round based on their current standings. Continues until a clear winner emerges or maximum rounds are reached.',
     },
-    // [TournamentType.ChampionsMeeting]: {
-    //   name: 'Champions Meeting Tournament (W.I.P)',
-    //   description:
-    //     'Multi-round tournament with group divisions based on performance. Top performers advance to final groups. (This tournament type is still VERY early work and is very likely to not work at all)',
-    // },
   };
 
   ngOnInit(): void {
@@ -186,14 +177,13 @@ export class TournamentFormComponent implements OnInit {
       password: ['', [Validators.maxLength(50), Validators.required, Validators.minLength(6)]],
     });
 
-    // Subscribe to form changes
     this.tournamentForm.valueChanges.subscribe((value) => {
       this.formChanged.emit(value);
     });
   }
 
   onSubmit(): void {
-    if (this.tournamentForm.valid && !this.state.isLoading) {
+    if (this.tournamentForm.valid && !this.state().isLoading) {
       const formData = this.tournamentForm.value;
       const request: CreateTournamentRequest = {
         name: formData.name.trim(),
@@ -256,8 +246,9 @@ export class TournamentFormComponent implements OnInit {
 
   resetForm(): void {
     this.tournamentForm.reset();
-    if (this.initialData) {
-      this.tournamentForm.patchValue(this.initialData);
+    const data = this.initialData();
+    if (data) {
+      this.tournamentForm.patchValue(data);
     }
   }
 

@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+
+import { Component, effect, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BaseButtonComponent } from '../../atoms/button/base-button.component';
 import { BaseIconComponent } from '../../atoms/icon/base-icon.component';
@@ -9,7 +10,7 @@ import { EditTournamentData, TournamentEditModalData } from '../../types/compone
   selector: 'app-tournament-edit-modal',
   imports: [FormsModule, BaseIconComponent, BaseButtonComponent, BaseInputComponent],
   template: `
-    @if (data.isVisible) {
+    @if (data().isVisible) {
     <div class="modal-overlay" (click)="onOverlayClick()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -24,17 +25,17 @@ import { EditTournamentData, TournamentEditModalData } from '../../types/compone
             <app-input
               type="text"
               placeholder="Tournament's name"
-              [(ngModel)]="data.formData.name"
-              [disabled]="data.isLoading"
+              [(ngModel)]="editName"
+              [disabled]="data().isLoading"
               (keyup.enter)="onSubmit()"
             >
             </app-input>
           </div>
 
-          @if (data.error) {
+          @if (data().error) {
           <div class="error-message">
             <app-icon name="warning" size="sm" color="danger"></app-icon>
-            {{ data.error }}
+            {{ data().error }}
           </div>
           }
         </div>
@@ -43,15 +44,15 @@ import { EditTournamentData, TournamentEditModalData } from '../../types/compone
           <app-button
             variant="outline-secondary"
             (clicked)="onCancel()"
-            [disabled]="data.isLoading"
+            [disabled]="data().isLoading"
           >
             Cancel
           </app-button>
           <app-button
             variant="primary"
             (clicked)="onSubmit()"
-            [loading]="data.isLoading"
-            [disabled]="!data.formData.name.trim()"
+            [loading]="data().isLoading"
+            [disabled]="!editName().trim()"
           >
             Confirm
           </app-button>
@@ -63,24 +64,29 @@ import { EditTournamentData, TournamentEditModalData } from '../../types/compone
   styleUrl: '../password-modal/password-modal.component.css',
 })
 export class TournamentEditModal {
-  @Input() data: TournamentEditModalData = {
+  readonly data = input<TournamentEditModalData>({
     formData: {
       name: '',
     },
     isVisible: false,
     isLoading: false,
     error: null,
-  };
+  });
 
-  @Output() dataSubmitted = new EventEmitter<EditTournamentData>();
-  @Output() cancelled = new EventEmitter<void>();
+  readonly dataSubmitted = output<EditTournamentData>();
+  readonly cancelled = output<void>();
+
+  readonly editName = signal('');
+
+  constructor() {
+    effect(() => {
+      this.editName.set(this.data().formData.name);
+    });
+  }
 
   onSubmit(): void {
-    console.log(this.data.formData.name);
-    console.log(!this.data.formData.name.trim());
-    if (this.data.formData.name.trim()) {
-      console.log('hit');
-      this.dataSubmitted.emit(this.data.formData);
+    if (this.editName().trim()) {
+      this.dataSubmitted.emit({ name: this.editName().trim() });
     }
   }
 

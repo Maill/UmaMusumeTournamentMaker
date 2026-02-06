@@ -1,5 +1,5 @@
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { BaseBadgeComponent } from '../../atoms/badge/base-badge.component';
 import { BaseIconComponent } from '../../atoms/icon/base-icon.component';
 import { MatchRowData } from '../../types/components.types';
@@ -18,20 +18,20 @@ import { WinnerSelectorComponent } from '../winner-selector/winner-selector.comp
   template: `
     <!-- Match Number -->
     <td class="match-number">
-      <span>#{{ match.matchNumber }}</span>
+      <span>#{{ match().matchNumber }}</span>
     </td>
 
     <!-- Players -->
     <td class="match-players">
       <div class="players-list">
-        @for (player of match.playerIds; track $index) {
+        @for (player of match().playerIds; track $index) {
         <span class="player-name" [class.winner]="isWinner(player)" [class.loser]="isLoser(player)">
-          {{ players[player].name }}
+          {{ players()[player].name }}
           @if (isWinner(player)) {
           <app-icon name="trophy" size="xs" color="warning" ariaLabel="Winner"> </app-icon>
           }
         </span>
-        @if ($index < match.playerIds.length - 1) {
+        @if ($index < match().playerIds.length - 1) {
         <span class="vs-separator">vs</span>
         } }
       </div>
@@ -51,10 +51,10 @@ import { WinnerSelectorComponent } from '../winner-selector/winner-selector.comp
 
     <!-- Winner -->
     <td class="match-winner">
-      @if (match.winnerId) {
+      @if (match().winnerId) {
       <div class="winner-display">
         <app-icon name="star" size="sm" color="success"> </app-icon>
-        <span class="winner-name">{{ players[match.winnerId].name }}</span>
+        <span class="winner-name">{{ players()[match().winnerId!].name }}</span>
       </div>
       } @else {
       <span class="no-winner">-</span>
@@ -62,13 +62,13 @@ import { WinnerSelectorComponent } from '../winner-selector/winner-selector.comp
     </td>
 
     <!-- Actions (Management Mode) -->
-    @if (match.canManage) {
+    @if (match().canManage) {
     <td class="match-actions">
       <app-winner-selector
-        [matchId]="match.id"
-        [players]="getPlayersWinnerSelector()"
-        [selectedWinnerId]="match.winnerId || null"
-        [disabled]="isCompleted() && !allowWinnerChange"
+        [matchId]="match().id"
+        [players]="playersForWinnerSelector()"
+        [selectedWinnerId]="match().winnerId || null"
+        [disabled]="isCompleted() && !allowWinnerChange()"
         placeholder="Select winner..."
         (winnerChanged)="onWinnerChange($event)"
       >
@@ -77,10 +77,10 @@ import { WinnerSelectorComponent } from '../winner-selector/winner-selector.comp
     }
 
     <!-- Completed At (Optional) -->
-    @if (showCompletedAt && match.completedAt) {
+    @if (showCompletedAt() && match().completedAt) {
     <td class="match-completed">
-      <span class="completed-time" [title]="getFullCompletedDate()">
-        {{ getCompletedTimeDisplay() }}
+      <span class="completed-time" [title]="fullCompletedDate()">
+        {{ completedTimeDisplay() }}
       </span>
     </td>
     }
@@ -88,37 +88,25 @@ import { WinnerSelectorComponent } from '../winner-selector/winner-selector.comp
   styleUrl: './match-row.component.css',
 })
 export class MatchRowComponent {
-  @Input() players!: Record<number, Player>;
-  @Input() match!: MatchRowData;
-  @Input() allowWinnerChange: boolean = true;
-  @Input() showCompletedAt: boolean = false;
+  readonly players = input.required<Record<number, Player>>();
+  readonly match = input.required<MatchRowData>();
+  readonly allowWinnerChange = input<boolean>(true);
+  readonly showCompletedAt = input<boolean>(false);
 
-  @Output() winnerChanged = new EventEmitter<{
+  readonly winnerChanged = output<{
     matchId: number;
     winnerId: number | null;
     playerName?: string;
   }>();
 
-  onWinnerChange(event: { matchId: number; winnerId: number | null; playerName?: string }): void {
-    this.winnerChanged.emit(event);
-  }
+  readonly isCompleted = computed(() => !!this.match().winnerId);
 
-  isCompleted(): boolean {
-    return !!this.match.winnerId;
-  }
+  readonly playersForWinnerSelector = computed(() => Object.values(this.players()));
 
-  isWinner(playerId: number): boolean {
-    return this.match.winnerId === playerId;
-  }
+  readonly completedTimeDisplay = computed(() => {
+    if (!this.match().completedAt) return '';
 
-  isLoser(playerId: number): boolean {
-    return this.isCompleted() && !this.isWinner(playerId);
-  }
-
-  getCompletedTimeDisplay(): string {
-    if (!this.match.completedAt) return '';
-
-    const completedDate = new Date(this.match.completedAt);
+    const completedDate = new Date(this.match().completedAt!);
     const now = new Date();
     const diffMs = now.getTime() - completedDate.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
@@ -132,18 +120,22 @@ export class MatchRowComponent {
     if (diffDays < 7) return `${diffDays}d ago`;
 
     return completedDate.toLocaleDateString();
+  });
+
+  readonly fullCompletedDate = computed(() => {
+    if (!this.match().completedAt) return '';
+    return new Date(this.match().completedAt!).toLocaleString();
+  });
+
+  onWinnerChange(event: { matchId: number; winnerId: number | null; playerName?: string }): void {
+    this.winnerChanged.emit(event);
   }
 
-  getFullCompletedDate(): string {
-    if (!this.match.completedAt) return '';
-    return new Date(this.match.completedAt).toLocaleString();
+  isWinner(playerId: number): boolean {
+    return this.match().winnerId === playerId;
   }
 
-  getMatchStatusText(): string {
-    return this.isCompleted() ? 'Completed' : 'Pending';
-  }
-
-  getPlayersWinnerSelector(): Player[] {
-    return Object.values(this.players);
+  isLoser(playerId: number): boolean {
+    return this.isCompleted() && !this.isWinner(playerId);
   }
 }

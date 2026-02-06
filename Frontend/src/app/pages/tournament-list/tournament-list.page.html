@@ -26,7 +26,7 @@
   <!-- Main Content -->
   <div class="page-content">
     <!-- Loading State with Skeletons -->
-    @if (state.isLoading && !state.hasLoaded) {
+    @if (isLoading() && !hasLoaded()) {
     <div class="tournaments-section">
       <div class="tournaments-grid">
         @for (i of [1,2,3,4,5,6]; track i) {
@@ -37,10 +37,10 @@
     }
 
     <!-- Error State -->
-    @if (state.error && !state.isLoading) {
+    @if (error() && !isLoading()) {
     <div class="error-section">
       <app-error-display
-        [message]="state.error"
+        [message]="error()!"
         type="error"
         [retryable]="true"
         retryText="Retry Loading"
@@ -53,7 +53,7 @@
     }
 
     <!-- Tournaments Grid -->
-    @if (!state.isLoading && !state.error && state.tournaments.length > 0) {
+    @if (!isLoading() && !error() && tournaments().length > 0) {
     <div class="tournaments-section">
       <!-- Tournament Stats - Deferred for better LCP -->
       @defer (on viewport) {
@@ -61,7 +61,7 @@
         <div class="stat-card">
           <app-icon name="trophy" size="lg" color="primary"></app-icon>
           <div class="stat-content">
-            <span class="stat-value">{{ state.tournaments.length }}</span>
+            <span class="stat-value">{{ tournaments().length }}</span>
             <span class="stat-label">Total Tournaments</span>
           </div>
         </div>
@@ -69,7 +69,7 @@
         <div class="stat-card">
           <app-icon name="play" size="md" color="success"></app-icon>
           <div class="stat-content">
-            <span class="stat-value">{{ getActiveTournamentsCount() }}</span>
+            <span class="stat-value">{{ activeTournamentsCount() }}</span>
             <span class="stat-label">Active</span>
           </div>
         </div>
@@ -77,7 +77,7 @@
         <div class="stat-card">
           <app-icon name="check" size="md" color="warning"></app-icon>
           <div class="stat-content">
-            <span class="stat-value">{{ getCompletedTournamentsCount() }}</span>
+            <span class="stat-value">{{ completedTournamentsCount() }}</span>
             <span class="stat-label">Completed</span>
           </div>
         </div>
@@ -93,7 +93,7 @@
       <div class="tournaments-filters">
         <div class="filter-info">
           <span class="results-count">
-            Showing {{ getFilteredTournaments().length }} tournaments
+            Showing {{ filteredTournaments().length }} tournaments
           </span>
         </div>
 
@@ -101,7 +101,7 @@
           <app-button
             variant="outline-secondary"
             size="sm"
-            [loading]="state.isLoading"
+            [loading]="isLoading()"
             (clicked)="refreshTournaments()"
           >
             <app-icon name="refresh" size="xs"></app-icon>
@@ -112,7 +112,7 @@
 
       <!-- Tournaments Grid -->
       <div class="tournaments-grid">
-        @for (tournament of getFilteredTournaments(); track tournament.id) {
+        @for (tournament of filteredTournaments(); track tournament.id) {
         <app-tournament-card
           [tournament]="mapToCardData(tournament)"
           [clickable]="true"
@@ -126,7 +126,7 @@
     }
 
     <!-- Empty State -->
-    @if (!state.isLoading && !state.error && state.tournaments.length === 0 && state.hasLoaded) {
+    @if (!isLoading() && !error() && tournaments().length === 0 && hasLoaded()) {
     <div class="empty-state">
       <div class="empty-content">
         <app-icon name="trophy" size="xxl" color="secondary" ariaLabel="No tournaments"> </app-icon>

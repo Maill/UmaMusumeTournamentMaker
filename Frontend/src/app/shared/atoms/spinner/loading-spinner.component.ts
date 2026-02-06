@@ -1,5 +1,5 @@
 
-import { Component, Input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { LoadingSize } from '../../types/ui.types';
 
 @Component({
@@ -7,30 +7,30 @@ import { LoadingSize } from '../../types/ui.types';
   standalone: true,
   imports: [],
   template: `
-    <!--<span [class]="getSpinnerClasses()" role="status" [attr.aria-label]="ariaLabel">
-      <span class="visually-hidden">{{ loadingText }}</span>
+    <!--<span [class]="spinnerClasses()" role="status" [attr.aria-label]="ariaLabel()">
+      <span class="visually-hidden">{{ loadingText() }}</span>
     </span>-->
     <div style="text-align: center;">
-      <div [class]="getSpinnerClasses()" role="status" [attr.aria-label]="ariaLabel"></div>
-      <div class="visually-hidden">{{ loadingText }}</div>
+      <div [class]="spinnerClasses()" role="status" [attr.aria-label]="ariaLabel()"></div>
+      <div class="visually-hidden">{{ loadingText() }}</div>
     </div>
   `,
   styleUrl: './loading-spinner.component.css',
 })
 export class LoadingSpinnerComponent {
-  @Input() size: LoadingSize = 'md';
-  @Input() variant: 'primary' | 'secondary' | 'light' | 'dark' = 'primary';
-  @Input() loadingText: string = 'Loading...';
-  @Input() ariaLabel: string = 'Loading';
-  @Input() overlay: boolean = false;
+  size = input<LoadingSize>('md');
+  variant = input<'primary' | 'secondary' | 'light' | 'dark'>('primary');
+  loadingText = input<string>('Loading...');
+  ariaLabel = input<string>('Loading');
+  overlay = input<boolean>(false);
 
-  getSpinnerClasses(): string {
-    const classes = ['spinner', `spinner-${this.size}`, `spinner-${this.variant}`];
+  spinnerClasses = computed(() => {
+    const classes = ['spinner', `spinner-${this.size()}`, `spinner-${this.variant()}`];
 
-    if (this.overlay) {
+    if (this.overlay()) {
       classes.push('spinner-overlay');
     }
 
     return classes.join(' ');
-  }
+  });
 }

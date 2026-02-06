@@ -1,6 +1,6 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
 
 // Import organisms and molecules
 import { BaseButtonComponent } from '../../shared/atoms/button/base-button.component';
@@ -18,13 +18,6 @@ import {
   TournamentType,
 } from '../../shared/types/tournament.types';
 
-interface TournamentListState {
-  tournaments: TournamentListItem[];
-  isLoading: boolean;
-  error: string | null;
-  hasLoaded: boolean;
-}
-
 @Component({
   selector: 'app-tournament-list-page',
   standalone: true,
@@ -38,42 +31,65 @@ interface TournamentListState {
   templateUrl: './tournament-list.page.html',
   styleUrl: './tournament-list.page.css',
 })
-export class TournamentListPageComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
-
-  state: TournamentListState = {
-    tournaments: [],
-    isLoading: true,
-    error: null,
-    hasLoaded: false,
-  };
-
+export class TournamentListPageComponent implements OnInit {
   private router: Router = inject(Router);
-  constructor(private tournamentService: TournamentService) {}
+  private tournamentService: TournamentService = inject(TournamentService);
+  private destroyRef = inject(DestroyRef);
+
+  // State signals
+  readonly tournaments = signal<TournamentListItem[]>([]);
+  readonly isLoading = signal(true);
+  readonly error = signal<string | null>(null);
+  readonly hasLoaded = signal(false);
+
+  // Computed signals
+  readonly activeTournamentsCount = computed(() =>
+    this.tournaments().filter(
+      (t) => t.status === TournamentStatus.Created || t.status === TournamentStatus.InProgress,
+    ).length,
+  );
+
+  readonly completedTournamentsCount = computed(() =>
+    this.tournaments().filter((t) => t.status === TournamentStatus.Completed).length,
+  );
+
+  readonly filteredTournaments = computed(() => {
+    return [...this.tournaments()].sort((a, b) => {
+      const statusOrder = {
+        [TournamentStatus.InProgress]: 0,
+        [TournamentStatus.Created]: 1,
+        [TournamentStatus.Completed]: 2,
+      };
+      const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+      if (statusDiff !== 0) return statusDiff;
+
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  });
 
   ngOnInit(): void {
     this.loadTournaments();
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   loadTournaments(): void {
-    // Simple subscription to service observables
-    this.tournamentService.tournaments$.pipe(takeUntil(this.destroy$)).subscribe((tournaments) => {
-      this.state.tournaments = tournaments;
-      this.state.hasLoaded = true;
-    });
+    this.tournamentService.tournaments$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((tournaments) => {
+        this.tournaments.set(tournaments);
+        this.hasLoaded.set(true);
+      });
 
-    this.tournamentService.loading$.pipe(takeUntil(this.destroy$)).subscribe((loading) => {
-      this.state.isLoading = loading;
-    });
+    this.tournamentService.loading$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((loading) => {
+        this.isLoading.set(loading);
+      });
 
-    this.tournamentService.error$.pipe(takeUntil(this.destroy$)).subscribe((error) => {
-      this.state.error = error;
-    });
+    this.tournamentService.error$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((error) => {
+        this.error.set(error);
+      });
 
     // Load tournaments
     this.tournamentService.getAllTournaments().subscribe();
@@ -92,33 +108,7 @@ export class TournamentListPageComponent implements OnInit, OnDestroy {
   }
 
   clearError(): void {
-    this.state.error = null;
-  }
-
-  getActiveTournamentsCount(): number {
-    return this.state.tournaments.filter(
-      (t) => t.status === TournamentStatus.Created || t.status === TournamentStatus.InProgress,
-    ).length;
-  }
-
-  getCompletedTournamentsCount(): number {
-    return this.state.tournaments.filter((t) => t.status === TournamentStatus.Completed).length;
-  }
-
-  getFilteredTournaments(): TournamentListItem[] {
-    // Add filtering logic here if needed
-    return [...this.state.tournaments].sort((a, b) => {
-      // Sort by status (active first), then by creation date (newest first)
-      const statusOrder = {
-        [TournamentStatus.InProgress]: 0,
-        [TournamentStatus.Created]: 1,
-        [TournamentStatus.Completed]: 2,
-      };
-      const statusDiff = statusOrder[a.status] - statusOrder[b.status];
-      if (statusDiff !== 0) return statusDiff;
-
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
+    this.error.set(null);
   }
 
   mapToCardData(tournament: TournamentListItem): TournamentCardData {
@@ -130,7 +120,7 @@ export class TournamentListPageComponent implements OnInit, OnDestroy {
       playersCount: tournament.playersCount,
       currentRound: tournament.currentRound,
       createdAt: tournament.createdAt,
-      winnerId: undefined, // Not available in list view
+      winnerId: undefined,
       winnerName: undefined,
     };
   }
@@ -140,8 +130,6 @@ export class TournamentListPageComponent implements OnInit, OnDestroy {
     switch (type) {
       case TournamentType.Swiss:
         return 'Swiss';
-      // case TournamentType.ChampionsMeeting:
-      //   return 'Champions Meeting';
       default:
         return 'Unknown';
     }

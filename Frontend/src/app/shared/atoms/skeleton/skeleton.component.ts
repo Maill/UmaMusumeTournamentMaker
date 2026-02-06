@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 
 @Component({
@@ -6,16 +6,16 @@ import { Component, Input } from '@angular/core';
   standalone: true,
   imports: [],
   template: `
-    <div 
+    <div
       class="skeleton"
-      [class.skeleton-text]="type === 'text'"
-      [class.skeleton-card]="type === 'card'"
-      [class.skeleton-button]="type === 'button'"
-      [class.skeleton-avatar]="type === 'avatar'"
-      [class.skeleton-image]="type === 'image'"
-      [style.width]="width"
-      [style.height]="height"
-      [style.border-radius]="borderRadius"
+      [class.skeleton-text]="type() === 'text'"
+      [class.skeleton-card]="type() === 'card'"
+      [class.skeleton-button]="type() === 'button'"
+      [class.skeleton-avatar]="type() === 'avatar'"
+      [class.skeleton-image]="type() === 'image'"
+      [style.width]="width()"
+      [style.height]="height()"
+      [style.border-radius]="borderRadius()"
     ></div>
   `,
   styles: [`
@@ -59,8 +59,8 @@ import { Component, Input } from '@angular/core';
   `]
 })
 export class SkeletonComponent {
-  @Input() type: 'text' | 'card' | 'button' | 'avatar' | 'image' = 'text';
-  @Input() width: string = '100%';
-  @Input() height: string = '16px';
-  @Input() borderRadius: string = '';
+  type = input<'text' | 'card' | 'button' | 'avatar' | 'image'>('text');
+  width = input<string>('100%');
+  height = input<string>('16px');
+  borderRadius = input<string>('');
 }

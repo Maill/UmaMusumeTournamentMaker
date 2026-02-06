@@ -1,4 +1,4 @@
-import { Component, inject, Input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 export type IconName =
@@ -39,16 +39,16 @@ export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   standalone: true,
   imports: [],
   template: `
-    <span [class]="getIconClasses()" [attr.aria-label]="ariaLabel" [innerHTML]="getIconSvg()">
+    <span [class]="iconClasses()" [attr.aria-label]="ariaLabel()" [innerHTML]="iconSvg()">
     </span>
   `,
   styleUrl: './base-icon.component.css',
 })
 export class BaseIconComponent {
-  @Input() name: IconName = 'info';
-  @Input() size: IconSize = 'md';
-  @Input() color: string = '';
-  @Input() ariaLabel: string = '';
+  readonly name = input<IconName>('info');
+  readonly size = input<IconSize>('md');
+  readonly color = input<string>('');
+  readonly ariaLabel = input<string>('');
 
   private sanitizer: DomSanitizer = inject(DomSanitizer);
 
@@ -84,18 +84,16 @@ export class BaseIconComponent {
     podium: `🏅`,
   };
 
-  getIconSvg(): SafeHtml {
-    const svg = this.icons[this.name] || this.icons.info;
+  readonly iconSvg = computed<SafeHtml>(() => {
+    const svg = this.icons[this.name()] || this.icons.info;
     return this.sanitizer.bypassSecurityTrustHtml(svg);
-  }
+  });
 
-  getIconClasses(): string {
-    const classes = ['icon', `icon-${this.size}`];
-
-    if (this.color) {
-      classes.push(`icon-${this.color}`);
+  readonly iconClasses = computed(() => {
+    const classes = ['icon', `icon-${this.size()}`];
+    if (this.color()) {
+      classes.push(`icon-${this.color()}`);
     }
-
     return classes.join(' ');
-  }
+  });
 }

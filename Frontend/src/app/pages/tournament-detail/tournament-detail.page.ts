@@ -1,7 +1,8 @@
 
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize, Subject, takeUntil } from 'rxjs';
+import { finalize } from 'rxjs';
 
 // Import organisms
 import { MatchTableComponent } from '../../shared/organisms/match-table/match-table.component';
@@ -26,9 +27,11 @@ import {
   EditTournamentData,
   MatchTableData,
   MatchTableState,
+  PasswordModalData,
   PlayerManagementState,
   StandingsTableData,
-  TournamentDetailState,
+  TournamentDeleteModalData,
+  TournamentEditModalData,
 } from '../../shared/types/components.types';
 import { HttpError, LocalStorageError, WebSocketUpdate } from '../../shared/types/service.types';
 import {
@@ -52,8 +55,8 @@ import {
     BaseBadgeComponent,
     PasswordModalComponent,
     TournamentDeleteModal,
-    TournamentEditModal
-],
+    TournamentEditModal,
+  ],
   templateUrl: './tournament-detail.page.html',
   styleUrl: './tournament-detail.page.css',
 })
@@ -64,45 +67,146 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   private tournamentService: TournamentService = inject(TournamentService);
   private webSocketService: WebSocketService = inject(WebSocketService);
   private localStorageService: LocalStorageService = inject(LocalStorageService);
+  private destroyRef = inject(DestroyRef);
 
-  // Component state
-  private destroy$ = new Subject<void>();
+  // Private non-signal state
   private tournamentId: number = 0;
-
-  state: TournamentDetailState = {
-    tournament: null,
-    isLoading: true,
-    error: null,
-    managementMode: false,
-    isUpdating: false,
-    passwordModal: {
-      isVisible: false,
-      title: 'Enter Management Mode',
-      message: 'Enter the tournament password to manage this tournament.',
-      isLoading: false,
-      error: null,
-    },
-    tournamentDeleteModal: {
-      error: null,
-      isLoading: false,
-      isVisible: false,
-    },
-    tournamentEditModal: {
-      formData: {
-        name: '',
-      },
-      error: null,
-      isLoading: false,
-      isVisible: false,
-    },
-  };
 
   // Expose enums for template
   TournamentStatus = TournamentStatus;
   TournamentType = TournamentType;
 
+  // Core state signals
+  readonly tournament = signal<Tournament | null>(null);
+  readonly isLoading = signal(true);
+  readonly error = signal<string | null>(null);
+  readonly managementMode = signal(false);
+  readonly isUpdating = signal(false);
+
+  // Modal state signals
+  readonly passwordModal = signal<PasswordModalData>({
+    isVisible: false,
+    title: 'Enter Management Mode',
+    message: 'Enter the tournament password to manage this tournament.',
+    isLoading: false,
+    error: null,
+  });
+
+  readonly tournamentDeleteModal = signal<TournamentDeleteModalData>({
+    error: null,
+    isLoading: false,
+    isVisible: false,
+  });
+
+  readonly tournamentEditModal = signal<TournamentEditModalData>({
+    formData: { name: '' },
+    error: null,
+    isLoading: false,
+    isVisible: false,
+  });
+
+  // Computed signals
+  readonly currentRound = computed<Round | null>(() => {
+    if (!this.tournament()?.rounds) return null;
+    return this.tournament()!.rounds.find((r) => !r.isCompleted) || null;
+  });
+
+  readonly tournamentTypeName = computed(() => {
+    switch (this.tournament()?.type) {
+      case TournamentType.Swiss:
+        return 'Swiss Tournament';
+      default:
+        return 'Unknown';
+    }
+  });
+
+  readonly statusText = computed(() => {
+    switch (this.tournament()?.status) {
+      case TournamentStatus.Created:
+        return 'Setup Phase';
+      case TournamentStatus.InProgress:
+        return 'In Progress';
+      case TournamentStatus.Completed:
+        return 'Completed';
+      default:
+        return 'Unknown';
+    }
+  });
+
+  readonly typeVariant = computed<'primary' | 'info'>(() =>
+    this.tournament()?.type === TournamentType.Swiss ? 'primary' : 'info',
+  );
+
+  readonly statusVariant = computed<'warning' | 'primary' | 'success'>(() => {
+    switch (this.tournament()?.status) {
+      case TournamentStatus.Created:
+        return 'warning';
+      case TournamentStatus.InProgress:
+        return 'primary';
+      case TournamentStatus.Completed:
+        return 'success';
+      default:
+        return 'warning';
+    }
+  });
+
+  readonly winnerName = computed(() => {
+    if (!this.tournament()?.winnerId) return '';
+    const winner = this.tournament()!.players.find(
+      (p) => p.id === this.tournament()?.winnerId,
+    );
+    return winner?.name || '';
+  });
+
+  readonly canStartNextRound = computed(() => {
+    const round = this.currentRound();
+    if (!round) return false;
+    return round.matches.every((match) => match.winnerId) && this.managementMode();
+  });
+
+  readonly nextRoundButtonText = computed(() =>
+    this.currentRound()?.roundType == 'Final' ? 'Complete Tournament' : 'Start Next Round',
+  );
+
+  readonly playerManagementState = computed<PlayerManagementState>(() => ({
+    isAddingPlayer: this.isUpdating(),
+    isRemovingPlayer: this.isUpdating(),
+    isStartingTournament: this.isUpdating(),
+    canManage: this.managementMode(),
+    error: this.error(),
+    addPlayerError: null,
+  }));
+
+  readonly matchTableData = computed<MatchTableData>(() => ({
+    players: Object.fromEntries(
+      this.tournament()!.players.map((player) => [player.id, player]),
+    ),
+    round: this.currentRound()!,
+    canManage: this.managementMode(),
+    isLoading: this.isUpdating(),
+    error: this.error(),
+  }));
+
+  readonly matchTableState = computed<MatchTableState>(() => ({
+    updatingMatchId: this.isUpdating() ? -1 : null,
+    canStartNextRound: this.canStartNextRound(),
+    isStartingNextRound: this.isUpdating(),
+    nextRoundButtonText: this.nextRoundButtonText(),
+  }));
+
+  readonly standingsData = computed<StandingsTableData>(() => ({
+    players: this.tournament()?.players || [],
+    isLoading: this.isUpdating(),
+    error: this.error(),
+    tournamentComplete: this.tournament()?.status === TournamentStatus.Completed,
+    winnerId: this.tournament()?.winnerId,
+    winnerName: this.winnerName(),
+    totalGames:
+      this.tournament()?.rounds.reduce((sum, obj) => sum + obj.matches.length, 0) ?? 0,
+  }));
+
   ngOnInit(): void {
-    this.route.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+    this.route.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       this.tournamentId = +params['id'];
       this.loadTournament();
     });
@@ -111,8 +215,8 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   private async initializeWebSocket(): Promise<void> {
     // Don't connect WebSocket for completed tournaments
     if (
-      this.state.tournament?.status === TournamentStatus.Completed &&
-      !this.state.managementMode
+      this.tournament()?.status === TournamentStatus.Completed &&
+      !this.managementMode()
     ) {
       console.log('Skipping WebSocket connection for completed tournament');
       return;
@@ -124,7 +228,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
 
       // Subscribe to updates
       this.webSocketService.updates$
-        .pipe(takeUntil(this.destroy$))
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((update: WebSocketUpdate) => {
           if (update.tournamentId === this.tournamentId) {
             this.handleWebSocketUpdate(update);
@@ -139,27 +243,28 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
     this.webSocketService.leaveTournament(true).catch((error: unknown) => {
       console.warn('Failed to leave WebSocket group:', error);
     });
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   loadTournament(): void {
-    this.state.isLoading = true;
-    this.state.error = null;
+    this.isLoading.set(true);
+    this.error.set(null);
 
     this.tournamentService
       .getTournament(this.tournamentId)
       .pipe(
-        finalize(() => (this.state.isLoading = false)),
-        takeUntil(this.destroy$)
+        finalize(() => this.isLoading.set(false)),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: (tournament: Tournament) => {
-          this.state.tournament = tournament;
-          this.state.tournamentEditModal.formData.name = tournament.name;
+          this.tournament.set(tournament);
+          this.tournamentEditModal.update((m) => ({
+            ...m,
+            formData: { name: tournament.name },
+          }));
           // Auto-enter management mode if password is stored
           if (this.localStorageService.hasPassword(this.tournamentId)) {
-            this.state.managementMode = true;
+            this.managementMode.set(true);
           }
           // Initialize WebSocket connection after tournament data is loaded
           this.initializeWebSocket();
@@ -176,7 +281,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   // Management mode methods
   async exitManagementMode(): Promise<void> {
     this.localStorageService.clearPassword(this.tournamentId);
-    this.state.managementMode = false;
+    this.managementMode.set(false);
     await this.webSocketService
       .leaveTournament()
       .catch(console.warn)
@@ -185,9 +290,9 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
 
   // Player management methods
   onPlayerAdd(playerName: string): void {
-    if (!this.state.tournament) return;
+    if (!this.tournament()) return;
 
-    this.state.isUpdating = true;
+    this.isUpdating.set(true);
     const request = {
       tournamentId: this.tournamentId,
       name: playerName,
@@ -197,8 +302,8 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
     this.tournamentService
       .addPlayer(request)
       .pipe(
-        finalize(() => (this.state.isUpdating = false)),
-        takeUntil(this.destroy$)
+        finalize(() => this.isUpdating.set(false)),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: (response: { message: string }) => {
@@ -210,21 +315,20 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   }
 
   onPlayerRemove(event: { playerId: number; playerName: string }): void {
-    if (!this.state.tournament) return;
+    if (!this.tournament()) return;
 
-    this.state.isUpdating = true;
+    this.isUpdating.set(true);
     const request = {
       tournamentId: this.tournamentId,
       playerId: event.playerId,
       password: '', //Service will fetch password from localstorage
     };
 
-    this.exitManagementMode.bind(this);
     this.tournamentService
       .removePlayer(request)
       .pipe(
-        finalize(() => (this.state.isUpdating = false)),
-        takeUntil(this.destroy$)
+        finalize(() => this.isUpdating.set(false)),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: (response: { message: string }) => {
@@ -236,9 +340,9 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   }
 
   onTournamentStart(): void {
-    if (!this.state.tournament) return;
+    if (!this.tournament()) return;
 
-    this.state.isUpdating = true;
+    this.isUpdating.set(true);
     const request = {
       tournamentId: this.tournamentId,
       password: '',
@@ -247,8 +351,8 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
     this.tournamentService
       .startTournament(request)
       .pipe(
-        finalize(() => (this.state.isUpdating = false)),
-        takeUntil(this.destroy$)
+        finalize(() => this.isUpdating.set(false)),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: (response: { message: string }) => {
@@ -258,14 +362,14 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
         error: this.handleError.bind(
           this,
           'Failed to start tournament. Please try again.',
-          request
+          request,
         ),
       });
   }
 
   // Match management methods
   onWinnerChange(event: { matchId: number; winnerId: number | null; playerName?: string }): void {
-    if (!this.state.tournament) return;
+    if (!this.tournament()) return;
 
     const request = {
       tournamentId: this.tournamentId,
@@ -275,7 +379,7 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
 
     this.tournamentService
       .setMatchWinner(request)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response: { message: string }) => {
           console.log('Winner selection broadcasted:', response.message);
@@ -286,16 +390,16 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   }
 
   onNextRoundStart(): void {
-    if (!this.state.tournament) return;
+    if (!this.tournament()) return;
 
     // Collect all match results with winners from current round
-    const currentRound = this.getCurrentRound();
-    if (!currentRound) {
-      this.state.error = 'No current round found';
+    const round = this.currentRound();
+    if (!round) {
+      this.error.set('No current round found');
       return;
     }
 
-    const matchResults = currentRound.matches
+    const matchResults = round.matches
       .filter((match) => match.winnerId) // Only matches with winners
       .map((match) => ({
         matchId: match.id,
@@ -303,12 +407,12 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
       }));
 
     // Ensure all matches have winners before proceeding
-    if (matchResults.length !== currentRound.matches.length) {
-      this.state.error = 'All matches must have winners before starting the next round';
+    if (matchResults.length !== round.matches.length) {
+      this.error.set('All matches must have winners before starting the next round');
       return;
     }
 
-    this.state.isUpdating = true;
+    this.isUpdating.set(true);
     const request = {
       tournamentId: this.tournamentId,
       matchResults: matchResults,
@@ -317,8 +421,8 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
     this.tournamentService
       .startNextRound(request)
       .pipe(
-        finalize(() => (this.state.isUpdating = false)),
-        takeUntil(this.destroy$)
+        finalize(() => this.isUpdating.set(false)),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: (response: { message: string }) => {
@@ -330,13 +434,12 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   }
 
   clearError(): void {
-    this.state.error = null;
+    this.error.set(null);
   }
 
   // Password Modal handling
   passwordModalSubmitted(password: string): void {
-    this.state.passwordModal.isLoading = true;
-    this.state.passwordModal.error = null;
+    this.passwordModal.update((m) => ({ ...m, isLoading: true, error: null }));
 
     const request = {
       tournamentId: this.tournamentId,
@@ -345,99 +448,94 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
 
     this.tournamentService
       .validateTournamentPassword(request)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: async (response) => {
-          this.state.passwordModal.isLoading = false;
+          this.passwordModal.update((m) => ({ ...m, isLoading: false }));
           if (response.isValid) {
             // Password is correct - store it and enter management mode
             this.localStorageService.setPassword(this.tournamentId, password);
-            this.state.managementMode = true;
-            this.state.passwordModal.isVisible = false;
+            this.managementMode.set(true);
+            this.passwordModal.update((m) => ({ ...m, isVisible: false }));
 
             if (
-              this.state.tournament?.status == TournamentStatus.Completed &&
+              this.tournament()?.status == TournamentStatus.Completed &&
               !this.webSocketService.isConnected()
             ) {
               await this.initializeWebSocket();
             }
           } else {
             // Password is incorrect - show error
-            this.state.passwordModal.error = 'Invalid password. Please try again.';
+            this.passwordModal.update((m) => ({
+              ...m,
+              error: 'Invalid password. Please try again.',
+            }));
           }
         },
         error: (error) => {
-          this.state.passwordModal.isLoading = false;
-          this.state.passwordModal.error = 'Failed to validate password. Please try again.';
+          this.passwordModal.update((m) => ({
+            ...m,
+            isLoading: false,
+            error: 'Failed to validate password. Please try again.',
+          }));
           console.error('Password validation failed:', error);
         },
       });
   }
 
   passwordModalCancelled(): void {
-    this.state.passwordModal.isVisible = false;
-    this.state.passwordModal.error = null;
+    this.passwordModal.update((m) => ({ ...m, isVisible: false, error: null }));
   }
 
   showPasswordModal(): void {
-    this.state.passwordModal = {
-      ...this.state.passwordModal,
-      isVisible: true,
-      error: null,
-    };
+    this.passwordModal.update((m) => ({ ...m, isVisible: true, error: null }));
   }
 
   // Tournament Deletion Modal handling
   tournamentDeleteModalSubmitted(password: string): void {
-    this.state.tournamentDeleteModal.isLoading = true;
-    this.state.tournamentDeleteModal.error = null;
+    this.tournamentDeleteModal.update((m) => ({ ...m, isLoading: true, error: null }));
 
-    var request = {
+    const request = {
       tournamentId: this.tournamentId,
       password: password,
     };
     this.tournamentService
       .deleteTournament(request)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           //Response via Websocket
         },
         error: (error) => {
-          this.state.tournamentDeleteModal.isLoading = false;
-
           if (error instanceof HttpError && error.httpCode == 401) {
-            if (error.httpCode == 401) {
-              this.state.tournamentDeleteModal.error =
-                'Failed to validate password. Please try again.';
-            } else {
-              this.state.tournamentDeleteModal.error = error.message;
-            }
+            this.tournamentDeleteModal.update((m) => ({
+              ...m,
+              isLoading: false,
+              error: 'Failed to validate password. Please try again.',
+            }));
           } else {
             console.error(error);
-            this.state.tournamentDeleteModal.error = 'Unexpected error. Please try again.';
+            this.tournamentDeleteModal.update((m) => ({
+              ...m,
+              isLoading: false,
+              error: 'Unexpected error. Please try again.',
+            }));
           }
         },
       });
   }
 
   tournamentDeleteModalCancelled(): void {
-    this.state.tournamentDeleteModal.isVisible = false;
-    this.state.tournamentDeleteModal.error = null;
+    this.tournamentDeleteModal.update((m) => ({ ...m, isVisible: false, error: null }));
   }
 
   showTournamentDeleteModal(): void {
-    this.state.tournamentDeleteModal = {
-      ...this.state.tournamentDeleteModal,
-      isVisible: true,
-      error: null,
-    };
+    this.tournamentDeleteModal.update((m) => ({ ...m, isVisible: true, error: null }));
   }
 
   // Tournament Edition Modal handling
   tournamentEditModalSubmitted(data: EditTournamentData) {
-    this.state.tournamentEditModal.isLoading = true;
-    this.state.tournamentEditModal.error = null;
+    this.tournamentEditModal.update((m) => ({ ...m, isLoading: true, error: null }));
     const request = {
       tournamentId: this.tournamentId,
       name: data.name,
@@ -446,72 +544,79 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
 
     this.tournamentService
       .updateTournament(request)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           //Response via Websocket
         },
         error: (error) => {
-          this.state.tournamentEditModal.isLoading = false;
-
           if (error instanceof HttpError && error.httpCode == 401) {
-            if (error.httpCode == 401) {
-              this.state.tournamentEditModal.error =
-                'Failed to update tournament. Please try again.';
-            } else {
-              this.state.tournamentEditModal.error = error.message;
-            }
+            this.tournamentEditModal.update((m) => ({
+              ...m,
+              isLoading: false,
+              error: 'Failed to update tournament. Please try again.',
+            }));
           } else {
             console.error(error);
-            this.state.tournamentEditModal.error = 'Unexpected error. Please try again.';
+            this.tournamentEditModal.update((m) => ({
+              ...m,
+              isLoading: false,
+              error: 'Unexpected error. Please try again.',
+            }));
           }
         },
       });
   }
 
   tournamentEditCancelled(): void {
-    this.state.tournamentEditModal.formData.name = this.state.tournament?.name!;
-    this.state.tournamentEditModal.isVisible = false;
-    this.state.tournamentEditModal.error = null;
+    this.tournamentEditModal.update((m) => ({
+      ...m,
+      formData: { name: this.tournament()?.name! },
+      isVisible: false,
+      error: null,
+    }));
   }
 
   showTournamentEditModal(): void {
-    this.state.tournamentEditModal = {
-      ...this.state.tournamentEditModal,
-      isVisible: true,
-      error: null,
-    };
+    this.tournamentEditModal.update((m) => ({ ...m, isVisible: true, error: null }));
   }
 
   // WebSocket update handling
   handleWebSocketUpdate(update: WebSocketUpdate): void {
     switch (update.type) {
       case 'PlayerAdded':
-        // Add player to local state
-        if (this.state.tournament && update.data) {
-          this.state.tournament.players.push(update.data);
+        // Add player to local state (immutable)
+        if (this.tournament() && update.data) {
+          this.tournament.update((t) =>
+            t ? { ...t, players: [...t.players, update.data] } : t,
+          );
         }
         break;
       case 'PlayerRemoved':
-        // Remove player from local state by ID
-        if (this.state.tournament && update.data.playerId) {
-          this.state.tournament.players = this.state.tournament.players.filter(
-            (player) => player.id !== update.data.playerId
+        // Remove player from local state by ID (immutable)
+        if (this.tournament() && update.data.playerId) {
+          this.tournament.update((t) =>
+            t
+              ? {
+                  ...t,
+                  players: t.players.filter((player) => player.id !== update.data.playerId),
+                }
+              : t,
           );
         }
         break;
       case 'TournamentUpdated':
-        this.state.tournament!.name = update.data;
-        this.state.tournamentEditModal.isLoading = false;
+        this.tournament.update((t) => (t ? { ...t, name: update.data } : t));
+        this.tournamentEditModal.update((m) => ({ ...m, isLoading: false }));
         this.tournamentEditCancelled();
         break;
       case 'NewRound':
       case 'TournamentStarted':
         // Use the tournament data directly from WebSocket update
-        this.state.tournament = update.data;
+        this.tournament.set(update.data);
 
         // Check if tournament just completed and disconnect WebSocket
-        if (update.data.status === TournamentStatus.Completed && !this.state.managementMode) {
+        if (update.data.status === TournamentStatus.Completed && !this.managementMode()) {
           console.log('Tournament completed via WebSocket - disconnecting');
           this.webSocketService
             .leaveTournament()
@@ -530,154 +635,42 @@ export class TournamentDetailPageComponent implements OnInit, OnDestroy {
   }
 
   private handleWinnerSelection(data: any): void {
-    if (!this.state.tournament || !data.matchId || !data.winnerId) return;
+    if (!this.tournament() || !data.matchId || !data.winnerId) return;
 
-    // Find and update the match in the current tournament state
-    const currentRound = this.getCurrentRound();
-    if (currentRound) {
-      const match = currentRound.matches.find((m) => m.id === data.matchId);
-      if (match) {
-        // Find the winner player
+    this.tournament.update((t) => {
+      if (!t) return t;
+      const updatedRounds = t.rounds.map((round) => {
+        if (round.isCompleted) return round;
+        const matchIndex = round.matches.findIndex((m) => m.id === data.matchId);
+        if (matchIndex === -1) return round;
+        const match = round.matches[matchIndex];
         const winner = match.playerIds.find((pId) => pId === data.winnerId);
-        if (winner) {
-          // Update the match with the selected winner
-          match.winnerId = data.winnerId;
+        if (!winner) return round;
 
-          // Force change detection by creating a new tournament object
-          this.state.tournament = { ...this.state.tournament };
+        console.log(
+          `Winner selected for match ${data.matchId}:`,
+          t.players.find((p) => p.id === winner)?.id,
+        );
 
-          console.log(
-            `Winner selected for match ${data.matchId}:`,
-            this.state.tournament.players.find((p) => p.id === winner)?.id
-          );
-        }
-      }
-    }
-  }
-
-  // Data mapping methods
-  getPlayerManagementState(): PlayerManagementState {
-    return {
-      isAddingPlayer: this.state.isUpdating,
-      isRemovingPlayer: this.state.isUpdating,
-      isStartingTournament: this.state.isUpdating,
-      canManage: this.state.managementMode,
-      error: this.state.error,
-      addPlayerError: null,
-    };
-  }
-
-  getMatchTableData(): MatchTableData {
-    const currentRound = this.getCurrentRound();
-    return {
-      players: Object.fromEntries(
-        this.state.tournament!.players.map((player) => [player.id, player])
-      ),
-      round: currentRound!,
-      canManage: this.state.managementMode,
-      isLoading: this.state.isUpdating,
-      error: this.state.error,
-    };
-  }
-
-  getMatchTableState(): MatchTableState {
-    return {
-      updatingMatchId: this.state.isUpdating ? -1 : null,
-      canStartNextRound: this.canStartNextRound(),
-      isStartingNextRound: this.state.isUpdating,
-      nextRoundButtonText: this.getNextRoundButtonText(),
-    };
-  }
-
-  getStandingsData(): StandingsTableData {
-    return {
-      players: this.state.tournament?.players || [],
-      isLoading: this.state.isUpdating,
-      error: this.state.error,
-      tournamentComplete: this.state.tournament?.status === TournamentStatus.Completed,
-      winnerId: this.state.tournament?.winnerId,
-      winnerName: this.getWinnerName(),
-      totalGames:
-        this.state.tournament?.rounds.reduce((sum, obj) => sum + obj.matches.length, 0) ?? 0,
-    };
-  }
-
-  // Helper methods
-  getCurrentRound(): Round | null {
-    if (!this.state.tournament?.rounds) return null;
-    return this.state.tournament.rounds.find((r) => !r.isCompleted) || null;
-  }
-
-  canStartNextRound(): boolean {
-    const currentRound = this.getCurrentRound();
-    if (!currentRound) return false;
-
-    return currentRound.matches.every((match) => match.winnerId) && this.state.managementMode;
-  }
-
-  getNextRoundButtonText(): string {
-    return this.getCurrentRound()?.roundType == 'Final'
-      ? 'Complete Tournament'
-      : 'Start Next Round';
+        return {
+          ...round,
+          matches: round.matches.map((m) =>
+            m.id === data.matchId ? { ...m, winnerId: data.winnerId } : m,
+          ),
+        };
+      });
+      return { ...t, rounds: updatedRounds };
+    });
   }
 
   getCompletedMatchesInRound(round: Round): number {
     return round.matches.filter((match) => match.winnerId).length;
   }
 
-  getTournamentTypeName(): string {
-    switch (this.state.tournament?.type) {
-      case TournamentType.Swiss:
-        return 'Swiss Tournament';
-      // case TournamentType.ChampionsMeeting:
-      //   return 'Champions Meeting';
-      default:
-        return 'Unknown';
-    }
-  }
-
-  getStatusText(): string {
-    switch (this.state.tournament?.status) {
-      case TournamentStatus.Created:
-        return 'Setup Phase';
-      case TournamentStatus.InProgress:
-        return 'In Progress';
-      case TournamentStatus.Completed:
-        return 'Completed';
-      default:
-        return 'Unknown';
-    }
-  }
-
-  getWinnerName(): string {
-    if (!this.state.tournament?.winnerId) return '';
-    const winner = this.state.tournament.players.find(
-      (p) => p.id === this.state.tournament?.winnerId
-    );
-    return winner?.name || '';
-  }
-
-  getTypeVariant(): 'primary' | 'info' {
-    return this.state.tournament?.type === TournamentType.Swiss ? 'primary' : 'info';
-  }
-
-  getStatusVariant(): 'warning' | 'primary' | 'success' {
-    switch (this.state.tournament?.status) {
-      case TournamentStatus.Created:
-        return 'warning';
-      case TournamentStatus.InProgress:
-        return 'primary';
-      case TournamentStatus.Completed:
-        return 'success';
-      default:
-        return 'warning';
-    }
-  }
-
   // Error Handling
   private handleError = (defaultErrorMessage: string, additionalObject: any, error: any) => {
     console.error(defaultErrorMessage, error);
-    this.state.error = error.message || defaultErrorMessage;
+    this.error.set(error.message || defaultErrorMessage);
 
     if (additionalObject !== null) {
       console.error('Additional info:', additionalObject);

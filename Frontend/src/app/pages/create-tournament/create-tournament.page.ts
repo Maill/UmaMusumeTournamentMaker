@@ -1,7 +1,7 @@
 
-import { Component, inject, OnDestroy } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
 
 // Import organisms
 import { TournamentFormComponent } from '../../shared/organisms/tournament-form/tournament-form.component';
@@ -12,7 +12,6 @@ import { BaseIconComponent } from '../../shared/atoms/icon/base-icon.component';
 import { TournamentService } from '../../shared/services/tournament.service';
 import { CreateTournamentRequest } from '../../shared/types/api.types';
 import {
-  CreateTournamentPageState,
   TournamentFormData,
   TournamentFormState,
 } from '../../shared/types/components.types';
@@ -24,39 +23,46 @@ import {
   templateUrl: './create-tournament.page.html',
   styleUrl: './create-tournament.page.css',
 })
-export class CreateTournamentPageComponent implements OnDestroy {
+export class CreateTournamentPageComponent {
   private tournamentService: TournamentService = inject(TournamentService);
   private router: Router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
-  private destroy$ = new Subject<void>();
+  // State signals
+  readonly isCreating = signal(false);
+  readonly error = signal<string | null>(null);
+  readonly formData = signal<TournamentFormData | null>(null);
 
-  state: CreateTournamentPageState = {
-    isCreating: false,
-    error: null,
-    formData: null,
-  };
+  // Computed signals
+  readonly formState = computed<TournamentFormState>(() => ({
+    isLoading: this.isCreating(),
+    error: this.error(),
+    showPassword: true,
+  }));
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
+  readonly pageTitle = computed(() =>
+    this.isCreating() ? 'Creating Tournament...' : 'Create New Tournament',
+  );
 
   onCreateTournament(request: CreateTournamentRequest): void {
-    this.state.isCreating = true;
-    this.state.error = null;
+    this.isCreating.set(true);
+    this.error.set(null);
 
-    this.tournamentService.createTournament(request).subscribe({
-      next: (tournament) => {
-        this.state.isCreating = false;
-        // Navigate to the newly created tournament
-        this.router.navigate(['/tournaments', tournament.id]);
-      },
-      error: (error) => {
-        console.error('Failed to create tournament:', error);
-        this.state.isCreating = false;
-        this.state.error = error.message || 'Failed to create tournament';
-      },
-    });
+    this.tournamentService
+      .createTournament(request)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (tournament) => {
+          this.isCreating.set(false);
+          // Navigate to the newly created tournament
+          this.router.navigate(['/tournaments', tournament.id]);
+        },
+        error: (error) => {
+          console.error('Failed to create tournament:', error);
+          this.isCreating.set(false);
+          this.error.set(error.message || 'Failed to create tournament');
+        },
+      });
   }
 
   onCancel(): void {
@@ -64,7 +70,7 @@ export class CreateTournamentPageComponent implements OnDestroy {
   }
 
   onFormChange(formData: TournamentFormData): void {
-    this.state.formData = formData;
+    this.formData.set(formData);
   }
 
   goBack(): void {
@@ -72,31 +78,19 @@ export class CreateTournamentPageComponent implements OnDestroy {
   }
 
   clearError(): void {
-    this.state.error = null;
-  }
-
-  getFormState(): TournamentFormState {
-    return {
-      isLoading: this.state.isCreating,
-      error: this.state.error,
-      showPassword: true,
-    };
+    this.error.set(null);
   }
 
   // Utility methods for template
   canNavigateAway(): boolean {
-    if (this.state.isCreating) {
+    if (this.isCreating()) {
       return false;
     }
 
-    if (this.state.formData) {
+    if (this.formData()) {
       return confirm('You have unsaved changes. Are you sure you want to leave?');
     }
 
     return true;
-  }
-
-  getPageTitle(): string {
-    return this.state.isCreating ? 'Creating Tournament...' : 'Create New Tournament';
   }
 }

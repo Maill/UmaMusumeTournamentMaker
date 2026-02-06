@@ -1,5 +1,5 @@
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { BaseButtonComponent } from '../../atoms/button/base-button.component';
 import { BaseIconComponent } from '../../atoms/icon/base-icon.component';
 import { ErrorDisplayComponent } from '../../molecules/error-display/error-display.component';
@@ -23,22 +23,22 @@ import { Player } from '../../types/tournament.types';
         <div class="header-info">
           <h2 class="section-title">
             <app-icon name="users" size="md" color="primary" ariaLabel="Players"> </app-icon>
-            Players ({{ players.length }})
+            Players ({{ players().length }})
           </h2>
-          @if (minPlayersRequired > 0) {
+          @if (minPlayersRequired() > 0) {
           <p class="section-subtitle">
-            @if (players.length < minPlayersRequired) { Need at least
-            {{ minPlayersRequired }} players to start (currently {{ players.length }}) } @else {
-            Ready to start with {{ players.length }} players }
+            @if (players().length < minPlayersRequired()) { Need at least
+            {{ minPlayersRequired() }} players to start (currently {{ players().length }}) } @else {
+            Ready to start with {{ players().length }} players }
           </p>
           }
         </div>
       </div>
 
       <!-- General Error Display -->
-      @if (state.error) {
+      @if (state().error) {
       <app-error-display
-        [message]="state.error"
+        [message]="state().error!"
         type="error"
         [dismissible]="true"
         (dismissed)="onErrorDismiss()"
@@ -47,13 +47,13 @@ import { Player } from '../../types/tournament.types';
       }
 
       <!-- Add Player Form -->
-      @if (state.canManage) {
+      @if (state().canManage) {
       <div class="add-player-section">
         <app-player-input
           placeholder="Enter player name"
           buttonText="Add Player"
-          [isLoading]="state.isAddingPlayer"
-          [error]="state.addPlayerError"
+          [isLoading]="state().isAddingPlayer"
+          [error]="state().addPlayerError"
           [autoFocus]="true"
           [clearOnAdd]="true"
           [minLength]="1"
@@ -65,16 +65,16 @@ import { Player } from '../../types/tournament.types';
       }
 
       <!-- Players List -->
-      @if (players.length > 0) {
+      @if (players().length > 0) {
       <div class="players-section">
         <div class="players-list">
-          @for (player of players; track player.id; let i = $index) {
+          @for (player of players(); track player.id; let i = $index) {
           <div class="player-item" [class.removing]="isPlayerBeingRemoved(player.id)">
             <div class="player-info">
               <span class="player-number">{{ i + 1 }}.</span>
               <span class="player-name" [title]="player.name">{{ player.name }}</span>
 
-              @if (showPlayerStats) {
+              @if (showPlayerStats()) {
               <div class="player-stats">
                 <span class="stat">{{ player.points }}pts</span>
                 <span class="stat">{{ player.wins }}W</span>
@@ -83,12 +83,12 @@ import { Player } from '../../types/tournament.types';
               }
             </div>
 
-            @if (state.canManage && allowPlayerRemoval) {
+            @if (state().canManage && allowPlayerRemoval()) {
             <div class="player-actions">
               <app-button
                 variant="outline-danger"
                 size="sm"
-                [disabled]="state.isRemovingPlayer || isPlayerBeingRemoved(player.id)"
+                [disabled]="state().isRemovingPlayer || isPlayerBeingRemoved(player.id)"
                 [loading]="isPlayerBeingRemoved(player.id)"
                 loadingText="Removing..."
                 (clicked)="onPlayerRemove(player.id, player.name)"
@@ -109,7 +109,7 @@ import { Player } from '../../types/tournament.types';
         <h3>No players yet</h3>
         <p>
           {{
-            state.canManage
+            state().canManage
               ? 'Add players to get started with your tournament.'
               : 'This tournament has no players yet.'
           }}
@@ -118,21 +118,21 @@ import { Player } from '../../types/tournament.types';
       }
 
       <!-- Start Tournament Section -->
-      @if (state.canManage && canStartTournament()) {
+      @if (state().canManage && canStartTournament()) {
       <div class="start-tournament-section">
         <div class="start-info">
           <div class="start-text">
             <h3>Ready to Start!</h3>
-            <p>You have {{ players.length }} players registered. The tournament can begin.</p>
+            <p>You have {{ players().length }} players registered. The tournament can begin.</p>
           </div>
         </div>
 
         <app-button
           variant="success"
           size="lg"
-          [loading]="state.isStartingTournament"
+          [loading]="state().isStartingTournament"
           loadingText="Starting Tournament..."
-          [disabled]="state.isStartingTournament"
+          [disabled]="state().isStartingTournament"
           (clicked)="onStartTournament()"
         >
           <app-icon name="play" size="sm"> </app-icon>
@@ -141,13 +141,13 @@ import { Player } from '../../types/tournament.types';
       </div>
       }
       <!-- Minimum Players Warning -->
-      @else if (players.length < minPlayersRequired && players.length > 0) {
+      @else if (players().length < minPlayersRequired() && players().length > 0) {
       <div class="warning-section">
         <app-icon name="warning" size="md" color="warning" ariaLabel="Warning"> </app-icon>
         <div class="warning-text">
           <h4>More Players Needed</h4>
           <p>
-            Add at least {{ minPlayersRequired - players.length }} more players to start the
+            Add at least {{ minPlayersRequired() - players().length }} more players to start the
             tournament.
           </p>
         </div>
@@ -158,24 +158,24 @@ import { Player } from '../../types/tournament.types';
   styleUrl: './player-management.component.css',
 })
 export class PlayerManagementComponent {
-  @Input() players: Player[] = [];
-  @Input() state: PlayerManagementState = {
+  readonly players = input<Player[]>([]);
+  readonly state = input<PlayerManagementState>({
     isAddingPlayer: false,
     isRemovingPlayer: false,
     isStartingTournament: false,
     canManage: false,
     error: null,
     addPlayerError: null,
-  };
-  @Input() minPlayersRequired: number = 4;
-  @Input() allowPlayerRemoval: boolean = true;
-  @Input() showPlayerStats: boolean = false;
-  @Input() removingPlayerId: number | null = null;
+  });
+  readonly minPlayersRequired = input<number>(4);
+  readonly allowPlayerRemoval = input<boolean>(true);
+  readonly showPlayerStats = input<boolean>(false);
+  readonly removingPlayerId = input<number | null>(null);
 
-  @Output() playerAdded = new EventEmitter<string>();
-  @Output() playerRemoved = new EventEmitter<{ playerId: number; playerName: string }>();
-  @Output() tournamentStarted = new EventEmitter<void>();
-  @Output() errorDismissed = new EventEmitter<void>();
+  readonly playerAdded = output<string>();
+  readonly playerRemoved = output<{ playerId: number; playerName: string }>();
+  readonly tournamentStarted = output<void>();
+  readonly errorDismissed = output<void>();
 
   onPlayerAdd(playerName: string): void {
     if (playerName.trim()) {
@@ -196,16 +196,15 @@ export class PlayerManagementComponent {
   }
 
   canStartTournament(): boolean {
-    console.log(this.minPlayersRequired);
     return (
-      this.players.length >= this.minPlayersRequired &&
-      !this.state.isAddingPlayer &&
-      !this.state.isRemovingPlayer &&
-      !this.state.isStartingTournament
+      this.players().length >= this.minPlayersRequired() &&
+      !this.state().isAddingPlayer &&
+      !this.state().isRemovingPlayer &&
+      !this.state().isStartingTournament
     );
   }
 
   isPlayerBeingRemoved(playerId: number): boolean {
-    return this.removingPlayerId === playerId;
+    return this.removingPlayerId() === playerId;
   }
 }

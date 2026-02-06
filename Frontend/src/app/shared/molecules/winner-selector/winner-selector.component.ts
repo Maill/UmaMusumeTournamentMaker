@@ -1,5 +1,5 @@
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BaseIconComponent } from '../../atoms/icon/base-icon.component';
 import { BaseSelectComponent } from '../../atoms/select/base-select.component';
@@ -14,39 +14,39 @@ import { Player } from '../../types/tournament.types';
     <div class="winner-selector-wrapper">
       <div class="selector-container">
         <app-select
-          [options]="playerOptions"
-          [disabled]="disabled"
-          [error]="error"
-          [label]="label"
+          [options]="playerOptions()"
+          [disabled]="disabled()"
+          [error]="error()"
+          [label]="label()"
           (valueChange)="onWinnerChange($event)"
         >
         </app-select>
 
         <div class="winner-indicator">
-          @if (selectedWinnerId && !disabled) {
+          @if (selectedWinnerId() && !disabled()) {
           <!--<app-icon
               name="check"
               size="sm"
               color="success"
-              [ariaLabel]="'Winner selected: ' + getSelectedPlayerName()">
+              [ariaLabel]="'Winner selected: ' + selectedPlayerName()">
             </app-icon>
-          <span class="winner-text">{{ getSelectedPlayerName() }}</span>-->
-          } @else if (selectedWinnerId && disabled) {
+          <span class="winner-text">{{ selectedPlayerName() }}</span>-->
+          } @else if (selectedWinnerId() && disabled()) {
           <app-icon
             name="trophy"
             size="sm"
             color="warning"
-            [ariaLabel]="'Match winner: ' + getSelectedPlayerName()"
+            [ariaLabel]="'Match winner: ' + selectedPlayerName()"
           >
           </app-icon>
-          <span class="winner-text winner-final">{{ getSelectedPlayerName() }}</span>
+          <span class="winner-text winner-final">{{ selectedPlayerName() }}</span>
           }
         </div>
       </div>
 
-      @if (showHelp && !error) {
+      @if (showHelp() && !error()) {
       <div class="selector-help">
-        {{ helpText }}
+        {{ helpText() }}
       </div>
       }
     </div>
@@ -54,37 +54,34 @@ import { Player } from '../../types/tournament.types';
   styleUrl: './winner-selector.component.css',
 })
 export class WinnerSelectorComponent {
-  @Input() matchId: number = 0;
-  @Input() players: Player[] = [];
-  @Input() selectedWinnerId: number | null = null;
-  @Input() disabled: boolean = false;
-  @Input() error: string | null = null;
-  //@Input() label: string = 'Select Winner';
-  @Input() label: string = ' ';
-  @Input() placeholder: string = 'Choose match winner...';
-  @Input() helpText: string = 'Select the player who won this match';
-  @Input() showHelp: boolean = false;
+  readonly matchId = input<number>(0);
+  readonly players = input<Player[]>([]);
+  readonly selectedWinnerId = input<number | null>(null);
+  readonly disabled = input<boolean>(false);
+  readonly error = input<string | null>(null);
+  readonly label = input<string>(' ');
+  readonly placeholder = input<string>('Choose match winner...');
+  readonly helpText = input<string>('Select the player who won this match');
+  readonly showHelp = input<boolean>(false);
 
-  @Output() winnerChanged = new EventEmitter<{
+  readonly winnerChanged = output<{
     matchId: number;
     winnerId: number | null;
     playerName?: string;
   }>();
 
-  get playerOptions(): SelectOption<number>[] {
+  readonly playerOptions = computed<SelectOption<number>[]>(() => {
     const options: SelectOption<number>[] = [];
 
-    // Add placeholder option when no winner is selected
-    if (!this.selectedWinnerId) {
+    if (!this.selectedWinnerId()) {
       options.push({
-        value: 0, // Use 0 for no selection
-        label: this.placeholder,
+        value: 0,
+        label: this.placeholder(),
         disabled: false,
       });
     }
 
-    // Add player options
-    this.players.forEach((player) => {
+    this.players().forEach((player) => {
       options.push({
         value: player.id,
         label: player.name,
@@ -93,42 +90,22 @@ export class WinnerSelectorComponent {
     });
 
     return options;
-  }
+  });
+
+  readonly selectedPlayerName = computed(() => {
+    if (!this.selectedWinnerId()) return '';
+    const selectedPlayer = this.players().find((p) => p.id === this.selectedWinnerId());
+    return selectedPlayer?.name || '';
+  });
 
   onWinnerChange(winnerId: number): void {
-    // Convert 0 back to null for placeholder selection
     const actualWinnerId = winnerId === 0 ? null : winnerId;
-    const selectedPlayer = this.players.find((p) => p.id === actualWinnerId);
+    const selectedPlayer = this.players().find((p) => p.id === actualWinnerId);
 
-    // Don't modify the input property - let parent handle the state
     this.winnerChanged.emit({
-      matchId: this.matchId,
+      matchId: this.matchId(),
       winnerId: actualWinnerId,
       playerName: selectedPlayer?.name,
     });
-  }
-
-  getSelectedPlayerName(): string {
-    if (!this.selectedWinnerId) return '';
-    const selectedPlayer = this.players.find((p) => p.id === this.selectedWinnerId);
-    return selectedPlayer?.name || '';
-  }
-
-  isMatchCompleted(): boolean {
-    return this.selectedWinnerId !== null && this.disabled;
-  }
-
-  canChangeWinner(): boolean {
-    return !this.disabled && this.players.length > 0;
-  }
-
-  clearSelection(): void {
-    if (this.canChangeWinner()) {
-      this.winnerChanged.emit({
-        matchId: this.matchId,
-        winnerId: null,
-        playerName: undefined,
-      });
-    }
   }
 }

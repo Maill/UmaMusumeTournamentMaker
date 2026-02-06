@@ -1,6 +1,6 @@
 <div class="tournament-detail-page">
   <!-- Loading State -->
-  @if (state.isLoading && !state.tournament) {
+  @if (isLoading() && !tournament()) {
   <div class="page-loading">
     <app-loading-spinner
       size="lg"
@@ -13,10 +13,10 @@
   }
 
   <!-- Error State -->
-  @if (state.error && !state.tournament) {
+  @if (error() && !tournament()) {
   <div class="page-error">
     <app-error-display
-      [message]="state.error"
+      [message]="error()!"
       type="error"
       [retryable]="true"
       retryText="Reload Tournament"
@@ -36,7 +36,7 @@
   }
 
   <!-- Tournament Content -->
-  @if (state.tournament) {
+  @if (tournament()) {
   <div class="tournament-content">
     <!-- Tournament Header -->
     <div class="tournament-header">
@@ -49,21 +49,21 @@
 
       <div class="header-main">
         <div class="tournament-info">
-          <h1 class="tournament-name">{{ state.tournament.name }}</h1>
+          <h1 class="tournament-name">{{ tournament()!.name }}</h1>
 
           <div class="tournament-meta">
-            <app-badge [variant]="getTypeVariant()">
-              {{ getTournamentTypeName() }}
+            <app-badge [variant]="typeVariant()">
+              {{ tournamentTypeName() }}
             </app-badge>
 
-            <app-badge [variant]="getStatusVariant()">
-              {{ getStatusText() }}
+            <app-badge [variant]="statusVariant()">
+              {{ statusText() }}
             </app-badge>
           </div>
         </div>
       </div>
       <div class="header-actions">
-        @if (!state.managementMode) {
+        @if (!managementMode()) {
         <app-button variant="primary" (clicked)="showPasswordModal()">
           <app-icon name="cog" size="sm"></app-icon>
           Enter Management
@@ -88,11 +88,11 @@
     <!-- Tournament States -->
     <div class="tournament-body">
       <!-- Created State: Player Management -->
-      @if (state.tournament.status === TournamentStatus.Created) {
+      @if (tournament()!.status === TournamentStatus.Created) {
       <div class="tournament-section">
         <app-player-management
-          [players]="state.tournament.players"
-          [state]="getPlayerManagementState()"
+          [players]="tournament()!.players"
+          [state]="playerManagementState()"
           [allowPlayerRemoval]="true"
           (playerAdded)="onPlayerAdd($event)"
           (playerRemoved)="onPlayerRemove($event)"
@@ -104,14 +104,14 @@
       }
 
       <!-- In Progress State: Matches and Standings -->
-      @if (state.tournament.status === TournamentStatus.InProgress) {
+      @if (tournament()!.status === TournamentStatus.InProgress) {
       <div class="tournament-sections">
         <!-- Current Round Matches -->
-        @if (getCurrentRound()) {
+        @if (currentRound()) {
         <div class="tournament-section">
           <app-match-table
-            [data]="getMatchTableData()"
-            [state]="getMatchTableState()"
+            [data]="matchTableData()"
+            [state]="matchTableState()"
             (winnerChanged)="onWinnerChange($event)"
             (nextRoundStarted)="onNextRoundStart()"
             (errorDismissed)="clearError()"
@@ -123,7 +123,7 @@
         <!-- Current Standings -->
         <div class="tournament-section">
           <app-standings-table
-            [data]="getStandingsData()"
+            [data]="standingsData()"
             [viewMode]="'current'"
             [showGamesPlayed]="false"
             [highlightTop3]="true"
@@ -136,12 +136,12 @@
       }
 
       <!-- Completed State: Final Results -->
-      @if (state.tournament.status === TournamentStatus.Completed) {
+      @if (tournament()!.status === TournamentStatus.Completed) {
       <div class="tournament-sections">
         <!-- Final Standings with Podium -->
         <div class="tournament-section">
           <app-standings-table
-            [data]="getStandingsData()"
+            [data]="standingsData()"
             [viewMode]="'final'"
             [showGamesPlayed]="true"
             [highlightTop3]="true"
@@ -161,7 +161,7 @@
             </h3>
 
             <div class="rounds-history">
-              @for (round of state.tournament.rounds; track round.id) {
+              @for (round of tournament()!.rounds; track round.id) {
               <div class="round-summary">
                 <h4>Round {{ round.roundNumber }}</h4>
                 <div class="round-info">
@@ -181,21 +181,21 @@
 
   <!-- Password Modal -->
   <app-password-modal
-    [data]="state.passwordModal"
+    [data]="passwordModal()"
     (passwordSubmitted)="passwordModalSubmitted($event)"
     (cancelled)="passwordModalCancelled()"
   >
   </app-password-modal>
 
   <app-tournament-delete-modal
-    [data]="state.tournamentDeleteModal"
+    [data]="tournamentDeleteModal()"
     (passwordSubmitted)="tournamentDeleteModalSubmitted($event)"
     (cancelled)="tournamentDeleteModalCancelled()"
   >
   </app-tournament-delete-modal>
 
   <app-tournament-edit-modal
-    [data]="state.tournamentEditModal"
+    [data]="tournamentEditModal()"
     (dataSubmitted)="tournamentEditModalSubmitted($event)"
     (cancelled)="tournamentEditCancelled()"
   >

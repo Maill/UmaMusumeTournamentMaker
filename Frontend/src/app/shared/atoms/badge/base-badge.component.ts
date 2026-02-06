@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 
 import { BadgeVariant } from '../../types/ui.types';
 
@@ -7,12 +7,12 @@ import { BadgeVariant } from '../../types/ui.types';
   standalone: true,
   imports: [],
   template: `
-    <span [class]="getBadgeClasses()">
+    <span [class]="badgeClasses()">
       <ng-content></ng-content>
-      @if (dismissible) {
-        <button 
-          type="button" 
-          class="badge-close" 
+      @if (dismissible()) {
+        <button
+          type="button"
+          class="badge-close"
           (click)="onDismiss($event)"
           aria-label="Close">
           ×
@@ -23,28 +23,25 @@ import { BadgeVariant } from '../../types/ui.types';
   styleUrl: './base-badge.component.css'
 })
 export class BaseBadgeComponent {
-  @Input() variant: BadgeVariant = 'primary';
-  @Input() dismissible: boolean = false;
-  @Input() pill: boolean = false;
+  readonly variant = input<BadgeVariant>('primary');
+  readonly dismissible = input<boolean>(false);
+  readonly pill = input<boolean>(false);
 
-  @Output() dismissed = new EventEmitter<Event>();
+  readonly dismissed = output<Event>();
 
   onDismiss(event: Event): void {
     event.stopPropagation();
     this.dismissed.emit(event);
   }
 
-  getBadgeClasses(): string {
-    const classes = ['badge', `badge-${this.variant}`];
-    
-    if (this.pill) {
+  readonly badgeClasses = computed(() => {
+    const classes = ['badge', `badge-${this.variant()}`];
+    if (this.pill()) {
       classes.push('badge-pill');
     }
-    
-    if (this.dismissible) {
+    if (this.dismissible()) {
       classes.push('badge-dismissible');
     }
-
     return classes.join(' ');
-  }
+  });
 }
